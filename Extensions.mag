@@ -56,7 +56,7 @@ intrinsic Evaluate(P :: NwtnPgon, x :: RngIntElt) -> FldRatElt
 end intrinsic;
 
 intrinsic FactorialValuation(n :: RngIntElt, p :: RngIntElt) -> RngIntElt
-  {The p-adic valuation of n! (equivalent to `Valuation(Factorial(n),p)` but more efficient).}
+  {The p-adic valuation of `n!` (equivalent to `Valuation(Factorial(n),p)` but more efficient).}
   require n ge 0: "n must be positive";
   v := 0;
   m := n;
@@ -77,6 +77,8 @@ intrinsic BinomialValuation(n :: RngIntElt, k :: RngIntElt, p :: RngIntElt) -> R
 end intrinsic;
 
 ///# Template p-adic fields
+///
+///toc
 
 declare type FldPadTmpl;
 declare attributes FldPadTmpl: p, e, f, actual;
@@ -110,7 +112,7 @@ intrinsic TemplatepAdicField(K :: FldPad) -> FldPadTmpl
   return F;
 end intrinsic;
 
-///# Extensions
+///## Extensions
 
 intrinsic UnramifiedExtension(F :: FldPadTmpl, n :: RngIntElt) -> FldPadTmpl
   {An unramified extension of F of degree n.}
@@ -167,6 +169,8 @@ end intrinsic;
 ///# Ramification polygons
 ///
 /// A `PadRamifPts` represents a set of points defining a ramification polygon. Some of the points need not be vertices, but can line on the interior of faces, and therefore this is a more refined invariant than ramification polygon.
+///
+///toc
 
 ///## Creation
 
@@ -337,7 +341,7 @@ intrinsic vbinbps(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
   return vbinbps(P, i, i);
 end intrinsic;
 
-///# Validity
+///## Validity
 ///
 /// Proposition 3.9 tells us if a given set of points is the ramification polygon for some extension, and if so we say it is *valid*. If the set of points satisfies cases (a), (b) and (c) of the proposition, we say it is *semivalid*; a semivalid set of points remains semivalid if we remove points (except for the critical points at 1, p^s_u and n) and so in particular if a set of points is not semivalid, then adding points to it cannot make it valid. This fact may be used to efficiently enumerate all possible ramification points of a given degree.
 
@@ -598,6 +602,8 @@ intrinsic AllRamificationPoints(F :: FldPadTmpl, n :: RngIntElt : J0:=false) -> 
 end intrinsic;
 
 ///# Generating Eisenstein polynomials
+///
+///toc
 
 ///## Creation of templates
 
@@ -666,7 +672,7 @@ intrinsic Print(C :: EisenTmplCoeff)
   printf "%o", C`one select 1 else Join([Sprintf("min_val=%o", C`min_val)] cat (C`min_val_sharp select ["(sharp)"] else []) cat [Sprintf("max_val=%o", C`max_val)] cat (assigned C`residues select [Sprintf("residues=%o",C`residues)] else []), " ");
 end intrinsic;
 
-/// Creation of polynomials
+///## Creation of polynomials
 
 intrinsic '#'(C :: EisenTmplCoeff) -> RngIntElt
   {Size of the template.}
