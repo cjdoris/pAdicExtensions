@@ -1,0 +1,712 @@
+// Implements functionality from "Enumerating extensions of (pi)-adic fields with given invariants" by Pauli and Sinclair.
+// 
+// F := TemplatepAdicField(2);
+// P := RamificationPoints(F, [<1,10>,<8,0>]);
+// T := TemplateForEisensteinPolynomials(P);
+// the assertion error implies an inconsistency between Lemma 3.5 and Prop 3.10!
+
+declare type PadRamifPts;
+declare attributes PadRamifPts: F, vs, tvs, wvs, n, u, Js, bs, as, ss, pgon, propA, propB, propC, propD, propE, semivalid, valid, little_ell, big_ell;
+
+declare type EisenTmpl;
+declare attributes EisenTmpl: F, n, J, coeffs;
+
+declare type EisenTmplCoeff;
+declare attributes EisenTmplCoeff: parent, one, min_val, min_val_sharp, max_val;
+
+Z := Integers();
+Q := Rationals();
+
+///# Miscellaneous
+
+intrinsic FloorLog(b :: RngIntElt, x :: RngIntElt) -> RngIntElt
+  {Equivalent to `Floor(Log(b,x))` but avoids any floating point arithmetic.}
+  require b gt 0: "b must be positive";
+  require x gt 0: "x must be positive";
+  n := 0;
+  while x ge b do
+    n +:= 1;
+    x div:= b;
+  end while;
+  return n;
+end intrinsic;
+
+// evaluates a piecewise-linear function vs at x
+// vs: the function as a sequence of <x,y> pairs sorted by x
+function plf_evaluate(vs, x)
+  error if x lt vs[1][1] or x gt vs[#vs][1], "out of bounds";
+  if #vs eq 1 then
+    assert x eq vs[1][1];
+    return vs[1][2];
+  end if;
+  assert exists(i){i : i in [2..#vs] | vs[i-1][1] le x and x le vs[i][1]};
+  x0, y0 := Explode(vs[i-1]);
+  x1, y1 := Explode(vs[i]);
+  return y0 + (y1-y0)*(x-x0)/(x1-x0);  
+end function;
+
+intrinsic Evaluate(P :: NwtnPgon, x :: FldRatElt) -> FldRatElt
+  {Treating P as a piecewise-linear function, evaluates it at x.}
+  return plf_evaluate(Vertices(P), x);
+end intrinsic;
+
+intrinsic Evaluate(P :: NwtnPgon, x :: RngIntElt) -> FldRatElt
+  {"}
+  return Evaluate(P, Q!x);
+end intrinsic;
+
+intrinsic FactorialValuation(n :: RngIntElt, p :: RngIntElt) -> RngIntElt
+  {The p-adic valuation of n! (equivalent to `Valuation(Factorial(n),p)` but more efficient).}
+  require n ge 0: "n must be positive";
+  v := 0;
+  m := n;
+  while m gt 0 do
+    m div:= p;
+    v +:= m;
+  end while;
+  return v;
+end intrinsic;
+
+intrinsic BinomialValuation(n :: RngIntElt, k :: RngIntElt, p :: RngIntElt) -> RngIntElt
+  {The p-adic valuation of n choose k.}
+  if k gt n or k lt 0 then
+    return Infinity();
+  else
+    return FactorialValuation(n, p) - FactorialValuation(k, p) - FactorialValuation(n-k, p);
+  end if;
+end intrinsic;
+
+///# Template p-adic fields
+
+declare type FldPadTmpl;
+declare attributes FldPadTmpl: p, e, f, actual;
+
+///## Creation
+
+intrinsic TemplatepAdicField(p :: RngIntElt, f :: RngIntElt, e :: RngIntElt) -> FldPadTmpl
+  {A "template" p-adic field with residue degree f and ramification degree e.}
+  require IsPrime(p) and p gt 0: "p must be a prime";
+  require f ge 1: "f must be positive";
+  require e ge 1: "e must be positive";
+  F := New(FldPadTmpl);
+  F`p := p;
+  F`e := e;
+  F`f := f;
+  return F;
+end intrinsic;
+
+intrinsic TemplatepAdicField(p :: RngIntElt) -> FldPadTmpl
+  {A "template" p-adic field.}
+  return TemplatepAdicField(p, 1, 1);
+end intrinsic;
+
+intrinsic TemplatepAdicField(K :: FldPad) -> FldPadTmpl
+  {A "template" version of K.}
+  F := New(FldPadTmpl);
+  F`p := Prime(K);
+  F`f := AbsoluteInertiaDegree(K);
+  F`e := AbsoluteRamificationDegree(K);
+  F`actual := K;
+  return F;
+end intrinsic;
+
+///# Extensions
+
+intrinsic UnramifiedExtension(F :: FldPadTmpl, n :: RngIntElt) -> FldPadTmpl
+  {An unramified extension of F of degree n.}
+  require n ge 1: "n must be positive";
+  return TemplatepAdicField(F`p, F`f * n, F`e);
+end intrinsic;
+
+intrinsic TotallyRamifiedExtension(F :: FldPadTmpl, n :: RngIntElt) -> FldPadTmpl
+  {A totally ramified extension of F of degree n.}
+  require n ge 1: "n must be positive";
+  return TemplatepAdicField(F`p, F`f, F`e * n);
+end intrinsic;
+
+///hide
+intrinsic Print(F :: FldPadTmpl)
+  {Print.}
+  printf "Template %o-adic field (f=%o, e=%o)", F`p, F`f, F`e;
+end intrinsic;
+
+intrinsic Print(P :: PadRamifPts)
+  {Print.}
+  printf "Ramification Points [%o; %o]", Join([(j eq s(P,i)) select Sprintf("%o", J(P,i)) else "." : j in (i eq u(P)) select [s(P,i)] else [s(P,i)..s(P,i+1)-1], i in [0..u(P)]], " "), Join([Sprintf("%o", v[1]) : v in P`tvs], " ");
+end intrinsic;
+
+///## Ore's conditions
+
+intrinsic OreConditions(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt, s :: RngIntElt) -> BoolElt
+  {True if there exists an extension of degree n of F whose ramification polygon has a point (p^s, J).}
+  require n ge 1: "n must be at least 1";
+  require s ge 0: "s must be at least 0";
+  p := F`p;
+  ps := p^s;
+  e := F`e;
+  require s le Valuation(n,p): "p^s must divide n";
+  return Min(n * e * BinomialValuation(J mod n, ps, p), n * e * BinomialValuation(n, ps, p)) le J
+    and J le n * e * BinomialValuation(n, ps, p);
+end intrinsic;
+
+intrinsic OreConditions(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt) -> BoolElt
+  {True if there exists an extension of degree n and discriminant valuation n+J-1 of F.}
+  return OreConditions(F, n, J, 0);
+end intrinsic;
+
+intrinsic OrePossibilities(F :: FldPadTmpl, n :: RngIntElt, s :: RngIntElt) -> BoolElt
+  {The possible J such that (F,n,J,s) satisfy Ore's conditions.}
+  return [J : J in [0..n * F`e * BinomialValuation(n, F`p^s, F`p)]];
+end intrinsic;
+
+intrinsic OrePossibilities(F :: FldPadTmpl, n :: RngIntElt) -> []
+  {The possible J such that (F,n,J) satisfy Ore's conditions.}
+  return OrePossibilities(F, n, 0);
+end intrinsic;
+
+///# Ramification polygons
+///
+/// A `PadRamifPts` represents a set of points defining a ramification polygon. Some of the points need not be vertices, but can line on the interior of faces, and therefore this is a more refined invariant than ramification polygon.
+
+///## Creation
+
+intrinsic IsCoercible_RamificationPoints(F :: FldPadTmpl, vs :: []) -> BoolElt, PadRamifPts
+  {True if vs can be made into a potential set of ramification points over F. vs must be a list of `<x,y>` pairs of integers defining the points.}
+  ok, vs := CanChangeUniverse(vs, car<Z,Z>);
+  if not ok then
+    return false, "vs not a sequence of pairs of integers";
+  elif #vs lt 1 then
+    return false, "no points";
+  elif vs[1][1] ne 1 then
+    return false, "should start at 1";
+  elif vs[#vs][2] ne 0 then
+    return false, "should end on 0";
+  elif exists{i : i in [2..#vs] | vs[i][1] le vs[i-1][1]} then
+    return false, "not sorted";
+  elif exists{i : i in [2..#vs] | vs[i][2] gt vs[i-1][2]} then
+    return false, "should be decreasing";
+  end if;
+  pgon := NewtonPolygon(vs : Faces:="Lower");
+  if exists{v : v in vs | Evaluate(pgon, v[1]) ne v[2]} then
+    return false, "not a convex polygon";
+  end if;
+  widx := Min([i : i in [1..#vs] | vs[i][2] eq 0]);
+  wvs := vs[1..widx];
+  if exists{v : v in wvs | not IsPowerOf(v[1], F`p)} then
+    return false, "not powers of p";
+  end if;
+  ss := [s where ok,s:=IsPowerOf(v[1], F`p) : v in wvs];
+  assert ss[1] eq 0;
+  n := vs[#vs][1];
+  u := #ss-1;
+  assert u ge 0;
+  ok, m := IsDivisibleBy(n, vs[widx][1]);
+  if not ok then
+    return false, "final vertex not multiple of last power of p";
+  elif IsDivisibleBy(m, F`p) then
+    return false, "p-powers in horizontal part";
+  end if;
+  tvs := vs[widx..#vs];
+  assert forall{v : v in tvs | v[2] eq 0};
+  Js := [v[2] : v in wvs];
+  bs := [J mod n : J in Js];
+  as := [J div n : J in Js];
+  P := New(PadRamifPts);
+  P`F := F;
+  P`vs := vs;
+  P`tvs := tvs;
+  P`wvs := wvs;
+  P`n := n;
+  P`u := u;
+  P`Js := Js;
+  P`bs := bs;
+  P`as := as;
+  P`ss := ss;
+  P`pgon := pgon;
+  return true, P;
+end intrinsic;
+
+intrinsic RamificationPoints(F :: FldPadTmpl, vs :: []) -> PadRamifPts
+  {A potential set of ramification points over F.}
+  ok, P := IsCoercible_RamificationPoints(F, vs);
+  require ok: P;
+  return P;
+end intrinsic;
+
+intrinsic Copy(P :: PadRamifPts) -> PadRamifPts
+  {Makes a copy of P.}
+  return RamificationPoints(P`F, P`vs);
+end intrinsic;
+
+///## Invariants
+
+/// n (degree), p (prime), e (absolute ramification degree), u (number of wild faces), s_u (p^s_u is the wild degree)
+intrinsic n(P :: PadRamifPts) -> RngIntElt
+  {n}
+  return P`n;
+end intrinsic;
+
+///ditto
+intrinsic p(P :: PadRamifPts) -> RngIntElt
+  {p}
+  return P`F`p;
+end intrinsic;
+
+///ditto
+intrinsic e(P :: PadRamifPts) -> RngIntElt
+  {e}
+  return P`F`e;
+end intrinsic;
+
+///ditto
+intrinsic u(P :: PadRamifPts) -> RngIntElt
+  {u}
+  return P`u;
+end intrinsic;
+
+///ditto
+intrinsic su(P :: PadRamifPts) -> RngIntElt
+  {s_u}
+  return s(P,u(P));
+end intrinsic;
+
+/// J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
+intrinsic J(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
+  {J_i}
+  return P`Js[i+1];
+end intrinsic;
+
+///ditto
+intrinsic a(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
+  {a_i}
+  return P`as[i+1];
+end intrinsic;
+
+///ditto
+intrinsic b(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
+  {b_i}
+  return P`bs[i+1];
+end intrinsic;
+
+///ditto
+intrinsic s(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
+  {s_i}
+  return P`ss[i+1];
+end intrinsic;
+
+///ditto
+intrinsic x(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
+  {p^s_i}
+  return P`vs[i+1][1];
+end intrinsic;
+
+///## Valuations of binomials
+
+intrinsic vbin(P :: PadRamifPts, n :: RngIntElt, k :: RngIntElt) -> RngIntElt
+  {Valuation of n choose k.}
+  return e(P) * BinomialValuation(n, k, p(P));
+end intrinsic;
+
+intrinsic vbinp(P :: PadRamifPts, n :: RngIntElt, i :: RngIntElt) -> RngIntElt
+  {Valuation of n choose p^i.}
+  return vbin(P, n, p(P)^i);
+end intrinsic;
+
+intrinsic vbinbp(P :: PadRamifPts, j :: RngIntElt, i :: RngIntElt) -> RngIntElt
+  {Valuation of b_j choose p^i.}
+  return vbin(P, b(P,j), p(P)^i);
+end intrinsic;
+
+intrinsic vbinps(P :: PadRamifPts, n :: RngIntElt, i :: RngIntElt) -> RngIntElt
+  {The valuation of n choose p^s_i.}
+  return vbin(P, n, x(P,i));
+end intrinsic;
+
+intrinsic vbinnps(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
+  {The valuation of n choose p^s_i.}
+  return vbinps(P, n(P), i);
+end intrinsic;
+
+intrinsic vbinbps(P :: PadRamifPts, j :: RngIntElt, i :: RngIntElt) -> RngIntElt
+  {The valuation of b_j choose p^s_i.}
+  return vbinps(P, b(P,j), i);
+end intrinsic;
+
+intrinsic vbinbps(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
+  {The valuation of b_i choose p^s_i.}
+  return vbinbps(P, i, i);
+end intrinsic;
+
+///# Validity
+///
+/// Proposition 3.9 tells us if a given set of points is the ramification polygon for some extension, and if so we say it is *valid*. If the set of points satisfies cases (a), (b) and (c) of the proposition, we say it is *semivalid*; a semivalid set of points remains semivalid if we remove points (except for the critical points at 1, p^s_u and n) and so in particular if a set of points is not semivalid, then adding points to it cannot make it valid. This fact may be used to efficiently enumerate all possible ramification points of a given degree.
+
+intrinsic _SatisfiesPropertyA(P :: PadRamifPts) -> BoolElt, .
+  {True iff P satisfies case (a) of Proposition 3.9.}
+  for i in [0..u(P)-1] do
+    if Min(n(P)*vbinbps(P,i), n(P)*vbinnps(P,i)) gt J(P,i) or J(P,i) gt n(P)*vbinnps(P,i) then
+      return false, i;
+    end if;
+  end for;
+  return true, _;
+end intrinsic;
+
+intrinsic SatisfiesPropertyA(P :: PadRamifPts) -> BoolElt
+  {"}
+  if not assigned P`propA then
+    P`propA := _SatisfiesPropertyA(P);
+  end if;
+  return P`propA;
+end intrinsic;
+
+intrinsic _SatisfiesPropertyB(P :: PadRamifPts) -> BoolElt, ., .
+  {True iff P satisfies case (b) of Proposition 3.9.}
+  for i in [0..u(P)-1] do
+    for j in [i+1..u(P)-1] do
+      if b(P,i) eq b(P,j) then
+        if a(P,i) - vbinnps(P,i) ne a(P,j) - vbinnps(P,j) then
+          return false, i, j;
+        end if;
+      end if;
+    end for;
+  end for;
+  return true, _, _;
+end intrinsic;
+
+intrinsic SatisfiesPropertyB(P :: PadRamifPts) -> BoolElt
+  {"}
+  if not assigned P`propB then
+    P`propB := _SatisfiesPropertyB(P);
+  end if;
+  return P`propB;
+end intrinsic;
+
+intrinsic _SatisfiesPropertyC(P :: PadRamifPts) -> BoolElt, ., .
+  {True iff P satisfies case (c) of Proposition 3.9.}
+  for i in [0..u(P)-1] do
+    for t in [0..u(P)-1] do
+      lhs := a(P,i) - vbinbps(P,i,i);
+      rhs := a(P,t) - vbinbps(P,i,t);
+      assert J(P,t) ne 0;
+      if b(P,i) ge b(P,t) then
+        if lhs lt rhs then
+          return false, i, t;
+        end if;
+      elif b(P,i) ge x(P,i) then
+        if lhs lt 1+rhs then
+          return false, i, t;
+        end if;
+      end if;
+    end for;
+  end for;
+  return true, _, _;
+end intrinsic;
+
+intrinsic SatisfiesPropertyC(P :: PadRamifPts) -> BoolElt
+  {"}
+  if not assigned P`propC then
+    P`propC := _SatisfiesPropertyC(P);
+  end if;
+  return P`propC;
+end intrinsic;
+
+intrinsic _SatisfiesPropertyD(P :: PadRamifPts) -> BoolElt, ., ., .
+  {True iff P satisfies property (d) of Proposition 3.9.}
+  for t in [0..u(P)-1] do
+    for i in [s(P,t)+1..s(P,t+1)-1] do
+      pi := p(P)^i;
+      for k in [0..u(P)] do
+        if b(P,k) gt pi then
+          if a(P,k) le ((J(P,t+1) - J(P,t))*(x(P,t+1) - x(P,t))/(pi - x(P,t)) + J(P,t) - b(P,k))/n(P) - vbinbp(P,k,i) + vbinbps(P,k,k) then
+            return false, t, i, k;
+          end if;
+        end if;
+      end for;
+    end for;
+  end for;
+  return true, _, _, _;
+end intrinsic;
+
+intrinsic SatisfiesPropertyD(P :: PadRamifPts) -> BoolElt
+  {"}
+  if not assigned P`propD then
+    P`propD := _SatisfiesPropertyD(P);
+  end if;
+  return P`propD;
+end intrinsic;
+
+intrinsic _LittleEll(P :: PadRamifPts, i :: RngIntElt, S :: RngIntElt) -> RngIntElt
+  {The "little ell" bound of Definition 3.8.}
+  require 0 le S and S le s(P,u(P)): "s out of bounds";
+  require p(P)^S le i and i le n(P)-1: "i out of bounds";
+  t := Max([t : t in [0..u(P)] | s(P,t) le S]);
+  if s(P,t) eq S then
+    return Max((i ge b(P,t) select 1 else 2) + a(P,t) - vbinp(P, i, S), 1);
+  else
+    assert s(P,t) lt S and S lt s(P,t+1);
+    return Max(1+Floor(((J(P,t+1) - J(P,t))*(p(P)^S - x(P,t))/(x(P,t+1) - x(P,t)) + J(P,t) - i)/n(P) + 1 - vbinp(P, i, S)), 1);
+  end if;  
+end intrinsic;
+
+intrinsic LittleEll(P :: PadRamifPts, i :: RngIntElt, s :: RngIntElt) -> RngIntElt
+  {"}
+  if not assigned P`little_ell then
+    P`little_ell := AssociativeArray();
+  end if;
+  key := <i,s>;
+  if not IsDefined(P`little_ell, key) then
+    P`little_ell[key] := _LittleEll(P, i, s);
+  end if;
+  return P`little_ell[key];
+end intrinsic;
+
+intrinsic _BigEll(P :: PadRamifPts, i :: RngIntElt : Cache:=false) -> RngIntElt
+  {The "big ell" bound of Definition 3.8.}
+  require 0 le i and i le P`n: "i out of bounds";
+  case i:
+  when 0:
+    return 1;
+  when P`n:
+    return 0;
+  else
+    return Max([(Cache select LittleEll else _LittleEll)(P, i, s) : s in [0..su(P)] | p(P)^s le i]);
+  end case;
+end intrinsic;
+
+intrinsic BigEll(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
+  {"}
+  if not assigned P`big_ell then
+    P`big_ell := AssociativeArray();
+  end if;
+  if not IsDefined(P`big_ell, i) then
+    P`big_ell[i] := _BigEll(P, i : Cache);
+  end if;
+  return P`big_ell[i];
+end intrinsic;
+
+intrinsic _SatisfiesPropertyE(P :: PadRamifPts) -> BoolElt
+  {True iff P satisfies property (e) of Proposition 3.9.}
+  return P`tvs[2..#P`tvs] eq [<i,0> : i in [P`tvs[1][1]+1..P`n] | BinomialValuation(P`n, i, P`F`p) eq 0];
+end intrinsic;
+
+intrinsic SatisfiesPropertyE(P :: PadRamifPts) -> BoolElt
+  {"}
+  if not assigned P`propE then
+    P`propE := _SatisfiesPropertyE(P);
+  end if;
+  return P`propE;
+end intrinsic;
+
+intrinsic FixPropertyE(P :: PadRamifPts) -> PadRamifPts
+  {A copy of P with the tame part corrected to satisfy case (e) of Proposition 3.9.}
+  P2 := RamificationPoints(P`F, P`wvs cat [<i,0> : i in [P`tvs[1][1]+1..P`n] | BinomialValuation(P`n, i, P`F`p) eq 0]);
+  assert P2`n eq P`n;
+  assert SatisfiesPropertyE(P2);
+  return P2;
+end intrinsic;
+
+intrinsic _IsSemivalid(P :: PadRamifPts) -> BoolElt
+  {True iff P satisfies properties (a)--(c) of Proposition 3.9.}
+  return _SatisfiesPropertyA(P) and _SatisfiesPropertyB(P) and _SatisfiesPropertyC(P);
+end intrinsic;
+
+intrinsic IsSemivalid(P :: PadRamifPts) -> BoolElt
+  {"}
+  if not assigned P`semivalid then
+    P`semivalid := SatisfiesPropertyA(P) and SatisfiesPropertyB(P) and SatisfiesPropertyC(P);
+  end if;
+  return P`semivalid;
+end intrinsic;
+
+intrinsic _IsValid(P :: PadRamifPts) -> BoolElt
+  {True iff P satisfies Proposition 3.9.}
+  return _SatisfiesPropertyA(P) and _SatisfiesPropertyB(P) and _SatisfiesPropertyC(P) and _SatisfiesPropertyD(P) and _SatisfiesPropertyE(P);
+end intrinsic;
+
+intrinsic IsValid(P :: PadRamifPts) -> BoolElt
+  {"}
+  if not assigned P`valid then
+     P`valid := SatisfiesPropertyA(P) and SatisfiesPropertyB(P) and SatisfiesPropertyC(P) and SatisfiesPropertyD(P) and SatisfiesPropertyE(P);
+  end if;
+  return P`valid;
+end intrinsic;
+
+///## Enumeration
+
+///param J0:=false When given, just produce the points with discriminant valuation J0+n-1
+intrinsic AllRamificationPoints(F :: FldPadTmpl, n :: RngIntElt : J0:=false) -> []
+  {All possible ramification points of extensions of F of degree n.}
+  require n ge 1: "n must be at least 1";
+  p := F`p;
+  ret := [];
+  vn := Valuation(n, p);
+  tail := [<p^vn, 0>] cat (n gt p^vn select [<n, 0>] else []);
+  J0s := OrePossibilities(F, n);
+  Jis := [OrePossibilities(F, n, i) : i in [1..vn-1]];
+  if J0 cmpne false then
+    if J0 in J0s then
+      J0s := [J0];
+    else
+      return [];
+    end if;
+  end if;
+  // deal with the tame case first
+  if vn eq 0 then
+    ok, P := IsCoercible_RamificationPoints(F, tail);
+    assert ok;
+    P2 := FixPropertyE(P);
+    assert IsValid(P2);
+    return [P2];
+  end if;
+  // make an initial todo list
+  todo := [];
+  for J0 in J0s do
+    if J0 gt 0 then
+      vs := [<1,J0>];
+      ok, P := IsCoercible_RamificationPoints(F, vs cat tail);
+      assert ok;
+      P2 := FixPropertyE(P);
+      if IsSemivalid(P2) then
+        Append(~todo, <1, vs>);
+      end if;
+      if IsValid(P2) then
+        Append(~ret, P2);
+      end if;
+    end if;
+  end for;
+  // expand the list
+  while #todo gt 0 do
+    i, vs := Explode(todo[1]);
+    todo := todo[2..#todo];
+    if i lt vn then
+      for J in Jis[i] do
+        ok, P := IsCoercible_RamificationPoints(F, vs cat [<p^i, J>] cat tail);
+        if ok then
+          assert J ne 0;
+          P2 := FixPropertyE(P);
+          if IsSemivalid(P2) then
+            Append(~todo, <i+1, vs cat [<p^i, J>]>);
+          end if;
+          if IsValid(P2) then
+            Append(~ret, P2);
+          end if;
+        end if;
+      end for;
+    end if;
+  end while;
+  return ret;
+end intrinsic;
+
+///# Generating Eisenstein polynomials
+
+///## Creation of templates
+
+intrinsic TemplateForEisensteinPolynomialsByDegreeAndDisciminant(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt) -> EisenTmpl
+  {Template for Eisenstein polynomials of degree n, discriminant valuation n+J-1 over F.}
+  require OreConditions(F, n, J): "parameters must satisfy Ore conditions";
+  T := New(EisenTmpl);
+  T`F := F;
+  T`n := n;
+  T`J := J;
+  b := J mod n;
+  a := J div n;
+  T`coeffs := [];
+  for i in [0..n] do
+    C := New(EisenTmplCoeff);
+    C`parent := T;
+    C`one := i eq n;
+    C`min_val := i eq n select 0 else i eq 0 select 1 else i ge b select Max(1+a-F`e*Valuation(i,F`p),1) else Max(2+a-F`e*Valuation(i,F`p),1);
+    C`min_val_sharp := i in {0,n,b};
+    C`max_val := i eq n select 0 else Floor(1 + 2*a + 2*b/n);
+    Append(~T`coeffs, C);
+  end for;
+  return T;
+end intrinsic;
+
+///hide
+intrinsic Print(T :: EisenTmpl)
+  {Print.}
+  print "Eisenstein polynomial template over";
+  IndentPush();
+  print T`F;
+  IndentPop();
+  print "with coefficients";
+  IndentPush();
+  for i in [1..#T`coeffs] do
+    printf "%2o ", i-1;
+    Print(T`coeffs[i]);
+    if i lt #T`coeffs then
+      print "";
+    end if;
+  end for;
+  IndentPop();
+end intrinsic;
+
+intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts) -> EisenTmpl
+  {A template for Eisenstein polynomials with this ramification polygon.}
+  T := TemplateForEisensteinPolynomialsByDegreeAndDisciminant(P`F, n(P), J(P,0));
+  for i in [0..n(P)-1] do
+    C := T`coeffs[i+1];
+    assert C`min_val le BigEll(P, i);
+    C`min_val := BigEll(P, i);
+  end for;
+  for t in [0..u(P)] do
+    if b(P,t) ne 0 then
+      assert BigEll(P, b(P,t)) eq 1 + a(P,t) - vbinbps(P,t,t);
+      C := T`coeffs[b(P,t)+1];
+      C`min_val_sharp := true;
+    end if;
+  end for;
+  return T;
+end intrinsic;
+
+///hide
+intrinsic Print(C :: EisenTmplCoeff)
+  {Print.}
+  printf "%o", C`one select 1 else Join([Sprintf("min_val=%o", C`min_val)] cat (C`min_val_sharp select ["(sharp)"] else []) cat [Sprintf("max_val=%o", C`max_val)] cat (assigned C`residues select [Sprintf("residues=%o",C`residues)] else []), " ");
+end intrinsic;
+
+/// Creation of polynomials
+
+intrinsic '#'(C :: EisenTmplCoeff) -> RngIntElt
+  {Size of the template.}
+  if C`min_val gt C`max_val then
+    return 1;
+  elif C`one then
+    return 1;
+  end if;
+  q := C`parent`F`p^C`parent`F`f;
+  n1 := assigned C`residues select #C`residues else C`min_val_sharp select q-1 else q;
+  n2 := q^(C`max_val - C`min_val);
+  return n1*n2;
+end intrinsic;
+
+intrinsic '#'(T :: EisenTmpl) -> RngIntElt
+  {Size of the template.}
+  return &*[Z|#C : C in T`coeffs];
+end intrinsic;
+
+intrinsic Random(T :: EisenTmplCoeff, K :: FldPad) -> RngIntElt
+  {A random element of K satisfying the template.}
+  require Prime(K) eq T`parent`F`p: "K has incorrect prime";
+  require AbsoluteInertiaDegree(K) eq T`parent`F`f: "K has incorrect absolute inertia degree";
+  require AbsoluteRamificationDegree(K) eq T`parent`F`e: "K has incorrect absolute ramification degree";
+  if T`one then
+    return K ! 1;
+  elif T`min_val gt T`max_val then
+    return K ! 0;
+  end if;
+  OK := Integers(K);
+  pi := UniformizingElement(OK);
+  Q := quo<OK | pi^(T`max_val - T`min_val + 1)>;
+  repeat
+    x := Random(Q);
+  until (not T`min_val_sharp) or Valuation(x) eq 0;
+  return x eq 0 select K!0 else ChangePrecision(ShiftValuation(K ! OK ! x, T`min_val), Precision(K));
+end intrinsic;
+
+intrinsic Random(T :: EisenTmpl, K :: FldPad) -> RngIntElt
+  {A random polynomial from T over the field K.}
+  return Polynomial([K| Random(C, K) : C in T`coeffs]);
+end intrinsic;
+
