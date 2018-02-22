@@ -6,7 +6,7 @@
 // the assertion error implies an inconsistency between Lemma 3.5 and Prop 3.10!
 
 declare type PadRamifPts;
-declare attributes PadRamifPts: F, vs, tvs, wvs, n, u, Js, bs, as, ss, pgon, propA, propB, propC, propD, propE, semivalid, valid, little_ell, big_ell;
+declare attributes PadRamifPts: F, vs, tvs, wvs, n, u, Js, bs, as, ss, pgon, valid_ore, valid_tame, valid_cong, valid_bound, valid_missing, is_valid, is_semivalid;
 
 declare type EisenTmpl;
 declare attributes EisenTmpl: F, n, J, coeffs;
@@ -135,7 +135,8 @@ end intrinsic;
 ///hide
 intrinsic Print(P :: PadRamifPts)
   {Print.}
-  printf "Ramification Points [%o; %o]", Join([(j eq s(P,i)) select Sprintf("%o", J(P,i)) else "." : j in (i eq u(P)) select [s(P,i)] else [s(P,i)..s(P,i+1)-1], i in [0..u(P)]], " "), Join([Sprintf("%o", v[1]) : v in P`tvs], " ");
+  vertices := SequenceToSet(ChangeUniverse(Vertices(P`pgon), car<Z,Z>));
+  printf "Ramification Points [%o; %o]", Join([(j eq s(P,i)) select Sprintf("%o", J(P,i)) cat (i eq 0 or i eq u(P) or not P`vs[i+1] in vertices select "" else ",") else "." : j in (i eq u(P)) select [s(P,i)] else [s(P,i)..s(P,i+1)-1], i in [0..u(P)]], " "), Join([Sprintf("%o", v[1]) : v in P`tvs], " ");
 end intrinsic;
 
 ///## Ore's conditions
@@ -245,7 +246,7 @@ end intrinsic;
 
 ///## Invariants
 
-/// n (degree), p (prime), e (absolute ramification degree), u (number of wild faces), s_u (p^s_u is the wild degree)
+/// n (degree), p (prime), e (absolute ramification degree), u (number of wild faces), x_u=p^s_u (wild degree)
 intrinsic n(P :: PadRamifPts) -> RngIntElt
   {n}
   return P`n;
@@ -273,6 +274,12 @@ end intrinsic;
 intrinsic su(P :: PadRamifPts) -> RngIntElt
   {s_u}
   return s(P,u(P));
+end intrinsic;
+
+///ditto
+intrinsic xu(P :: PadRamifPts) -> RngIntElt
+  {x_u}
+  return x(P, u(P));
 end intrinsic;
 
 /// J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
@@ -343,34 +350,61 @@ intrinsic vbinbps(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
 end intrinsic;
 
 ///## Validity
-///
-/// Proposition 3.9 tells us if a given set of points is the ramification polygon for some extension, and if so we say it is *valid*. If the set of points satisfies cases (a), (b) and (c) of the proposition, we say it is *semivalid*; a semivalid set of points remains semivalid if we remove points (except for the critical points at 1, p^s_u and n) and so in particular if a set of points is not semivalid, then adding points to it cannot make it valid. This fact may be used to efficiently enumerate all possible ramification points of a given degree.
 
-intrinsic _SatisfiesPropertyA(P :: PadRamifPts) -> BoolElt, .
-  {True iff P satisfies case (a) of Proposition 3.9.}
-  for i in [0..u(P)-1] do
-    if Min(n(P)*vbinbps(P,i), n(P)*vbinnps(P,i)) gt J(P,i) or J(P,i) gt n(P)*vbinnps(P,i) then
-      return false, i;
+intrinsic _SatisfiesOreCondition(P :: PadRamifPts) -> BoolElt, .
+  {True iff P satisfies the Ore conditions: `b_t=0 => a_t eq vB(n,p^s_t)`, `b_t>0 => B(b_t,p^s_t) le a_t le B(n,p^s_t)-1`.}
+  for t in [0..u(P)] do
+    if b(P,t) eq 0 then
+      if a(P,t) ne vbinnps(P,t) then
+        return false, t;
+      end if;
+    else
+      if vbinbps(P,t,t) gt a(P,t) or a(P,t) gt vbinnps(P,t)-1 then
+        return false, t;
+      end if;
     end if;
   end for;
   return true, _;
 end intrinsic;
 
-intrinsic SatisfiesPropertyA(P :: PadRamifPts) -> BoolElt
+intrinsic SatisfiesOreCondition(P :: PadRamifPts) -> BoolElt
   {"}
-  if not assigned P`propA then
-    P`propA := _SatisfiesPropertyA(P);
+  if not assigned P`valid_ore then
+    P`valid_ore := _SatisfiesOreCondition(P);
   end if;
-  return P`propA;
+  return P`valid_ore;
 end intrinsic;
 
-intrinsic _SatisfiesPropertyB(P :: PadRamifPts) -> BoolElt, ., .
-  {True iff P satisfies case (b) of Proposition 3.9.}
-  for i in [0..u(P)-1] do
-    for j in [i+1..u(P)-1] do
-      if b(P,i) eq b(P,j) then
-        if a(P,i) - vbinnps(P,i) ne a(P,j) - vbinnps(P,j) then
-          return false, i, j;
+intrinsic _SatisfiesTameCondition(P :: PadRamifPts) -> BoolElt
+  {True iff P satisfies the tame conditions: `p^s_u le j le n => (j,0) in P iff B(n,j)=0`.}
+  return CorrectTamePoints(P) eq P`tvs;
+end intrinsic;
+
+intrinsic SatisfiesTameCondition(P :: PadRamifPts) -> BoolElt
+  {"}
+  if not assigned P`valid_tame then
+    P`valid_tame := _SatisfiesTameCondition(P);
+  end if;
+  return P`valid_tame;
+end intrinsic;
+
+intrinsic CorrectTamePoints(P :: PadRamifPts) -> []
+  {The correct tame points for a valid P of this degree.}
+  return [<j,0> : j in [xu(P)..n(P)] | BinomialValuation(n(P),j,p(P)) eq 0];
+end intrinsic;
+
+intrinsic WithCorrectTamePoints(P :: PadRamifPts) -> PadRamifPts
+  {A copy of P with the correct tame points.}
+  return RamificationPoints(P`F, P`vs[1..P`u] cat CorrectTamePoints(P));
+end intrinsic;
+
+intrinsic _SatisfiesCongruenceCondition(P :: PadRamifPts) -> BoolElt, ., .
+  {True if P satisfies the congruence conditions: `b_t = b_r => a_t - B(b_t,p^s_t) = a_r - B(b_r,p^s_r)`.}
+  for t in [0..u(P)] do
+    for r in [0..t-1] do
+      if b(P,t) eq b(P,r) then
+        if a(P,t) - vbinbps(P,t,t) ne a(P,r) - vbinbps(P,r,r) then
+          return false, r, t;
         end if;
       end if;
     end for;
@@ -378,28 +412,27 @@ intrinsic _SatisfiesPropertyB(P :: PadRamifPts) -> BoolElt, ., .
   return true, _, _;
 end intrinsic;
 
-intrinsic SatisfiesPropertyB(P :: PadRamifPts) -> BoolElt
+intrinsic SatisfiesCongruenceCondition(P :: PadRamifPts) -> BoolElt
   {"}
-  if not assigned P`propB then
-    P`propB := _SatisfiesPropertyB(P);
+  if not assigned P`valid_cong then
+    P`valid_cong := _SatisfiesCongruenceCondition(P);
   end if;
-  return P`propB;
+  return P`valid_cong;
 end intrinsic;
 
-intrinsic _SatisfiesPropertyC(P :: PadRamifPts) -> BoolElt, ., .
-  {True iff P satisfies case (c) of Proposition 3.9.}
-  for i in [0..u(P)-1] do
-    for t in [0..u(P)-1] do
-      lhs := a(P,i) - vbinbps(P,i,i);
-      rhs := a(P,t) - vbinbps(P,i,t);
-      assert J(P,t) ne 0;
-      if b(P,i) ge b(P,t) then
-        if lhs lt rhs then
-          return false, i, t;
-        end if;
-      elif b(P,i) ge x(P,i) then
-        if lhs lt 1+rhs then
-          return false, i, t;
+intrinsic _SatisfiesBoundingCondition(P :: PadRamifPts) -> BoolElt, ., .
+  {True if P satisfies the bounding conditions: `b_r eq 0, p^s_r le b_t => a_t ge B(n,p^s_r) - B(b_t,p^s_r) + B(b_t,p^s_t)` and `b_r ne 0, p^s_r le b_t => a_t ge a_r - B(b_t,p^s_r) + B(b_t,p^s_t) + 1[b_t lt b_r]`.}
+  for t in [0..u(P)] do
+    for r in [0..u(P)] do
+      if x(P,r) le b(P,t) then
+        if b(P,r) eq 0 then
+          if a(P,t) lt vbinnps(P,r) - vbinbps(P,t,r) + vbinbps(P,t,t) then
+            return false, t, r;
+          end if;
+        else
+          if a(P,t) lt a(P,r) - vbinbps(P,t,r) + vbinbps(P,t,t) + (b(P,t) lt b(P,r) select 1 else 0) then
+            return false, t, r;
+          end if;
         end if;
       end if;
     end for;
@@ -407,134 +440,263 @@ intrinsic _SatisfiesPropertyC(P :: PadRamifPts) -> BoolElt, ., .
   return true, _, _;
 end intrinsic;
 
-intrinsic SatisfiesPropertyC(P :: PadRamifPts) -> BoolElt
+intrinsic SatisfiesBoundingCondition(P :: PadRamifPts) -> BoolElt
   {"}
-  if not assigned P`propC then
-    P`propC := _SatisfiesPropertyC(P);
+  if not assigned P`valid_bound then
+    P`valid_bound := _SatisfiesBoundingCondition(P);
   end if;
-  return P`propC;
+  return P`valid_bound;
 end intrinsic;
 
-intrinsic _SatisfiesPropertyD(P :: PadRamifPts) -> BoolElt, ., ., .
-  {True iff P satisfies property (d) of Proposition 3.9.}
+intrinsic _SatisfiesMissingCondition(P :: PadRamifPts) -> BoolElt, ., .
+  {True if P satisfies the "missing" conditions: `s_t lt s lt s_(t+1) => Floor(X/n) le B(n,p^s) - 1` and `s_t lt s_(t+1), p^s le b_r => a_r ge Floor((X-b_r)/n) + B(b_r,p^s_r) - B(b_r,p^s) + 1` where `X = J_t + (J_(t+1)-J_t)*(x_(t+1)-x_t)/(p^s-x_t)`.}
   for t in [0..u(P)-1] do
-    for i in [s(P,t)+1..s(P,t+1)-1] do
-      pi := p(P)^i;
-      for k in [0..u(P)] do
-        if b(P,k) gt pi then
-          if a(P,k) le ((J(P,t+1) - J(P,t))*(x(P,t+1) - x(P,t))/(pi - x(P,t)) + J(P,t) - b(P,k))/n(P) - vbinbp(P,k,i) + vbinbps(P,k,k) then
-            return false, t, i, k;
+    for s0 in [s(P,t)+1..s(P,t+1)-1] do
+      ps := p(P)^s0;
+      X := J(P,t) + (J(P,t+1) - J(P,t)) * (ps - x(P,t)) / (x(P,t+1) - x(P,t));
+      if Floor(X/n(P)) gt vbin(P,n(P),ps) - 1 then
+        return false, s0, -1;
+      end if;
+      for r in [0..u(P)] do
+        if ps le b(P,r) then
+          if a(P,r) lt Floor((X-b(P,r))/n(P)) + vbinbps(P,r,r) - vbin(P,b(P,r),ps) + 1 then
+            return false, s0, r;
           end if;
         end if;
       end for;
     end for;
   end for;
-  return true, _, _, _;
+  return true, _, _;
 end intrinsic;
 
-intrinsic SatisfiesPropertyD(P :: PadRamifPts) -> BoolElt
+intrinsic SatisfiesMissingCondition(P :: PadRamifPts) -> BoolElt
   {"}
-  if not assigned P`propD then
-    P`propD := _SatisfiesPropertyD(P);
+  if not assigned P`valid_missing then
+    P`valid_missing := _SatisfiesMissingCondition(P);
   end if;
-  return P`propD;
-end intrinsic;
-
-intrinsic _LittleEll(P :: PadRamifPts, i :: RngIntElt, S :: RngIntElt) -> RngIntElt
-  {The "little ell" bound of Definition 3.8.}
-  require 0 le S and S le s(P,u(P)): "s out of bounds";
-  require p(P)^S le i and i le n(P)-1: "i out of bounds";
-  t := Max([t : t in [0..u(P)] | s(P,t) le S]);
-  if s(P,t) eq S then
-    return Max((i ge b(P,t) select 1 else 2) + a(P,t) - vbinp(P, i, S), 1);
-  else
-    assert s(P,t) lt S and S lt s(P,t+1);
-    return Max(1+Floor(((J(P,t+1) - J(P,t))*(p(P)^S - x(P,t))/(x(P,t+1) - x(P,t)) + J(P,t) - i)/n(P) + 1 - vbinp(P, i, S)), 1);
-  end if;  
-end intrinsic;
-
-intrinsic LittleEll(P :: PadRamifPts, i :: RngIntElt, s :: RngIntElt) -> RngIntElt
-  {"}
-  if not assigned P`little_ell then
-    P`little_ell := AssociativeArray();
-  end if;
-  key := <i,s>;
-  if not IsDefined(P`little_ell, key) then
-    P`little_ell[key] := _LittleEll(P, i, s);
-  end if;
-  return P`little_ell[key];
-end intrinsic;
-
-intrinsic _BigEll(P :: PadRamifPts, i :: RngIntElt : Cache:=false) -> RngIntElt
-  {The "big ell" bound of Definition 3.8.}
-  require 0 le i and i le P`n: "i out of bounds";
-  case i:
-  when 0:
-    return 1;
-  when P`n:
-    return 0;
-  else
-    return Max([(Cache select LittleEll else _LittleEll)(P, i, s) : s in [0..su(P)] | p(P)^s le i]);
-  end case;
-end intrinsic;
-
-intrinsic BigEll(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
-  {"}
-  if not assigned P`big_ell then
-    P`big_ell := AssociativeArray();
-  end if;
-  if not IsDefined(P`big_ell, i) then
-    P`big_ell[i] := _BigEll(P, i : Cache);
-  end if;
-  return P`big_ell[i];
-end intrinsic;
-
-intrinsic _SatisfiesPropertyE(P :: PadRamifPts) -> BoolElt
-  {True iff P satisfies property (e) of Proposition 3.9.}
-  return P`tvs[2..#P`tvs] eq [<i,0> : i in [P`tvs[1][1]+1..P`n] | BinomialValuation(P`n, i, P`F`p) eq 0];
-end intrinsic;
-
-intrinsic SatisfiesPropertyE(P :: PadRamifPts) -> BoolElt
-  {"}
-  if not assigned P`propE then
-    P`propE := _SatisfiesPropertyE(P);
-  end if;
-  return P`propE;
-end intrinsic;
-
-intrinsic FixPropertyE(P :: PadRamifPts) -> PadRamifPts
-  {A copy of P with the tame part corrected to satisfy case (e) of Proposition 3.9.}
-  P2 := RamificationPoints(P`F, P`wvs cat [<i,0> : i in [P`tvs[1][1]+1..P`n] | BinomialValuation(P`n, i, P`F`p) eq 0]);
-  assert P2`n eq P`n;
-  assert SatisfiesPropertyE(P2);
-  return P2;
+  return P`valid_missing;
 end intrinsic;
 
 intrinsic _IsSemivalid(P :: PadRamifPts) -> BoolElt
-  {True iff P satisfies properties (a)--(c) of Proposition 3.9.}
-  return _SatisfiesPropertyA(P) and _SatisfiesPropertyB(P) and _SatisfiesPropertyC(P);
+  {True if P satisfies the Ore, congruence and bounding conditions, which are necessary (but not sufficient) for being valid.}
+  return _SatisfiesOreCondition(P) and _SatisfiesCongruenceCondition(P) and _SatisfiesBoundingCondition(P);
 end intrinsic;
 
 intrinsic IsSemivalid(P :: PadRamifPts) -> BoolElt
-  {"}
-  if not assigned P`semivalid then
-    P`semivalid := SatisfiesPropertyA(P) and SatisfiesPropertyB(P) and SatisfiesPropertyC(P);
+  {True if P satisfies the Ore, congruence and bounding conditions, which are necessary (but not sufficient) for being valid.}
+  if not assigned P`is_semivalid then
+    P`is_semivalid := _SatisfiesOreCondition(P) and _SatisfiesCongruenceCondition(P) and _SatisfiesBoundingCondition(P);
   end if;
-  return P`semivalid;
+  return P`is_semivalid;
 end intrinsic;
 
 intrinsic _IsValid(P :: PadRamifPts) -> BoolElt
-  {True iff P satisfies Proposition 3.9.}
-  return _SatisfiesPropertyA(P) and _SatisfiesPropertyB(P) and _SatisfiesPropertyC(P) and _SatisfiesPropertyD(P) and _SatisfiesPropertyE(P);
+  {True if P corresponds to an actual extension.}
+  return _SatisfiesOreCondition(P) and _SatisfiesCongruenceCondition(P) and _SatisfiesBoundingCondition(P) and _SatisfiesTameCondition(P) and _SatisfiesMissingCondition(P);
 end intrinsic;
 
 intrinsic IsValid(P :: PadRamifPts) -> BoolElt
-  {"}
-  if not assigned P`valid then
-     P`valid := SatisfiesPropertyA(P) and SatisfiesPropertyB(P) and SatisfiesPropertyC(P) and SatisfiesPropertyD(P) and SatisfiesPropertyE(P);
+  {True if P corresponds to an actual extension.}
+  if not assigned P`is_valid then
+    P`is_valid := _SatisfiesOreCondition(P) and _SatisfiesCongruenceCondition(P) and _SatisfiesBoundingCondition(P) and _SatisfiesTameCondition(P) and _SatisfiesMissingCondition(P);
   end if;
-  return P`valid;
+  return P`is_valid;
 end intrinsic;
+
+// ///
+// /// Proposition 3.9 tells us if a given set of points is the ramification polygon for some extension, and if so we say it is *valid*. If the set of points satisfies cases (a), (b) and (c) of the proposition, we say it is *semivalid*; a semivalid set of points remains semivalid if we remove points (except for the critical points at 1, p^s_u and n) and so in particular if a set of points is not semivalid, then adding points to it cannot make it valid. This fact may be used to efficiently enumerate all possible ramification points of a given degree.
+
+// intrinsic _SatisfiesPropertyA(P :: PadRamifPts) -> BoolElt, .
+//   {True iff P satisfies case (a) of Proposition 3.9.}
+//   for i in [0..u(P)-1] do
+//     if Min(n(P)*vbinbps(P,i), n(P)*vbinnps(P,i)) gt J(P,i) or J(P,i) gt n(P)*vbinnps(P,i) then
+//       return false, i;
+//     end if;
+//   end for;
+//   return true, _;
+// end intrinsic;
+
+// intrinsic SatisfiesPropertyA(P :: PadRamifPts) -> BoolElt
+//   {"}
+//   if not assigned P`propA then
+//     P`propA := _SatisfiesPropertyA(P);
+//   end if;
+//   return P`propA;
+// end intrinsic;
+
+// intrinsic _SatisfiesPropertyB(P :: PadRamifPts) -> BoolElt, ., .
+//   {True iff P satisfies case (b) of Proposition 3.9.}
+//   for i in [0..u(P)-1] do
+//     for j in [i+1..u(P)-1] do
+//       if b(P,i) eq b(P,j) then
+//         if a(P,i) - vbinnps(P,i) ne a(P,j) - vbinnps(P,j) then
+//           return false, i, j;
+//         end if;
+//       end if;
+//     end for;
+//   end for;
+//   return true, _, _;
+// end intrinsic;
+
+// intrinsic SatisfiesPropertyB(P :: PadRamifPts) -> BoolElt
+//   {"}
+//   if not assigned P`propB then
+//     P`propB := _SatisfiesPropertyB(P);
+//   end if;
+//   return P`propB;
+// end intrinsic;
+
+// intrinsic _SatisfiesPropertyC(P :: PadRamifPts) -> BoolElt, ., .
+//   {True iff P satisfies case (c) of Proposition 3.9.}
+//   for i in [0..u(P)-1] do
+//     for t in [0..u(P)-1] do
+//       lhs := a(P,i) - vbinbps(P,i,i);
+//       rhs := a(P,t) - vbinbps(P,i,t);
+//       assert J(P,t) ne 0;
+//       if b(P,i) ge b(P,t) then
+//         if lhs lt rhs then
+//           return false, i, t;
+//         end if;
+//       elif b(P,i) ge x(P,i) then
+//         if lhs lt 1+rhs then
+//           return false, i, t;
+//         end if;
+//       end if;
+//     end for;
+//   end for;
+//   return true, _, _;
+// end intrinsic;
+
+// intrinsic SatisfiesPropertyC(P :: PadRamifPts) -> BoolElt
+//   {"}
+//   if not assigned P`propC then
+//     P`propC := _SatisfiesPropertyC(P);
+//   end if;
+//   return P`propC;
+// end intrinsic;
+
+// intrinsic _SatisfiesPropertyD(P :: PadRamifPts) -> BoolElt, ., ., .
+//   {True iff P satisfies property (d) of Proposition 3.9.}
+//   for t in [0..u(P)-1] do
+//     for i in [s(P,t)+1..s(P,t+1)-1] do
+//       pi := p(P)^i;
+//       for k in [0..u(P)] do
+//         if b(P,k) ge pi then
+//           rhs := ((J(P,t+1) - J(P,t))*(pi - x(P,t))/(x(P,t+1) - x(P,t)) + J(P,t) - b(P,k))/n(P) - vbinbp(P,k,i) + vbinbps(P,k,k);
+//           // print i,k,t,a(P,k),rhs,((J(P,t+1) - J(P,t))*(x(P,t+1) - x(P,t))/(pi - x(P,t)) + J(P,t) - b(P,k))/n(P),vbinbp(P,k,i),vbinbps(P,k,k),J(P,t+1),J(P,t),x(P,t+1),x(P,t),pi,b(P,k),((J(P,t+1) - J(P,t))*(x(P,t+1) - x(P,t))/(pi - x(P,t)) + J(P,t) - b(P,k));
+//           if a(P,k) le rhs then
+//             return false, t, i, k;
+//           end if;
+//         end if;
+//       end for;
+//     end for;
+//   end for;
+//   return true, _, _, _;
+// end intrinsic;
+
+// intrinsic SatisfiesPropertyD(P :: PadRamifPts) -> BoolElt
+//   {"}
+//   if not assigned P`propD then
+//     P`propD := _SatisfiesPropertyD(P);
+//   end if;
+//   return P`propD;
+// end intrinsic;
+
+// intrinsic _LittleEll(P :: PadRamifPts, i :: RngIntElt, S :: RngIntElt) -> RngIntElt
+//   {The "little ell" bound of Definition 3.8.}
+//   require 0 le S and S le s(P,u(P)): "s out of bounds";
+//   require p(P)^S le i and i le n(P)-1: "i out of bounds";
+//   t := Max([t : t in [0..u(P)] | s(P,t) le S]);
+//   if s(P,t) eq S then
+//     return Max((i ge b(P,t) select 1 else 2) + a(P,t) - vbinp(P, i, S), 1);
+//   else
+//     assert s(P,t) lt S and S lt s(P,t+1);
+//     return Max(1+Floor(((J(P,t+1) - J(P,t))*(p(P)^S - x(P,t))/(x(P,t+1) - x(P,t)) + J(P,t) - i)/n(P) + 1 - vbinp(P, i, S)), 1);
+//   end if;  
+// end intrinsic;
+
+// intrinsic LittleEll(P :: PadRamifPts, i :: RngIntElt, s :: RngIntElt) -> RngIntElt
+//   {"}
+//   if not assigned P`little_ell then
+//     P`little_ell := AssociativeArray();
+//   end if;
+//   key := <i,s>;
+//   if not IsDefined(P`little_ell, key) then
+//     P`little_ell[key] := _LittleEll(P, i, s);
+//   end if;
+//   return P`little_ell[key];
+// end intrinsic;
+
+// intrinsic _BigEll(P :: PadRamifPts, i :: RngIntElt : Cache:=false) -> RngIntElt
+//   {The "big ell" bound of Definition 3.8.}
+//   require 0 le i and i le P`n: "i out of bounds";
+//   case i:
+//   when 0:
+//     return 1;
+//   when P`n:
+//     return 0;
+//   else
+//     return Max([(Cache select LittleEll else _LittleEll)(P, i, s) : s in [0..su(P)] | p(P)^s le i]);
+//   end case;
+// end intrinsic;
+
+// intrinsic BigEll(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
+//   {"}
+//   if not assigned P`big_ell then
+//     P`big_ell := AssociativeArray();
+//   end if;
+//   if not IsDefined(P`big_ell, i) then
+//     P`big_ell[i] := _BigEll(P, i : Cache);
+//   end if;
+//   return P`big_ell[i];
+// end intrinsic;
+
+// intrinsic _SatisfiesPropertyE(P :: PadRamifPts) -> BoolElt
+//   {True iff P satisfies property (e) of Proposition 3.9.}
+//   return P`tvs[2..#P`tvs] eq [<i,0> : i in [P`tvs[1][1]+1..P`n] | BinomialValuation(P`n, i, P`F`p) eq 0];
+// end intrinsic;
+
+// intrinsic SatisfiesPropertyE(P :: PadRamifPts) -> BoolElt
+//   {"}
+//   if not assigned P`propE then
+//     P`propE := _SatisfiesPropertyE(P);
+//   end if;
+//   return P`propE;
+// end intrinsic;
+
+// intrinsic FixPropertyE(P :: PadRamifPts) -> PadRamifPts
+//   {A copy of P with the tame part corrected to satisfy case (e) of Proposition 3.9.}
+//   P2 := RamificationPoints(P`F, P`wvs cat [<i,0> : i in [P`tvs[1][1]+1..P`n] | BinomialValuation(P`n, i, P`F`p) eq 0]);
+//   assert P2`n eq P`n;
+//   assert SatisfiesPropertyE(P2);
+//   return P2;
+// end intrinsic;
+
+// intrinsic _IsSemivalid(P :: PadRamifPts) -> BoolElt
+//   {True iff P satisfies properties (a)--(c) of Proposition 3.9.}
+//   return _SatisfiesPropertyA(P) and _SatisfiesPropertyB(P) and _SatisfiesPropertyC(P);
+// end intrinsic;
+
+// intrinsic IsSemivalid(P :: PadRamifPts) -> BoolElt
+//   {"}
+//   if not assigned P`semivalid then
+//     P`semivalid := SatisfiesPropertyA(P) and SatisfiesPropertyB(P) and SatisfiesPropertyC(P);
+//   end if;
+//   return P`semivalid;
+// end intrinsic;
+
+// intrinsic _IsValid(P :: PadRamifPts) -> BoolElt
+//   {True iff P satisfies Proposition 3.9.}
+//   return _SatisfiesPropertyA(P) and _SatisfiesPropertyB(P) and _SatisfiesPropertyC(P) and _SatisfiesPropertyD(P) and _SatisfiesPropertyE(P);
+// end intrinsic;
+
+// intrinsic IsValid(P :: PadRamifPts) -> BoolElt
+//   {"}
+//   if not assigned P`valid then
+//      P`valid := SatisfiesPropertyA(P) and SatisfiesPropertyB(P) and SatisfiesPropertyC(P) and SatisfiesPropertyD(P) and SatisfiesPropertyE(P);
+//   end if;
+//   return P`valid;
+// end intrinsic;
 
 ///## Enumeration
 
@@ -560,7 +722,7 @@ intrinsic AllRamificationPoints(F :: FldPadTmpl, n :: RngIntElt : J0:=false) -> 
   if vn eq 0 then
     ok, P := IsCoercible_RamificationPoints(F, tail);
     assert ok;
-    P2 := FixPropertyE(P);
+    P2 := WithCorrectTamePoints(P);
     assert IsValid(P2);
     return [P2];
   end if;
@@ -571,12 +733,12 @@ intrinsic AllRamificationPoints(F :: FldPadTmpl, n :: RngIntElt : J0:=false) -> 
       vs := [<1,J0>];
       ok, P := IsCoercible_RamificationPoints(F, vs cat tail);
       assert ok;
-      P2 := FixPropertyE(P);
-      if IsSemivalid(P2) then
+      if IsSemivalid(P) then
         Append(~todo, <1, vs>);
-      end if;
-      if IsValid(P2) then
-        Append(~ret, P2);
+        P2 := WithCorrectTamePoints(P);
+        if IsValid(P2) then
+          Append(~ret, P2);
+        end if;
       end if;
     end if;
   end for;
@@ -585,16 +747,17 @@ intrinsic AllRamificationPoints(F :: FldPadTmpl, n :: RngIntElt : J0:=false) -> 
     i, vs := Explode(todo[1]);
     todo := todo[2..#todo];
     if i lt vn then
+      Append(~todo, <i+1, vs>);
       for J in Jis[i] do
         ok, P := IsCoercible_RamificationPoints(F, vs cat [<p^i, J>] cat tail);
         if ok then
           assert J ne 0;
-          P2 := FixPropertyE(P);
-          if IsSemivalid(P2) then
+          if IsSemivalid(P) then
             Append(~todo, <i+1, vs cat [<p^i, J>]>);
-          end if;
-          if IsValid(P2) then
-            Append(~ret, P2);
+            P2 := WithCorrectTamePoints(P);
+            if IsValid(P2) then
+              Append(~ret, P2);
+            end if;
           end if;
         end if;
       end for;
@@ -652,19 +815,57 @@ end intrinsic;
 
 intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts) -> EisenTmpl
   {A template for Eisenstein polynomials with this ramification polygon.}
-  T := TemplateForEisensteinPolynomialsByDegreeAndDisciminant(P`F, n(P), J(P,0));
-  for i in [0..n(P)-1] do
-    C := T`coeffs[i+1];
-    assert C`min_val le BigEll(P, i);
-    C`min_val := BigEll(P, i);
+  require IsValid(P): "invalid";
+  T := New(EisenTmpl);
+  T`F := P`F;
+  T`n := n(P);
+  T`J := J(P,0);
+  C := [New(EisenTmplCoeff) : i in [0..n(P)]];
+  for i in [0..n(P)] do
+    C[i+1]`parent := T;
+    C[i+1]`one := i eq n(P);
+    C[i+1]`min_val := i eq n(P) select 0 else 1;
+    C[i+1]`min_val_sharp := i eq 0;
+    C[i+1]`max_val := i eq n(P) select 0 else Floor(1 + 2*a(P,0) + 2*b(P,0)/n(P));
   end for;
+  // inequalities from the "bounding" condition
   for t in [0..u(P)] do
-    if b(P,t) ne 0 then
-      assert BigEll(P, b(P,t)) eq 1 + a(P,t) - vbinbps(P,t,t);
-      C := T`coeffs[b(P,t)+1];
-      C`min_val_sharp := true;
+    if b(P,t) eq 0 then
+      for i in [x(P,t)..n(P)-1] do
+        C[i+1]`min_val := Max(C[i+1]`min_val, vbin(P,n(P),x(P,t)) - vbin(P,i,x(P,t)) + 1);
+      end for;
+    else
+      for i in [x(P,t)..n(P)] do
+        if i ne b(P,t) then
+          C[i+1]`min_val := Max(C[i+1]`min_val, a(P,t) + 1 - vbin(P,i,x(P,t)) + (i lt b(P,t) select 1 else 0));
+        end if;
+      end for;
     end if;
   end for;
+  // inequalities from the "missing" condition
+  for t in [0..u(P)-1] do
+    for s0 in [s(P,t)+1..s(P,t+1)-1] do
+      ps := p(P)^s0;
+      for i in [ps..n(P)] do
+        C[i+1]`min_val := Max(C[i+1]`min_val, Floor((J(P,t) + (J(P,t+1)-J(P,t))*(ps-x(P,t))/(x(P,t+1)-x(P,t)) - i)/n(P)) + 2 - vbin(P,i,ps));
+      end for;
+    end for;
+  end for;
+  // sharp equalities from the "bounding" condition
+  for t in [0..u(P)] do
+    i := b(P,t);
+    if i ne 0 then
+      val := a(P,t) - vbin(P,i,x(P,t)) + 1;
+      if C[i+1]`min_val_sharp then
+        assert C[i+1]`min_val eq val;
+      else
+        assert C[i+1]`min_val le val;
+        C[i+1]`min_val := val;
+        C[i+1]`min_val_sharp := true;
+      end if;
+    end if;
+  end for;
+  T`coeffs := C;
   return T;
 end intrinsic;
 
