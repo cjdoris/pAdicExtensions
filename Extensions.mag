@@ -132,6 +132,7 @@ intrinsic Print(F :: FldPadTmpl)
   printf "Template %o-adic field (f=%o, e=%o)", F`p, F`f, F`e;
 end intrinsic;
 
+///hide
 intrinsic Print(P :: PadRamifPts)
   {Print.}
   printf "Ramification Points [%o; %o]", Join([(j eq s(P,i)) select Sprintf("%o", J(P,i)) else "." : j in (i eq u(P)) select [s(P,i)] else [s(P,i)..s(P,i+1)-1], i in [0..u(P)]], " "), Join([Sprintf("%o", v[1]) : v in P`tvs], " ");
@@ -140,7 +141,7 @@ end intrinsic;
 ///## Ore's conditions
 
 intrinsic OreConditions(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt, s :: RngIntElt) -> BoolElt
-  {True if there exists an extension of degree n of F whose ramification polygon has a point (p^s, J).}
+  {True if there exists an extension of degree n of F whose ramification polygon has a point `(p^s, J)`.}
   require n ge 1: "n must be at least 1";
   require s ge 0: "s must be at least 0";
   p := F`p;
@@ -152,17 +153,17 @@ intrinsic OreConditions(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt, s :: Rn
 end intrinsic;
 
 intrinsic OreConditions(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt) -> BoolElt
-  {True if there exists an extension of degree n and discriminant valuation n+J-1 of F.}
+  {True if there exists an extension of degree n and discriminant valuation `n+J-1` of F.}
   return OreConditions(F, n, J, 0);
 end intrinsic;
 
 intrinsic OrePossibilities(F :: FldPadTmpl, n :: RngIntElt, s :: RngIntElt) -> BoolElt
-  {The possible J such that (F,n,J,s) satisfy Ore's conditions.}
+  {The possible J such that `(F,n,J,s)` satisfy Ore's conditions.}
   return [J : J in [0..n * F`e * BinomialValuation(n, F`p^s, F`p)]];
 end intrinsic;
 
 intrinsic OrePossibilities(F :: FldPadTmpl, n :: RngIntElt) -> []
-  {The possible J such that (F,n,J) satisfy Ore's conditions.}
+  {The possible J such that `(F,n,J)` satisfy Ore's conditions.}
   return OrePossibilities(F, n, 0);
 end intrinsic;
 

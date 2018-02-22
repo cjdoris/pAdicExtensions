@@ -10,7 +10,7 @@
 ## Creation of templates
 {:#creation-of-templates}
 
-<a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--RngIntElt--RngIntElt"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--etc"></a>
+<a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--etc"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--RngIntElt--RngIntElt"></a>
 > **TemplateForEisensteinPolynomialsByDegreeAndDisciminant** (F :: *FldPadTmpl*, n :: *RngIntElt*, J :: *RngIntElt*)
 > 
 > -> *EisenTmpl*
@@ -20,7 +20,7 @@
 Template for Eisenstein polynomials of degree `n`, discriminant valuation `n`+`J`-1 over `F`.
 
 
-<a id="TemplateForEisensteinPolynomials"></a><a id="TemplateForEisensteinPolynomials--PadRamifPts"></a>
+<a id="TemplateForEisensteinPolynomials--PadRamifPts"></a><a id="TemplateForEisensteinPolynomials"></a>
 > **TemplateForEisensteinPolynomials** (P :: *PadRamifPts*)
 > 
 > -> *EisenTmpl*
@@ -33,7 +33,7 @@ A template for Eisenstein polynomials with this ramification polygon.
 ## Creation of polynomials
 {:#creation-of-polynomials}
 
-<a id="#"></a><a id="#--EisenTmplCoeff"></a>
+<a id="#--EisenTmplCoeff"></a><a id="#"></a>
 > **\'#\'** (C :: *EisenTmplCoeff*)
 > 
 > -> *RngIntElt*
@@ -63,7 +63,7 @@ Size of the template.
 A random element of `K` satisfying the template.
 
 
-<a id="Random-2"></a><a id="Random--EisenTmpl--FldPad"></a><a id="Random--EisenTmpl--etc"></a>
+<a id="Random--EisenTmpl--FldPad"></a><a id="Random--EisenTmpl--etc"></a><a id="Random-2"></a>
 > **Random** (T :: *EisenTmpl*, K :: *FldPad*)
 > 
 > -> *RngIntElt*
