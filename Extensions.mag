@@ -313,32 +313,32 @@ intrinsic vbin(P :: PadRamifPts, n :: RngIntElt, k :: RngIntElt) -> RngIntElt
 end intrinsic;
 
 intrinsic vbinp(P :: PadRamifPts, n :: RngIntElt, i :: RngIntElt) -> RngIntElt
-  {Valuation of n choose p^i.}
+  {Valuation of n choose `p^i`.}
   return vbin(P, n, p(P)^i);
 end intrinsic;
 
 intrinsic vbinbp(P :: PadRamifPts, j :: RngIntElt, i :: RngIntElt) -> RngIntElt
-  {Valuation of b_j choose p^i.}
+  {Valuation of `b_j` choose `p^i`.}
   return vbin(P, b(P,j), p(P)^i);
 end intrinsic;
 
 intrinsic vbinps(P :: PadRamifPts, n :: RngIntElt, i :: RngIntElt) -> RngIntElt
-  {The valuation of n choose p^s_i.}
+  {The valuation of n choose `p^s_i`.}
   return vbin(P, n, x(P,i));
 end intrinsic;
 
 intrinsic vbinnps(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
-  {The valuation of n choose p^s_i.}
+  {The valuation of `n` choose p^s_i.}
   return vbinps(P, n(P), i);
 end intrinsic;
 
 intrinsic vbinbps(P :: PadRamifPts, j :: RngIntElt, i :: RngIntElt) -> RngIntElt
-  {The valuation of b_j choose p^s_i.}
+  {The valuation of `b_j` choose `p^s_i`.}
   return vbinps(P, b(P,j), i);
 end intrinsic;
 
 intrinsic vbinbps(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
-  {The valuation of b_i choose p^s_i.}
+  {The valuation of `b_i choose p^s_i`.}
   return vbinbps(P, i, i);
 end intrinsic;
 
@@ -538,7 +538,8 @@ end intrinsic;
 
 ///## Enumeration
 
-///param J0:=false When given, just produce the points with discriminant valuation J0+n-1
+/// All possible ramification points of extensions of F of degree n.
+///param J0:=false When given, just produce the points with discriminant valuation `J0+n-1`
 intrinsic AllRamificationPoints(F :: FldPadTmpl, n :: RngIntElt : J0:=false) -> []
   {All possible ramification points of extensions of F of degree n.}
   require n ge 1: "n must be at least 1";
@@ -609,7 +610,7 @@ end intrinsic;
 ///## Creation of templates
 
 intrinsic TemplateForEisensteinPolynomialsByDegreeAndDisciminant(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt) -> EisenTmpl
-  {Template for Eisenstein polynomials of degree n, discriminant valuation n+J-1 over F.}
+  {Template for Eisenstein polynomials of degree n, discriminant valuation `n+J-1` over F.}
   require OreConditions(F, n, J): "parameters must satisfy Ore conditions";
   T := New(EisenTmpl);
   T`F := F;
@@ -689,7 +690,7 @@ intrinsic '#'(C :: EisenTmplCoeff) -> RngIntElt
 end intrinsic;
 
 intrinsic '#'(T :: EisenTmpl) -> RngIntElt
-  {Size of the template.}
+  {"}
   return &*[Z|#C : C in T`coeffs];
 end intrinsic;
 

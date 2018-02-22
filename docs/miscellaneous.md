@@ -1,7 +1,7 @@
 # Miscellaneous
 {:#miscellaneous}
 
-<a id="FloorLog--RngIntElt--etc"></a><a id="FloorLog"></a><a id="FloorLog--RngIntElt--RngIntElt"></a>
+<a id="FloorLog--RngIntElt--etc"></a><a id="FloorLog--RngIntElt--RngIntElt"></a><a id="FloorLog"></a>
 > **FloorLog** (b :: *RngIntElt*, x :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -25,7 +25,7 @@ Treating `P` as a piecewise-linear function, evaluates it at `x`.
 
 
 
-<a id="FactorialValuation--RngIntElt--etc"></a><a id="FactorialValuation"></a><a id="FactorialValuation--RngIntElt--RngIntElt"></a>
+<a id="FactorialValuation"></a><a id="FactorialValuation--RngIntElt--RngIntElt"></a><a id="FactorialValuation--RngIntElt--etc"></a>
 > **FactorialValuation** (n :: *RngIntElt*, p :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -35,7 +35,7 @@ Treating `P` as a piecewise-linear function, evaluates it at `x`.
 The `p`-adic valuation of `n!` (equivalent to `Valuation(Factorial(n),p)` but more efficient).
 
 
-<a id="BinomialValuation--RngIntElt--etc"></a><a id="BinomialValuation--RngIntElt--RngIntElt--RngIntElt"></a><a id="BinomialValuation"></a>
+<a id="BinomialValuation--RngIntElt--RngIntElt--RngIntElt"></a><a id="BinomialValuation--RngIntElt--etc"></a><a id="BinomialValuation"></a>
 > **BinomialValuation** (n :: *RngIntElt*, k :: *RngIntElt*, p :: *RngIntElt*)
 > 
 > -> *RngIntElt*

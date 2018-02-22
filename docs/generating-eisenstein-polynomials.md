@@ -17,7 +17,7 @@
 > {:.ret}
 {:.intrinsic}
 
-Template for Eisenstein polynomials of degree `n`, discriminant valuation `n`+`J`-1 over `F`.
+Template for Eisenstein polynomials of degree `n`, discriminant valuation `n+J-1` over `F`.
 
 
 <a id="TemplateForEisensteinPolynomials--PadRamifPts"></a><a id="TemplateForEisensteinPolynomials"></a>
@@ -33,17 +33,9 @@ A template for Eisenstein polynomials with this ramification polygon.
 ## Creation of polynomials
 {:#creation-of-polynomials}
 
-<a id="#--EisenTmplCoeff"></a><a id="#"></a>
+<a id="#"></a><a id="#--EisenTmplCoeff"></a><a id="#--EisenTmpl"></a>
 > **\'#\'** (C :: *EisenTmplCoeff*)
 > 
-> -> *RngIntElt*
-> {:.ret}
-{:.intrinsic}
-
-Size of the template.
-
-
-<a id="#-2"></a><a id="#--EisenTmpl"></a>
 > **\'#\'** (T :: *EisenTmpl*)
 > 
 > -> *RngIntElt*
@@ -53,7 +45,9 @@ Size of the template.
 Size of the template.
 
 
-<a id="Random--EisenTmplCoeff--etc"></a><a id="Random"></a><a id="Random--EisenTmplCoeff--FldPad"></a>
+
+
+<a id="Random--EisenTmplCoeff--etc"></a><a id="Random--EisenTmplCoeff--FldPad"></a><a id="Random"></a>
 > **Random** (T :: *EisenTmplCoeff*, K :: *FldPad*)
 > 
 > -> *RngIntElt*
@@ -63,7 +57,7 @@ Size of the template.
 A random element of `K` satisfying the template.
 
 
-<a id="Random--EisenTmpl--FldPad"></a><a id="Random--EisenTmpl--etc"></a><a id="Random-2"></a>
+<a id="Random--EisenTmpl--etc"></a><a id="Random--EisenTmpl--FldPad"></a><a id="Random-2"></a>
 > **Random** (T :: *EisenTmpl*, K :: *FldPad*)
 > 
 > -> *RngIntElt*
