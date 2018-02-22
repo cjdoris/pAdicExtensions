@@ -483,7 +483,7 @@ intrinsic _IsSemivalid(P :: PadRamifPts) -> BoolElt
 end intrinsic;
 
 intrinsic IsSemivalid(P :: PadRamifPts) -> BoolElt
-  {True if P satisfies the Ore, congruence and bounding conditions, which are necessary (but not sufficient) for being valid.}
+  {"}
   if not assigned P`is_semivalid then
     P`is_semivalid := _SatisfiesOreCondition(P) and _SatisfiesCongruenceCondition(P) and _SatisfiesBoundingCondition(P);
   end if;
@@ -496,7 +496,7 @@ intrinsic _IsValid(P :: PadRamifPts) -> BoolElt
 end intrinsic;
 
 intrinsic IsValid(P :: PadRamifPts) -> BoolElt
-  {True if P corresponds to an actual extension.}
+  {"}
   if not assigned P`is_valid then
     P`is_valid := _SatisfiesOreCondition(P) and _SatisfiesCongruenceCondition(P) and _SatisfiesBoundingCondition(P) and _SatisfiesTameCondition(P) and _SatisfiesMissingCondition(P);
   end if;

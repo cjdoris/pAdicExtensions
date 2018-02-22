@@ -15,7 +15,7 @@ A `PadRamifPts` represents a set of points defining a ramification polygon. Some
 ## Creation
 {:#creation}
 
-<a id="IsCoercible_RamificationPoints--FldPadTmpl--etc"></a><a id="IsCoercible_RamificationPoints"></a><a id="IsCoercible_RamificationPoints--FldPadTmpl--seq"></a>
+<a id="IsCoercible_RamificationPoints--FldPadTmpl--seq"></a><a id="IsCoercible_RamificationPoints"></a><a id="IsCoercible_RamificationPoints--FldPadTmpl--etc"></a>
 > **IsCoercible_RamificationPoints** (F :: *FldPadTmpl*, vs :: [])
 > 
 > -> *BoolElt*, *PadRamifPts*
@@ -25,7 +25,7 @@ A `PadRamifPts` represents a set of points defining a ramification polygon. Some
 True if `vs` can be made into a potential set of ramification points over `F`. `vs` must be a list of `<x,y>` pairs of integers defining the points.
 
 
-<a id="RamificationPoints"></a><a id="RamificationPoints--FldPadTmpl--etc"></a><a id="RamificationPoints--FldPadTmpl--seq"></a>
+<a id="RamificationPoints--FldPadTmpl--etc"></a><a id="RamificationPoints"></a><a id="RamificationPoints--FldPadTmpl--seq"></a>
 > **RamificationPoints** (F :: *FldPadTmpl*, vs :: [])
 > 
 > -> *PadRamifPts*
@@ -48,7 +48,7 @@ Makes a copy of `P`.
 ## Invariants
 {:#invariants}
 
-<a id="e"></a><a id="su--PadRamifPts"></a><a id="u"></a><a id="p"></a><a id="su"></a><a id="n--PadRamifPts"></a><a id="xu--PadRamifPts"></a><a id="n"></a><a id="p--PadRamifPts"></a><a id="e--PadRamifPts"></a><a id="xu"></a><a id="u--PadRamifPts"></a>
+<a id="n--PadRamifPts"></a><a id="p--PadRamifPts"></a><a id="xu"></a><a id="u--PadRamifPts"></a><a id="e"></a><a id="su"></a><a id="xu--PadRamifPts"></a><a id="n"></a><a id="u"></a><a id="e--PadRamifPts"></a><a id="su--PadRamifPts"></a><a id="p"></a>
 > **n** (P :: *PadRamifPts*)
 > 
 > **p** (P :: *PadRamifPts*)
@@ -78,7 +78,7 @@ n (degree), p (prime), e (absolute ramification degree), u (number of wild faces
 
 
 
-<a id="J--PadRamifPts--etc"></a><a id="a"></a><a id="b--PadRamifPts--RngIntElt"></a><a id="b--PadRamifPts--etc"></a><a id="b"></a><a id="s"></a><a id="x--PadRamifPts--RngIntElt"></a><a id="J--PadRamifPts--RngIntElt"></a><a id="x--PadRamifPts--etc"></a><a id="x"></a><a id="a--PadRamifPts--etc"></a><a id="a--PadRamifPts--RngIntElt"></a><a id="s--PadRamifPts--etc"></a><a id="J"></a><a id="s--PadRamifPts--RngIntElt"></a>
+<a id="J--PadRamifPts--etc"></a><a id="a"></a><a id="b"></a><a id="b--PadRamifPts--etc"></a><a id="s"></a><a id="s--PadRamifPts--etc"></a><a id="x--PadRamifPts--etc"></a><a id="b--PadRamifPts--RngIntElt"></a><a id="x--PadRamifPts--RngIntElt"></a><a id="a--PadRamifPts--etc"></a><a id="s--PadRamifPts--RngIntElt"></a><a id="J--PadRamifPts--RngIntElt"></a><a id="J"></a><a id="a--PadRamifPts--RngIntElt"></a><a id="x"></a>
 > **J** (P :: *PadRamifPts*, i :: *RngIntElt*)
 > 
 > **a** (P :: *PadRamifPts*, i :: *RngIntElt*)
@@ -107,7 +107,7 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 ## Valuations of binomials
 {:#valuations-of-binomials}
 
-<a id="vbin--PadRamifPts--etc"></a><a id="vbin"></a><a id="vbin--PadRamifPts--RngIntElt--RngIntElt"></a>
+<a id="vbin"></a><a id="vbin--PadRamifPts--RngIntElt--RngIntElt"></a><a id="vbin--PadRamifPts--etc"></a>
 > **vbin** (P :: *PadRamifPts*, n :: *RngIntElt*, k :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -117,7 +117,7 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 Valuation of `n` choose `k`.
 
 
-<a id="vbinp--PadRamifPts--RngIntElt--RngIntElt"></a><a id="vbinp"></a><a id="vbinp--PadRamifPts--etc"></a>
+<a id="vbinp--PadRamifPts--etc"></a><a id="vbinp--PadRamifPts--RngIntElt--RngIntElt"></a><a id="vbinp"></a>
 > **vbinp** (P :: *PadRamifPts*, n :: *RngIntElt*, i :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -137,7 +137,7 @@ Valuation of `n` choose `p^i`.
 Valuation of `b_j` choose `p^i`.
 
 
-<a id="vbinps--PadRamifPts--etc"></a><a id="vbinps"></a><a id="vbinps--PadRamifPts--RngIntElt--RngIntElt"></a>
+<a id="vbinps--PadRamifPts--RngIntElt--RngIntElt"></a><a id="vbinps--PadRamifPts--etc"></a><a id="vbinps"></a>
 > **vbinps** (P :: *PadRamifPts*, n :: *RngIntElt*, i :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -147,7 +147,7 @@ Valuation of `b_j` choose `p^i`.
 The valuation of `n` choose `p^s_i`.
 
 
-<a id="vbinnps"></a><a id="vbinnps--PadRamifPts--RngIntElt"></a><a id="vbinnps--PadRamifPts--etc"></a>
+<a id="vbinnps--PadRamifPts--etc"></a><a id="vbinnps--PadRamifPts--RngIntElt"></a><a id="vbinnps"></a>
 > **vbinnps** (P :: *PadRamifPts*, i :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -157,7 +157,7 @@ The valuation of `n` choose `p^s_i`.
 The valuation of `n` choose p^s_i.
 
 
-<a id="vbinbps--PadRamifPts--etc"></a><a id="vbinbps"></a><a id="vbinbps--PadRamifPts--RngIntElt--RngIntElt"></a>
+<a id="vbinbps--PadRamifPts--RngIntElt--RngIntElt"></a><a id="vbinbps--PadRamifPts--etc"></a><a id="vbinbps"></a>
 > **vbinbps** (P :: *PadRamifPts*, j :: *RngIntElt*, i :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -167,7 +167,7 @@ The valuation of `n` choose p^s_i.
 The valuation of `b_j` choose `p^s_i`.
 
 
-<a id="vbinbps--PadRamifPts--etc-2"></a><a id="vbinbps-2"></a><a id="vbinbps--PadRamifPts--RngIntElt"></a>
+<a id="vbinbps--PadRamifPts--etc-2"></a><a id="vbinbps--PadRamifPts--RngIntElt"></a><a id="vbinbps-2"></a>
 > **vbinbps** (P :: *PadRamifPts*, i :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -180,7 +180,7 @@ The valuation of `b_i choose p^s_i`.
 ## Validity
 {:#validity}
 
-<a id="_SatisfiesOreCondition"></a><a id="SatisfiesOreCondition"></a><a id="_SatisfiesOreCondition--PadRamifPts"></a><a id="SatisfiesOreCondition--PadRamifPts"></a>
+<a id="_SatisfiesOreCondition"></a><a id="_SatisfiesOreCondition--PadRamifPts"></a><a id="SatisfiesOreCondition"></a><a id="SatisfiesOreCondition--PadRamifPts"></a>
 > **_SatisfiesOreCondition** (P :: *PadRamifPts*)
 > 
 > -> *BoolElt*, Any
@@ -197,7 +197,7 @@ True iff `P` satisfies the Ore conditions: `b_t=0 => a_t eq vB(n,p^s_t)`, `b_t>0
 
 
 
-<a id="_SatisfiesTameCondition"></a><a id="SatisfiesTameCondition"></a><a id="_SatisfiesTameCondition--PadRamifPts"></a><a id="SatisfiesTameCondition--PadRamifPts"></a>
+<a id="SatisfiesTameCondition--PadRamifPts"></a><a id="_SatisfiesTameCondition--PadRamifPts"></a><a id="_SatisfiesTameCondition"></a><a id="SatisfiesTameCondition"></a>
 > **_SatisfiesTameCondition** (P :: *PadRamifPts*)
 > 
 > **SatisfiesTameCondition** (P :: *PadRamifPts*)
@@ -211,7 +211,7 @@ True iff `P` satisfies the tame conditions: `p^s_u le j le n => (j,0) in P iff B
 
 
 
-<a id="CorrectTamePoints--PadRamifPts"></a><a id="CorrectTamePoints"></a>
+<a id="CorrectTamePoints"></a><a id="CorrectTamePoints--PadRamifPts"></a>
 > **CorrectTamePoints** (P :: *PadRamifPts*)
 > 
 > -> []
@@ -231,7 +231,7 @@ The correct tame points for a valid `P` of this degree.
 A copy of `P` with the correct tame points.
 
 
-<a id="_SatisfiesCongruenceCondition"></a><a id="_SatisfiesCongruenceCondition--PadRamifPts"></a><a id="SatisfiesCongruenceCondition"></a><a id="SatisfiesCongruenceCondition--PadRamifPts"></a>
+<a id="_SatisfiesCongruenceCondition--PadRamifPts"></a><a id="SatisfiesCongruenceCondition"></a><a id="SatisfiesCongruenceCondition--PadRamifPts"></a><a id="_SatisfiesCongruenceCondition"></a>
 > **_SatisfiesCongruenceCondition** (P :: *PadRamifPts*)
 > 
 > -> *BoolElt*, Any, Any
@@ -248,7 +248,7 @@ True if `P` satisfies the congruence conditions: `b_t = b_r => a_t - B(b_t,p^s_t
 
 
 
-<a id="_SatisfiesBoundingCondition"></a><a id="SatisfiesBoundingCondition--PadRamifPts"></a><a id="SatisfiesBoundingCondition"></a><a id="_SatisfiesBoundingCondition--PadRamifPts"></a>
+<a id="SatisfiesBoundingCondition--PadRamifPts"></a><a id="_SatisfiesBoundingCondition"></a><a id="_SatisfiesBoundingCondition--PadRamifPts"></a><a id="SatisfiesBoundingCondition"></a>
 > **_SatisfiesBoundingCondition** (P :: *PadRamifPts*)
 > 
 > -> *BoolElt*, Any, Any
@@ -265,7 +265,7 @@ True if `P` satisfies the bounding conditions: `b_r eq 0, p^s_r le b_t => a_t ge
 
 
 
-<a id="SatisfiesMissingCondition--PadRamifPts"></a><a id="_SatisfiesMissingCondition--PadRamifPts"></a><a id="SatisfiesMissingCondition"></a><a id="_SatisfiesMissingCondition"></a>
+<a id="_SatisfiesMissingCondition--PadRamifPts"></a><a id="SatisfiesMissingCondition"></a><a id="SatisfiesMissingCondition--PadRamifPts"></a><a id="_SatisfiesMissingCondition"></a>
 > **_SatisfiesMissingCondition** (P :: *PadRamifPts*)
 > 
 > -> *BoolElt*, Any, Any
@@ -282,17 +282,9 @@ True if `P` satisfies the "missing" conditions: `s_t lt s lt s_(t+1) => Floor(X/
 
 
 
-<a id="_IsSemivalid--PadRamifPts"></a><a id="_IsSemivalid"></a>
+<a id="_IsSemivalid"></a><a id="IsSemivalid--PadRamifPts"></a><a id="_IsSemivalid--PadRamifPts"></a><a id="IsSemivalid"></a>
 > **_IsSemivalid** (P :: *PadRamifPts*)
 > 
-> -> *BoolElt*
-> {:.ret}
-{:.intrinsic}
-
-True if `P` satisfies the Ore, congruence and bounding conditions, which are necessary (but not sufficient) for being valid.
-
-
-<a id="IsSemivalid--PadRamifPts"></a><a id="IsSemivalid"></a>
 > **IsSemivalid** (P :: *PadRamifPts*)
 > 
 > -> *BoolElt*
@@ -302,17 +294,11 @@ True if `P` satisfies the Ore, congruence and bounding conditions, which are nec
 True if `P` satisfies the Ore, congruence and bounding conditions, which are necessary (but not sufficient) for being valid.
 
 
-<a id="_IsValid--PadRamifPts"></a><a id="_IsValid"></a>
+
+
+<a id="IsValid"></a><a id="IsValid--PadRamifPts"></a><a id="_IsValid--PadRamifPts"></a><a id="_IsValid"></a>
 > **_IsValid** (P :: *PadRamifPts*)
 > 
-> -> *BoolElt*
-> {:.ret}
-{:.intrinsic}
-
-True if `P` corresponds to an actual extension.
-
-
-<a id="IsValid"></a><a id="IsValid--PadRamifPts"></a>
 > **IsValid** (P :: *PadRamifPts*)
 > 
 > -> *BoolElt*
@@ -322,10 +308,12 @@ True if `P` corresponds to an actual extension.
 True if `P` corresponds to an actual extension.
 
 
+
+
 ## Enumeration
 {:#enumeration}
 
-<a id="AllRamificationPoints"></a><a id="AllRamificationPoints--FldPadTmpl--etc"></a><a id="AllRamificationPoints--FldPadTmpl--RngIntElt"></a>
+<a id="AllRamificationPoints--FldPadTmpl--RngIntElt"></a><a id="AllRamificationPoints--FldPadTmpl--etc"></a><a id="AllRamificationPoints"></a>
 > **AllRamificationPoints** (F :: *FldPadTmpl*, n :: *RngIntElt*)
 > 
 > -> []
