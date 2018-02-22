@@ -1,7 +1,7 @@
 ---
 ---
 
-# pAdicExtensions
+# p-Adic Extensions
 
 Tools for generating extensions of p-adic fields. Implemented in the Magma computer algebra system.
 
