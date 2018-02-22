@@ -669,7 +669,7 @@ end intrinsic;
 ///hide
 intrinsic Print(C :: EisenTmplCoeff)
   {Print.}
-  printf "%o", C`one select 1 else Join([Sprintf("min_val=%o", C`min_val)] cat (C`min_val_sharp select ["(sharp)"] else []) cat [Sprintf("max_val=%o", C`max_val)] cat (assigned C`residues select [Sprintf("residues=%o",C`residues)] else []), " ");
+  printf "%o", C`one select 1 else Join([Sprintf("min_val=%o", C`min_val)] cat (C`min_val_sharp select ["(sharp)"] else []) cat [Sprintf("max_val=%o", C`max_val)], " ");
 end intrinsic;
 
 ///## Creation of polynomials
@@ -682,7 +682,7 @@ intrinsic '#'(C :: EisenTmplCoeff) -> RngIntElt
     return 1;
   end if;
   q := C`parent`F`p^C`parent`F`f;
-  n1 := assigned C`residues select #C`residues else C`min_val_sharp select q-1 else q;
+  n1 := C`min_val_sharp select q-1 else q;
   n2 := q^(C`max_val - C`min_val);
   return n1*n2;
 end intrinsic;
@@ -708,7 +708,7 @@ intrinsic Random(T :: EisenTmplCoeff, K :: FldPad) -> RngIntElt
   repeat
     x := Random(Q);
   until (not T`min_val_sharp) or Valuation(x) eq 0;
-  return x eq 0 select K!0 else ChangePrecision(ShiftValuation(K ! OK ! x, T`min_val), Precision(K));
+  return x eq 0 select K!0 else ChangePrecision(ShiftValuation(K ! OK ! x, T`min_val), K`DefaultPrecision);
 end intrinsic;
 
 intrinsic Random(T :: EisenTmpl, K :: FldPad) -> RngIntElt
