@@ -810,7 +810,7 @@ intrinsic WithAllValidResidues(P :: PadRamifPts) -> []
   return ret;
 end intrinsic;
 
-intrinsic AllCCResidues(P :: PadRamifPts : Residues:=false) -> []
+intrinsic AllCCResidues(P :: PadRamifPts : Residues:=false, Classes:=false) -> []
   {All valid CC-residues for P.}
   require IsValid(P): "P must be valid";
   if Residues cmpeq false then
@@ -820,13 +820,24 @@ intrinsic AllCCResidues(P :: PadRamifPts : Residues:=false) -> []
     ok, pol := IsValidResidues(P, Residues);
     require ok: "Residues must be valid";
   end if;
-  return [x[1] : x in Roots(pol)];
+  rs := [x[1] : x in Roots(pol)];
+  if Classes then
+    cs := [];
+    for r in rs do
+      if not exists{c : c in cs | IsPower(c/r, n(P))} then
+        Append(~cs, r);
+      end if;
+    end for;
+    return cs;
+  else
+    return rs;
+  end if;
 end intrinsic;
 
-intrinsic WithAllCCResidues(P :: PadRamifPts) -> []
+intrinsic WithAllCCResidues(P :: PadRamifPts : Classes:=false) -> []
   {Copies of P with valid CC-residues attached.}
   ret := [];
-  for res in AllCCResidues(P) do
+  for res in AllCCResidues(P : Classes:=Classes) do
     P2 := Copy(P);
     P2`ccres := res;
     Append(~ret, P2);
@@ -881,7 +892,7 @@ intrinsic Print(T :: EisenTmpl)
   IndentPop();
 end intrinsic;
 
-intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts : Residues:=true, CCResidue:=false) -> EisenTmpl
+intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts : Residues:=true, CCResidue:=false, Shrink:=true) -> EisenTmpl
   {A template for Eisenstein polynomials with this ramification polygon.}
   require IsValid(P): "invalid";
   T := New(EisenTmpl);
@@ -933,8 +944,16 @@ intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts : Residues:=true, CC
       end if;
     end if;
   end for;
+  // shrink
+  if Shrink then
+    M := Floor(Max([-s : s in Slopes(P`pgon)]));
+    h, j := Quotrem(J(P,0) + M + 1, n(P));
+    for i in [0..n(P)-1] do
+      C[i+1]`max_val := Min(C[i+1]`max_val, h + (i lt j select 1 else 0));
+    end for;
+  end if;
   // residues
-  if Residues cmpne false then
+  if Residues cmpeq true select assigned P`residues else Residues cmpne false then
     FF := ResidueClassField(P`F);
     // get the set of residues
     if Residues cmpeq true then
@@ -971,6 +990,25 @@ intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts : Residues:=true, CC
         C[b(P,t)+1]`residues[1] := {rs[t+1] * ccres^(1+a(P,t)) / ShiftedBinomial(FF,b(P,t),x(P,t))};
       end if;
     end for;
+    // shrink
+    if Shrink then
+      RFF := PolynomialRing(FF);
+      for m in [1..M] do
+        vs1 := [<v[1], v[2]+v[1]*m> : v in P`vs];
+        Cm := Min([v[2] : v in vs1]);
+        h, j := Quotrem(Cm, n(P));
+        vs2 := [<v[1], v[2] - Cm> : v in vs1];
+        Sm := &+[RFF.1^vs2[i][1] * P`residues[i] : i in [1..#vs2] | vs2[i][2] eq 0];
+        U := { ccres^(1 + h) * Evaluate(Sm, x) : x in FF };
+        cosets := [];
+        for x in FF do
+          if not exists{c : c in cosets | c-x in U} then
+            Append(~cosets, x);
+          end if;
+        end for;
+        C[j+1]`residues[h+1] := SequenceToSet(cosets);
+      end for;
+    end if;
   end if;
   T`coeffs := C;
   return T;
@@ -990,7 +1028,7 @@ intrinsic '#'(C :: EisenTmplCoeff) -> RngIntElt
     return 1;
   end if;
   q := C`parent`F`p^C`parent`F`f;
-  return &*[Z| (assigned C`residues and IsDefined(C`residues, i) select #C`residues[i] else i eq C`min_val and C`min_val_sharp select q-1 else q) : i in [C`min_val..C`max_val]];
+  return &*[Z| (assigned C`residues and IsDefined(C`residues, i-C`min_val+1) select #C`residues[i-C`min_val+1] else i eq C`min_val and C`min_val_sharp select q-1 else q) : i in [C`min_val..C`max_val]];
 end intrinsic;
 
 intrinsic '#'(T :: EisenTmpl) -> RngIntElt
@@ -1010,8 +1048,8 @@ intrinsic Random(C :: EisenTmplCoeff, K :: FldPad) -> RngIntElt
   OK := Integers(K);
   FF, m := ResidueClassField(OK);
   for i in [C`min_val..C`max_val] do
-    if assigned C`residues and IsDefined(C`residues, i) then
-      res := Random(C`residues[i]);
+    if assigned C`residues and IsDefined(C`residues, i-C`min_val+1) then
+      res := Random(C`residues[i-C`min_val+1]);
     elif i eq C`min_val and C`min_val_sharp then
       repeat
         res := Random(FF);
