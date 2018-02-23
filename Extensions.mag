@@ -6,13 +6,13 @@
 // the assertion error implies an inconsistency between Lemma 3.5 and Prop 3.10!
 
 declare type PadRamifPts;
-declare attributes PadRamifPts: F, vs, tvs, wvs, n, u, Js, bs, as, ss, pgon, valid_ore, valid_tame, valid_cong, valid_bound, valid_missing, is_valid, is_semivalid, residues;
+declare attributes PadRamifPts: F, vs, tvs, wvs, n, u, Js, bs, as, ss, pgon, valid_ore, valid_tame, valid_cong, valid_bound, valid_missing, is_valid, is_semivalid, residues, ccrespol, ccres;
 
 declare type EisenTmpl;
 declare attributes EisenTmpl: F, n, J, coeffs;
 
 declare type EisenTmplCoeff;
-declare attributes EisenTmplCoeff: parent, one, min_val, min_val_sharp, max_val;
+declare attributes EisenTmplCoeff: parent, one, min_val, min_val_sharp, max_val, residues;
 
 Z := Integers();
 Q := Rationals();
@@ -272,6 +272,9 @@ intrinsic Print(P :: PadRamifPts)
   if assigned P`residues then
     printf " with residues %o", P`residues;
   end if;
+  if assigned P`ccres then
+    printf " with cc-residue %o", P`ccres;
+  end if;
 end intrinsic;
 
 ///## Creation
@@ -341,7 +344,28 @@ end intrinsic;
 
 intrinsic Copy(P :: PadRamifPts) -> PadRamifPts
   {Makes a copy of P.}
-  return RamificationPoints(P`F, P`vs);
+  P2 := New(PadRamifPts);
+  P2`F := P`F;
+  P2`vs := P`vs;
+  P2`tvs := P`tvs;
+  P2`wvs := P`wvs;
+  P2`n := P`n;
+  P2`u := P`u;
+  P2`Js := P`Js;
+  P2`bs := P`bs;
+  P2`as := P`as;
+  P2`ss := P`ss;
+  P2`pgon := P`pgon;
+  if assigned P`residues then
+    P2`residues := P`residues;
+  end if;
+  if assigned P`ccrespol then
+    P2`ccrespol := P`ccrespol;
+  end if;
+  if assigned P`ccres then
+    P2`ccres := P`ccres;
+  end if;
+  return P2;
 end intrinsic;
 
 ///## Invariants
@@ -590,17 +614,30 @@ intrinsic IsSemivalid(P :: PadRamifPts) -> BoolElt
   return P`is_semivalid;
 end intrinsic;
 
-intrinsic _IsValid(P :: PadRamifPts) -> BoolElt
+/// True if P corresponds to an actual extension.
+///param Residues:=true Only checks the residues (if they are assigned) when this is true
+intrinsic _IsValid(P :: PadRamifPts : Residues:=true) -> BoolElt
   {True if P corresponds to an actual extension.}
-  return _SatisfiesOreCondition(P) and _SatisfiesCongruenceCondition(P) and _SatisfiesBoundingCondition(P) and _SatisfiesTameCondition(P) and _SatisfiesMissingCondition(P);
+  return _SatisfiesOreCondition(P) and _SatisfiesCongruenceCondition(P) and _SatisfiesBoundingCondition(P) and _SatisfiesTameCondition(P) and _SatisfiesMissingCondition(P) and (not Residues or not assigned P`residues or IsValidResidues(P, P`residues));
 end intrinsic;
 
-intrinsic IsValid(P :: PadRamifPts) -> BoolElt
+intrinsic IsValid(P :: PadRamifPts : Residues:=true) -> BoolElt
   {"}
-  if not assigned P`is_valid then
-    P`is_valid := _SatisfiesOreCondition(P) and _SatisfiesCongruenceCondition(P) and _SatisfiesBoundingCondition(P) and _SatisfiesTameCondition(P) and _SatisfiesMissingCondition(P);
+  if Residues then
+    if not assigned P`is_valid then
+      ok := _IsValid(P : Residues:=false);
+      if ok and assigned P`residues then
+        ok, pol := IsValidResidues(P, P`residues);
+        if ok then
+          P`ccrespol := pol;
+        end if;
+      end if;
+      P`is_valid := ok;
+    end if;
+    return P`is_valid;
+  else
+    return _IsValid(P : Residues:=false);
   end if;
-  return P`is_valid;
 end intrinsic;
 
 ///## Residues
@@ -611,7 +648,7 @@ end intrinsic;
 intrinsic IsValidResidues(P :: PadRamifPts, rs :: [FldFinElt] : Partial:=false) -> BoolElt
   {True if rs is a valid assignment of residues to P, i.e. if there exists an Eisenstein polynomial with these residues. When true, also returns a polynomial whose roots are the possible leading p-adic coefficients of the constant coefficient.}
   FF := ResidueClassField(P`F);
-  require IsValid(P): "P must be valid";
+  require IsValid(P : Residues:=false): "P must be valid";
   require Universe(rs) eq FF: "rs must be elements of the residue class field";
   require #rs le #P`vs: "too long";
   require forall{r : r in rs | r ne 0}: "rs must be non-zero";
@@ -759,6 +796,44 @@ intrinsic AllValidResidues(P :: PadRamifPts) -> []
   return [<rs,pol> where ok,pol:=IsValidResidues(P,rs) : rs in ret];
 end intrinsic;
 
+intrinsic WithAllValidResidues(P :: PadRamifPts) -> []
+  {Copies of P with valid residues attached.}
+  require IsValid(P): "P must be valid";
+  ret := [];
+  for x in AllValidResidues(P) do
+    P2 := Copy(P);
+    P2`residues := x[1];
+    P2`ccrespol := x[2];
+    P2`is_valid := true;
+    Append(~ret, P2);
+  end for;
+  return ret;
+end intrinsic;
+
+intrinsic AllCCResidues(P :: PadRamifPts : Residues:=false) -> []
+  {All valid CC-residues for P.}
+  require IsValid(P): "P must be valid";
+  if Residues cmpeq false then
+    require assigned P`residues: "residues must be assigned";
+    pol := P`ccrespol;
+  else
+    ok, pol := IsValidResidues(P, Residues);
+    require ok: "Residues must be valid";
+  end if;
+  return [x[1] : x in Roots(pol)];
+end intrinsic;
+
+intrinsic WithAllCCResidues(P :: PadRamifPts) -> []
+  {Copies of P with valid CC-residues attached.}
+  ret := [];
+  for res in AllCCResidues(P) do
+    P2 := Copy(P);
+    P2`ccres := res;
+    Append(~ret, P2);
+  end for;
+  return ret;
+end intrinsic;
+
 ///# Generating Eisenstein polynomials
 ///
 ///toc
@@ -806,7 +881,7 @@ intrinsic Print(T :: EisenTmpl)
   IndentPop();
 end intrinsic;
 
-intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts) -> EisenTmpl
+intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts : Residues:=true, CCResidue:=false) -> EisenTmpl
   {A template for Eisenstein polynomials with this ramification polygon.}
   require IsValid(P): "invalid";
   T := New(EisenTmpl);
@@ -858,6 +933,45 @@ intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts) -> EisenTmpl
       end if;
     end if;
   end for;
+  // residues
+  if Residues cmpne false then
+    FF := ResidueClassField(P`F);
+    // get the set of residues
+    if Residues cmpeq true then
+      require assigned P`residues: "residues not assigned";
+      rs := P`residues;
+      ccrespol := P`ccrespol;
+    else
+      ok, rs := IsCoercible(PowerSequence(FF), Residues);
+      require ok: "Residues must be a boolean or a sequence of elements of the residue class field";
+      ok, ccrespol := IsValidResidues(P, rs);
+      require ok: "Residues are not valid";
+    end if;
+    // get the residue of the leading coefficient
+    if CCResidue cmpeq false then
+      require assigned P`ccres: "constant coefficient residue not specified";
+      ccres := P`ccres;
+      assert Evaluate(ccrespol, ccres) eq 0;
+    else
+      ok, ccres := IsCoercible(FF, CCResidue);
+      require ok: "CCResidue must be in the residue class field";
+      require Evaluate(ccrespol, ccres) eq 0: "CCResidue not valid";
+    end if;
+    // assign residues
+    for i in [1..#C] do
+      if not assigned C[i]`residues then
+        C[i]`residues := [PowerSet(FF)|];
+      end if;
+    end for;
+    // set the residue of the leading coefficient
+    C[1]`residues[1] := {-ccres};
+    // set the other residues
+    for t in [0..u(P)] do
+      if b(P,t) ne 0 then
+        C[b(P,t)+1]`residues[1] := {rs[t+1] * ccres^(1+a(P,t)) / ShiftedBinomial(FF,b(P,t),x(P,t))};
+      end if;
+    end for;
+  end if;
   T`coeffs := C;
   return T;
 end intrinsic;
@@ -865,22 +979,18 @@ end intrinsic;
 ///hide
 intrinsic Print(C :: EisenTmplCoeff)
   {Print.}
-  printf "%o", C`one select 1 else Join([Sprintf("min_val=%o", C`min_val)] cat (C`min_val_sharp select ["(sharp)"] else []) cat [Sprintf("max_val=%o", C`max_val)], " ");
+  printf "%o", C`one select 1 else Join([Sprintf("min_val=%o", C`min_val)] cat (C`min_val_sharp select ["(sharp)"] else []) cat [Sprintf("max_val=%o", C`max_val)] cat (assigned C`residues and #C`residues gt 0 select [Sprintf("residues=%o",C`residues)] else []), " ");
 end intrinsic;
 
 ///## Creation of polynomials
 
 intrinsic '#'(C :: EisenTmplCoeff) -> RngIntElt
   {Size of the template.}
-  if C`min_val gt C`max_val then
-    return 1;
-  elif C`one then
+  if C`one then
     return 1;
   end if;
   q := C`parent`F`p^C`parent`F`f;
-  n1 := C`min_val_sharp select q-1 else q;
-  n2 := q^(C`max_val - C`min_val);
-  return n1*n2;
+  return &*[Z| (assigned C`residues and IsDefined(C`residues, i) select #C`residues[i] else i eq C`min_val and C`min_val_sharp select q-1 else q) : i in [C`min_val..C`max_val]];
 end intrinsic;
 
 intrinsic '#'(T :: EisenTmpl) -> RngIntElt
@@ -888,23 +998,32 @@ intrinsic '#'(T :: EisenTmpl) -> RngIntElt
   return &*[Z|#C : C in T`coeffs];
 end intrinsic;
 
-intrinsic Random(T :: EisenTmplCoeff, K :: FldPad) -> RngIntElt
-  {A random element of K satisfying the template.}
-  require Prime(K) eq T`parent`F`p: "K has incorrect prime";
-  require AbsoluteInertiaDegree(K) eq T`parent`F`f: "K has incorrect absolute inertia degree";
-  require AbsoluteRamificationDegree(K) eq T`parent`F`e: "K has incorrect absolute ramification degree";
-  if T`one then
+intrinsic Random(C :: EisenTmplCoeff, K :: FldPad) -> RngIntElt
+  {A random element from C of K.}
+  require Prime(K) eq C`parent`F`p: "K has incorrect prime";
+  require AbsoluteInertiaDegree(K) eq C`parent`F`f: "K has incorrect absolute inertia degree";
+  require AbsoluteRamificationDegree(K) eq C`parent`F`e: "K has incorrect absolute ramification degree";
+  if C`one then
     return K ! 1;
-  elif T`min_val gt T`max_val then
-    return K ! 0;
   end if;
+  ret := K ! 0;
   OK := Integers(K);
-  pi := UniformizingElement(OK);
-  Q := quo<OK | pi^(T`max_val - T`min_val + 1)>;
-  repeat
-    x := Random(Q);
-  until (not T`min_val_sharp) or Valuation(x) eq 0;
-  return x eq 0 select K!0 else ChangePrecision(ShiftValuation(K ! OK ! x, T`min_val), K`DefaultPrecision);
+  FF, m := ResidueClassField(OK);
+  for i in [C`min_val..C`max_val] do
+    if assigned C`residues and IsDefined(C`residues, i) then
+      res := Random(C`residues[i]);
+    elif i eq C`min_val and C`min_val_sharp then
+      repeat
+        res := Random(FF);
+      until res ne 0;
+    else
+      res := Random(FF);
+    end if;
+    if res ne 0 then
+      ret +:= ShiftValuation(ChangePrecision(K!(res@@m), K`DefaultPrecision), i);
+    end if;
+  end for;
+  return ret;
 end intrinsic;
 
 intrinsic Random(T :: EisenTmpl, K :: FldPad) -> RngIntElt
