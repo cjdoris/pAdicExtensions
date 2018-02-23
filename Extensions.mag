@@ -8,11 +8,11 @@
 declare type PadRamifPts;
 declare attributes PadRamifPts: F, vs, tvs, wvs, n, u, Js, bs, as, ss, pgon, valid_ore, valid_tame, valid_cong, valid_bound, valid_missing, is_valid, is_semivalid, residues, ccrespol, ccres;
 
-declare type EisenTmpl;
-declare attributes EisenTmpl: F, n, J, coeffs;
+declare type Tmpl_RngUPolElt_FldPadTmpl;
+declare attributes Tmpl_RngUPolElt_FldPadTmpl: R, coeffs, index_set;
 
-declare type EisenTmplCoeff;
-declare attributes EisenTmplCoeff: parent, one, min_val, min_val_sharp, max_val, residues;
+declare type Tmpl_FldPadTmplElt;
+declare attributes Tmpl_FldPadTmplElt: F, min_val, min_val_sharp, max_val, residues, index_set;
 
 Z := Integers();
 Q := Rationals();
@@ -115,8 +115,13 @@ end intrinsic;
 ///
 ///toc
 
-declare type FldPadTmpl;
-declare attributes FldPadTmpl: p, d, e, f, actual, resfld, resmap;
+declare type FldPadTmpl[FldPadTmplElt];
+declare attributes FldPadTmpl: p, d, e, f, actual, resfld, resmap, polynomial_ring;
+declare attributes FldPadTmplElt: parent, coeffs, valuation;
+
+declare type RngUPol_FldPadTmpl[RngUPolElt_FldPadTmpl];
+declare attributes RngUPol_FldPadTmpl: base_ring;
+declare attributes RngUPolElt_FldPadTmpl: parent, coeffs;
 
 ///## Creation
 
@@ -167,6 +172,12 @@ end intrinsic;
 intrinsic Print(F :: FldPadTmpl)
   {Print.}
   printf "Template %o-adic field (f=%o, e=%o)", F`p, F`f, F`e;
+end intrinsic;
+
+///hide
+intrinsic 'eq'(F :: FldPadTmpl, E :: FldPadTmpl) -> BoolElt
+  {Equality.}
+  return IsIdentical(F, E);
 end intrinsic;
 
 ///## Invariants
@@ -256,6 +267,156 @@ end intrinsic;
 intrinsic OrePossibilities(F :: FldPadTmpl, n :: RngIntElt) -> []
   {The possible J such that `(F,n,J)` satisfy Ore's conditions.}
   return OrePossibilities(F, n, 0);
+end intrinsic;
+
+///## Elements
+
+///hide
+intrinsic Print(x :: FldPadTmplElt)
+  {Print.}
+  if IsZero(x) then
+    printf "0";
+  else
+    printf "(%o; %o)", x`valuation, Join([Sprintf("%o", c) : c in x`coeffs], " ");
+  end if;
+end intrinsic;
+
+intrinsic IsCoercible(F :: FldPadTmpl, X) -> BoolElt, .
+  {True if X is coercible into F.}
+  return false, "wrong type";
+end intrinsic;
+
+intrinsic IsCoercible(F :: FldPadTmpl, X :: Tup) -> BoolElt, .
+  {"}
+  if #X ne 2 then
+    return false, "wrong size";
+  end if;
+  if Type(X[1]) ne RngIntElt and Type(X[1]) ne Infty then
+    return false, "First argument must be an integer or infinity";
+  end if;
+  v := X[1];
+  ok, coeffs := IsCoercible(PowerSequence(ResidueClassField(F)), X[2]);
+  if not ok then
+    return false, "Second argument must be a sequence of elements";
+  end if;
+  while #coeffs gt 0 and coeffs[1] eq 0 do
+    v +:= 1;
+    coeffs := coeffs[2..#coeffs];
+  end while;
+  while #coeffs gt 0 and coeffs[#coeffs] eq 0 do
+    coeffs := coeffs[1..#coeffs-1];
+  end while;
+  if #coeffs eq 0 then
+    v := Infinity();
+  end if;
+  if v eq Infinity() and #coeffs ne 0 then
+    return false, "Second argument must be empty when first is infinite";
+  end if;
+  x := New(FldPadTmplElt);
+  x`parent := F;
+  x`valuation := v;
+  x`coeffs := coeffs;
+  return true, x;
+end intrinsic;
+
+intrinsic Parent(x :: FldPadTmplElt) -> FldPadTmpl
+  {The field containing x.}
+  return x`parent;
+end intrinsic;
+
+intrinsic IsZero(x :: FldPadTmplElt) -> BoolElt
+  {True iff x is zero.}
+  return #x`coeffs eq 0;
+end intrinsic;
+
+intrinsic Valuation(x :: FldPadTmplElt) -> BoolElt
+  {The valuation of x.}
+  return x`valuation;
+end intrinsic;
+
+///## Polynomial rings
+
+intrinsic PolynomialRing(F :: FldPadTmpl) -> RngUPol_FldPadTmpl
+  {The univariate polynomial ring over F.}
+  if not assigned F`polynomial_ring then
+    R := New(RngUPol_FldPadTmpl);
+    R`base_ring := F;
+    F`polynomial_ring := R;
+  end if;
+  return F`polynomial_ring;
+end intrinsic;
+
+intrinsic BaseRing(R :: RngUPol_FldPadTmpl) -> FldPadTmpl
+  {The base ring.}
+  return R`base_ring;
+end intrinsic;
+
+///hide
+intrinsic Print(R :: RngUPol_FldPadTmpl)
+  {Print.}
+  printf "Univariate polynomial ring over %o", BaseRing(R);
+end intrinsic;
+
+///hide
+intrinsic 'eq'(R :: RngUPol_FldPadTmpl, S :: RngUPol_FldPadTmpl) -> BoolElt
+  {Equality.}
+  return IsIdentical(R, S);
+end intrinsic;
+
+///## Polynomials
+
+///hide
+intrinsic Print(f :: RngUPolElt_FldPadTmpl)
+  {Print.}
+  if IsZero(f) then
+    printf "0";
+  else
+    printf "%o", Join([i eq 1 select Sprintf("%o",c) else i eq 2 select Sprintf("%o*x",c) else Sprintf("%o*x^%o", c, i-1) : i in [#f`coeffs..1 by -1] | not IsZero(c) where c:=f`coeffs[i]], " + ");
+  end if;
+end intrinsic;
+
+intrinsic IsCoercible(R :: RngUPol_FldPadTmpl, X) -> BoolElt, .
+  {True if X is coercible into R.}
+  return false, "wrong type";
+end intrinsic;
+
+intrinsic IsCoercible(R :: RngUPol_FldPadTmpl, X :: [FldPadTmplElt]) -> BoolElt, .
+  {"}
+  if Universe(X) eq BaseRing(R) then
+    f := New(RngUPolElt_FldPadTmpl);
+    f`parent := R;
+    while #X gt 0 and IsZero(X[#X]) do
+      X := X[1..#X-1];
+    end while;
+    f`coeffs := X;
+    return true, f;
+  end if;
+  return false, "wrong base ring";
+end intrinsic;
+
+intrinsic Parent(f :: RngUPolElt_FldPadTmpl) -> RngUPol_FldPadTmpl
+  {The ring containing f.}
+  return f`parent;
+end intrinsic;
+
+intrinsic BaseRing(f :: RngUPolElt_FldPadTmpl) -> FldPadTmpl
+  {The base ring of f.}
+  return BaseRing(Parent(f));
+end intrinsic;
+
+intrinsic Coefficients(f :: RngUPolElt_FldPadTmpl) -> []
+  {The coefficients of f.}
+  return f`coeffs;
+end intrinsic;
+
+intrinsic Degree(f :: RngUPolElt_FldPadTmpl) -> RngIntElt
+  {The degree.}
+  return #f`coeffs - 1;
+end intrinsic;
+
+intrinsic IsZero(f :: RngUPolElt_FldPadTmpl) -> BoolElt
+  {True iff f is zero.}
+  return #f`coeffs eq 0;
 end intrinsic;
 
 ///# Ramification polygons
@@ -851,34 +1012,34 @@ end intrinsic;
 
 ///## Creation of templates
 
-intrinsic TemplateForEisensteinPolynomialsByDegreeAndDisciminant(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt) -> EisenTmpl
+intrinsic TemplateForEisensteinPolynomialsByDegreeAndDisciminant(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt) -> Tmpl_RngUPolElt_FldPadTmpl
   {Template for Eisenstein polynomials of degree n, discriminant valuation `n+J-1` over F.}
   require OreConditions(F, n, J): "parameters must satisfy Ore conditions";
-  T := New(EisenTmpl);
-  T`F := F;
-  T`n := n;
-  T`J := J;
+  T := New(Tmpl_RngUPolElt_FldPadTmpl);
+  T`R := PolynomialRing(F);
   b := J mod n;
   a := J div n;
   T`coeffs := [];
   for i in [0..n] do
-    C := New(EisenTmplCoeff);
-    C`parent := T;
-    C`one := i eq n;
+    C := New(Tmpl_FldPadTmplElt);
+    C`F := F;
     C`min_val := i eq n select 0 else i eq 0 select 1 else i ge b select Max(1+a-F`e*Valuation(i,F`p),1) else Max(2+a-F`e*Valuation(i,F`p),1);
     C`min_val_sharp := i in {0,n,b};
     C`max_val := i eq n select 0 else Floor(1 + 2*a + 2*b/n);
+    if i eq n then
+      C`residues := [{ResidueClassField(F)!1}];
+    end if;
     Append(~T`coeffs, C);
   end for;
   return T;
 end intrinsic;
 
 ///hide
-intrinsic Print(T :: EisenTmpl)
+intrinsic Print(T :: Tmpl_RngUPolElt_FldPadTmpl)
   {Print.}
-  print "Eisenstein polynomial template over";
+  print "Template for an element of";
   IndentPush();
-  print T`F;
+  print T`R;
   IndentPop();
   print "with coefficients";
   IndentPush();
@@ -892,20 +1053,20 @@ intrinsic Print(T :: EisenTmpl)
   IndentPop();
 end intrinsic;
 
-intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts : Residues:=true, CCResidue:=false, Shrink:=true) -> EisenTmpl
+intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts : Residues:=true, CCResidue:=false, Shrink:=true) -> Tmpl_RngUPolElt_FldPadTmpl
   {A template for Eisenstein polynomials with this ramification polygon.}
   require IsValid(P): "invalid";
-  T := New(EisenTmpl);
-  T`F := P`F;
-  T`n := n(P);
-  T`J := J(P,0);
-  C := [New(EisenTmplCoeff) : i in [0..n(P)]];
+  T := New(Tmpl_RngUPolElt_FldPadTmpl);
+  T`R := PolynomialRing(P`F);
+  C := [New(Tmpl_FldPadTmplElt) : i in [0..n(P)]];
   for i in [0..n(P)] do
-    C[i+1]`parent := T;
-    C[i+1]`one := i eq n(P);
+    C[i+1]`F := P`F;
     C[i+1]`min_val := i eq n(P) select 0 else 1;
     C[i+1]`min_val_sharp := i eq 0;
     C[i+1]`max_val := i eq n(P) select 0 else Floor(1 + 2*a(P,0) + 2*b(P,0)/n(P));
+    if i eq n(P) then
+      C[i+1]`residues := [{ResidueClassField(P`F)!1}];
+    end if;
   end for;
   // inequalities from the "bounding" condition
   for t in [0..u(P)] do
@@ -1015,57 +1176,66 @@ intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPts : Residues:=true, CC
 end intrinsic;
 
 ///hide
-intrinsic Print(C :: EisenTmplCoeff)
+intrinsic Print(C :: Tmpl_FldPadTmplElt)
   {Print.}
-  printf "%o", C`one select 1 else Join([Sprintf("min_val=%o", C`min_val)] cat (C`min_val_sharp select ["(sharp)"] else []) cat [Sprintf("max_val=%o", C`max_val)] cat (assigned C`residues and #C`residues gt 0 select [Sprintf("residues=%o",C`residues)] else []), " ");
+  printf "%o", Join([Sprintf("min_val=%o", C`min_val)] cat (C`min_val_sharp select ["(sharp)"] else []) cat [Sprintf("max_val=%o", C`max_val)] cat (assigned C`residues and #C`residues gt 0 select [Sprintf("residues=%o",C`residues)] else []), " ");
 end intrinsic;
 
 ///## Creation of polynomials
 
-intrinsic '#'(C :: EisenTmplCoeff) -> RngIntElt
-  {Size of the template.}
-  if C`one then
-    return 1;
-  end if;
-  q := C`parent`F`p^C`parent`F`f;
-  return &*[Z| (assigned C`residues and IsDefined(C`residues, i-C`min_val+1) select #C`residues[i-C`min_val+1] else i eq C`min_val and C`min_val_sharp select q-1 else q) : i in [C`min_val..C`max_val]];
+intrinsic '#'(T :: Tmpl_FldPadTmplElt) -> RngIntElt
+  {The number of elements in the template.}
+  return #IndexSet(T);
 end intrinsic;
 
-intrinsic '#'(T :: EisenTmpl) -> RngIntElt
+intrinsic '#'(T :: Tmpl_RngUPolElt_FldPadTmpl) -> RngIntElt
   {"}
-  return &*[Z|#C : C in T`coeffs];
+  return #IndexSet(T);
 end intrinsic;
 
-intrinsic Random(C :: EisenTmplCoeff, K :: FldPad) -> RngIntElt
-  {A random element from C of K.}
-  require Prime(K) eq C`parent`F`p: "K has incorrect prime";
-  require AbsoluteInertiaDegree(K) eq C`parent`F`f: "K has incorrect absolute inertia degree";
-  require AbsoluteRamificationDegree(K) eq C`parent`F`e: "K has incorrect absolute ramification degree";
-  if C`one then
-    return K ! 1;
+intrinsic ToSequence(T :: Tmpl_FldPadTmplElt) -> []
+  {The elements of T as a sequence.}
+  return [GetIndex(T,idx) : idx in IndexSet(T)];
+end intrinsic;
+
+intrinsic ToSequence(T :: Tmpl_RngUPolElt_FldPadTmpl) -> []
+  {"}
+  return [GetIndex(T,idx) : idx in IndexSet(T)];
+end intrinsic;
+
+intrinsic Random(T :: Tmpl_FldPadTmplElt) -> FldPadTmplElt
+  {A random element of T.}
+  return GetIndex(T,Random(IndexSet(T)));
+end intrinsic;
+
+intrinsic Random(T :: Tmpl_RngUPolElt_FldPadTmpl) -> RngUPolElt_FldPadTmpl
+  {"}
+  return GetIndex(T,Random(IndexSet(T)));
+end intrinsic;
+
+intrinsic IndexSet(T :: Tmpl_FldPadTmplElt) -> .
+  {A set of indices for elements of T. This is quick to generate and can be iterated over.}
+  if not assigned T`index_set then
+    FF := ResidueClassField(T`F);
+    T`index_set := CartesianProduct(<assigned T`residues and IsDefined(T`residues,i-T`min_val+1) select T`residues[i-T`min_val+1] else i eq T`min_val and T`min_val_sharp select {x: x in FF | x ne 0} else FF : i in [T`min_val..T`max_val]>);
   end if;
-  ret := K ! 0;
-  OK := Integers(K);
-  FF, m := ResidueClassField(OK);
-  for i in [C`min_val..C`max_val] do
-    if assigned C`residues and IsDefined(C`residues, i-C`min_val+1) then
-      res := Random(C`residues[i-C`min_val+1]);
-    elif i eq C`min_val and C`min_val_sharp then
-      repeat
-        res := Random(FF);
-      until res ne 0;
-    else
-      res := Random(FF);
-    end if;
-    if res ne 0 then
-      ret +:= ShiftValuation(ChangePrecision(K!(res@@m), K`DefaultPrecision), i);
-    end if;
-  end for;
-  return ret;
+  return T`index_set;
 end intrinsic;
 
-intrinsic Random(T :: EisenTmpl, K :: FldPad) -> RngIntElt
-  {A random polynomial from T over the field K.}
-  return Polynomial([K| Random(C, K) : C in T`coeffs]);
+intrinsic IndexSet(T :: Tmpl_RngUPolElt_FldPadTmpl) -> .
+  {"}
+  if not assigned T`index_set then
+    T`index_set := CartesianProduct(<IndexSet(c) : c in T`coeffs>);
+  end if;
+  return T`index_set;
 end intrinsic;
 
+intrinsic GetIndex(T :: Tmpl_FldPadTmplElt, idx) -> FldPadTmplElt
+  {Gets the element of T at index idx (which should be an element of the index set).}
+  return T`F ! <T`min_val, [c : c in idx]>;
+end intrinsic;
+
+intrinsic GetIndex(T :: Tmpl_RngUPolElt_FldPadTmpl, idx) -> RngUPolElt_FldPadTmpl
+  {"}
+  return T`R ! [GetIndex(T`coeffs[i], idx[i]) : i in [1..#T`coeffs]];
+end intrinsic;
