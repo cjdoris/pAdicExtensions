@@ -6,7 +6,7 @@
 // the assertion error implies an inconsistency between Lemma 3.5 and Prop 3.10!
 
 declare type PadRamifPts;
-declare attributes PadRamifPts: F, vs, tvs, wvs, n, u, Js, bs, as, ss, pgon, valid_ore, valid_tame, valid_cong, valid_bound, valid_missing, is_valid, is_semivalid;
+declare attributes PadRamifPts: F, vs, tvs, wvs, n, u, Js, bs, as, ss, pgon, valid_ore, valid_tame, valid_cong, valid_bound, valid_missing, is_valid, is_semivalid, residues;
 
 declare type EisenTmpl;
 declare attributes EisenTmpl: F, n, J, coeffs;
@@ -76,12 +76,47 @@ intrinsic BinomialValuation(n :: RngIntElt, k :: RngIntElt, p :: RngIntElt) -> R
   end if;
 end intrinsic;
 
+intrinsic UnitFactorial(F :: FldFin, n :: RngIntElt) -> FldFinElt
+  {The product of the integers up to n which are units in F. By Wilson's formula, if n=kn+r this is (-1)^k * r!.}
+  require n ge 0: "n must be at least 0";
+  p := Characteristic(F);
+  if p eq 2 then
+    return F ! 1;
+  end if;
+  k := n div p;
+  r := n mod p;
+  return (F!-1)^k * &*[F| i : i in [1..r]];
+end intrinsic;
+
+intrinsic ShiftedFactorial(F :: FldFin, n :: RngIntElt) -> FldFinElt
+  {The product of the integers up to n shifted down to be units of F. This is the product of UnitFactorial(n div p^i) for all i.}
+  require n ge 0: "n must be at least 0";
+  p := Characteristic(F);
+  if p eq 2 then
+    return F ! 1;
+  end if;
+  ans := F!1;
+  m := n;
+  while m ne 0 do
+    ans *:= UnitFactorial(F, m);
+    m div:= p;
+  end while;
+  return ans;
+end intrinsic;
+
+intrinsic ShiftedBinomial(F :: FldFin, n :: RngIntElt, k :: RngIntElt) -> FldFinElt
+  {The binomial coefficient n choose k shifted down to be a unit of F.}
+  require 0 le n: "n must be at least 0";
+  require 0 le k and k le n: "k must be between 0 and n";
+  return ShiftedFactorial(F, n) / (ShiftedFactorial(F, k) * ShiftedFactorial(F, n-k));
+end intrinsic;
+
 ///# Template p-adic fields
 ///
 ///toc
 
 declare type FldPadTmpl;
-declare attributes FldPadTmpl: p, e, f, actual;
+declare attributes FldPadTmpl: p, d, e, f, actual, resfld, resmap;
 
 ///## Creation
 
@@ -94,6 +129,7 @@ intrinsic TemplatepAdicField(p :: RngIntElt, f :: RngIntElt, e :: RngIntElt) -> 
   F`p := p;
   F`e := e;
   F`f := f;
+  F`d := e*f;
   return F;
 end intrinsic;
 
@@ -108,6 +144,7 @@ intrinsic TemplatepAdicField(K :: FldPad) -> FldPadTmpl
   F`p := Prime(K);
   F`f := AbsoluteInertiaDegree(K);
   F`e := AbsoluteRamificationDegree(K);
+  F`d := F`f * F`e;
   F`actual := K;
   return F;
 end intrinsic;
@@ -132,11 +169,64 @@ intrinsic Print(F :: FldPadTmpl)
   printf "Template %o-adic field (f=%o, e=%o)", F`p, F`f, F`e;
 end intrinsic;
 
-///hide
-intrinsic Print(P :: PadRamifPts)
-  {Print.}
-  vertices := SequenceToSet(ChangeUniverse(Vertices(P`pgon), car<Z,Z>));
-  printf "Ramification Points [%o; %o]", Join([(j eq s(P,i)) select Sprintf("%o", J(P,i)) cat (i eq 0 or i eq u(P) or not P`vs[i+1] in vertices select "" else ",") else "." : j in (i eq u(P)) select [s(P,i)] else [s(P,i)..s(P,i+1)-1], i in [0..u(P)]], " "), Join([Sprintf("%o", v[1]) : v in P`tvs], " ");
+///## Invariants
+
+intrinsic Prime(F :: FldPadTmpl) -> RngIntElt
+  {The prime `p`.}
+  return F`p;
+end intrinsic;
+
+/// Absolute degree, inertia degree and ramification degree
+intrinsic AbsoluteDegree(F :: FldPadTmpl) -> RngIntElt
+  {Absolute degree.}
+  return F`d;
+end intrinsic;
+
+///ditto
+intrinsic AbsoluteInertiaDegree(F :: FldPadTmpl) -> RngIntElt
+  {Absolute inertia degree.}
+  return F`f;
+end intrinsic;
+
+///ditto
+intrinsic AbsoluteRamificationDegree(F :: FldPadTmpl) -> RngIntElt
+  {Absolute ramification degree.}
+  return F`e;
+end intrinsic;
+
+intrinsic ResidueClassField(F :: FldPadTmpl) -> FldFin, Map
+  {Residue class field. If F was created from an actual field, also returns the residue map.}
+  if assigned F`actual then
+    if not assigned F`resfld then
+      F`resfld, F`resmap := ResidueClassField(Integers(F`actual));
+    end if;
+    return F`resfld, F`resmap;
+  else
+    if not assigned F`resfld then
+      F`resfld := FiniteField(F`p^F`f);
+    end if;
+    return F`resfld, _;
+  end if;
+end intrinsic;
+
+///## Actual field
+///
+/// If a template field was created from an actual field ([such as this](#TemplatepAdicField--FldPad)) then that field is remembered.
+
+intrinsic HasActualField(F :: FldPadTmpl) -> BoolElt, FldPad
+  {True if F is associated to an actual field. If so, also returns the field.}
+  if assigned F`actual then
+    return true, F`actual;
+  else
+    return false, _;
+  end if;
+end intrinsic;
+
+intrinsic ActualField(F :: FldPadTmpl) -> FldPad
+  {The actual field associated to F, if there is one.}
+  ok, K := HasActualField(F);
+  require ok: "does not have an actual field";
+  return K;
 end intrinsic;
 
 ///## Ore's conditions
@@ -173,6 +263,16 @@ end intrinsic;
 /// A `PadRamifPts` represents a set of points defining a ramification polygon. Some of the points need not be vertices, but can line on the interior of faces, and therefore this is a more refined invariant than ramification polygon.
 ///
 ///toc
+
+///hide
+intrinsic Print(P :: PadRamifPts)
+  {Print.}
+  vertices := SequenceToSet(ChangeUniverse(Vertices(P`pgon), car<Z,Z>));
+  printf "Ramification Points [%o; %o]", Join([(j eq s(P,i)) select Sprintf("%o", J(P,i)) cat (i eq 0 or i eq u(P) or not P`vs[i+1] in vertices select "" else ",") else "." : j in (i eq u(P)) select [s(P,i)] else [s(P,i)..s(P,i+1)-1], i in [0..u(P)]], " "), Join([Sprintf("%o", v[1]) : v in P`tvs], " ");
+  if assigned P`residues then
+    printf " with residues %o", P`residues;
+  end if;
+end intrinsic;
 
 ///## Creation
 
@@ -503,200 +603,69 @@ intrinsic IsValid(P :: PadRamifPts) -> BoolElt
   return P`is_valid;
 end intrinsic;
 
-// ///
-// /// Proposition 3.9 tells us if a given set of points is the ramification polygon for some extension, and if so we say it is *valid*. If the set of points satisfies cases (a), (b) and (c) of the proposition, we say it is *semivalid*; a semivalid set of points remains semivalid if we remove points (except for the critical points at 1, p^s_u and n) and so in particular if a set of points is not semivalid, then adding points to it cannot make it valid. This fact may be used to efficiently enumerate all possible ramification points of a given degree.
+///## Residues
 
-// intrinsic _SatisfiesPropertyA(P :: PadRamifPts) -> BoolElt, .
-//   {True iff P satisfies case (a) of Proposition 3.9.}
-//   for i in [0..u(P)-1] do
-//     if Min(n(P)*vbinbps(P,i), n(P)*vbinnps(P,i)) gt J(P,i) or J(P,i) gt n(P)*vbinnps(P,i) then
-//       return false, i;
-//     end if;
-//   end for;
-//   return true, _;
-// end intrinsic;
+/// True if rs is a valid assignment of residues to P, i.e. if there exists an Eisenstein polynomial with these residues. When true, also returns a polynomial whose roots are the possible leading p-adic coefficients of the constant coefficient.
+/// 
+///param Partial:=false When true, rs may be a partial assignment (i.e. have some undefined entries) and the check becomes necessary but not sufficient for exisence.
+intrinsic IsValidResidues(P :: PadRamifPts, rs :: [FldFinElt] : Partial:=false) -> BoolElt
+  {True if rs is a valid assignment of residues to P, i.e. if there exists an Eisenstein polynomial with these residues. When true, also returns a polynomial whose roots are the possible leading p-adic coefficients of the constant coefficient.}
+  FF := ResidueClassField(P`F);
+  require IsValid(P): "P must be valid";
+  require Universe(rs) eq FF: "rs must be elements of the residue class field";
+  require #rs le #P`vs: "too long";
+  require forall{r : r in rs | r ne 0}: "rs must be non-zero";
+  require Partial or forall{i : i in [1..#P`vs] | IsDefined(rs, i)}: "not a complete assignment";
+  // first check tame residues
+  ts := CorrectTameResidues(P);
+  for i in [1..#ts] do
+    if IsDefined(ts,i) and IsDefined(rs,i) then
+      if ts[i] ne rs[i] then
+        return false;
+      end if;
+    end if;
+  end for;
+  // now check if some equations have a solution in the residue class field
+  // start with an equation for all units of FF
+  R := PolynomialRing(FF);
+  eqn := R.1^(#FF-1)-1;
+  for t in [0..u(P)-1] do
+    if IsDefined(rs, t+1) then
+      if b(P,t) eq 0 then
+        neweqn := R.1^a(P,t) - (rs[t+1])^-1 * ShiftedBinomial(FF, n(P), x(P,t));
+        eqn := GCD(eqn, neweqn);
+        if Degree(eqn) eq 0 then
+          return false;
+        end if;
+      else
+        for r in [0..t-1] do
+          if IsDefined(rs, r+1) and b(P,r) eq b(P,t) then
+            if a(P,t) ge a(P,r) then
+              neweqn := R.1^(a(P,t)-a(P,r)) - rs[r+1] * ShiftedBinomial(FF, b(P,r), x(P,r)) / (rs[t+1] * ShiftedBinomial(FF, b(P,t), x(P,t)));
+            else
+              neweqn := R.1^(a(P,r)-a(P,t)) - rs[t+1] * ShiftedBinomial(FF, b(P,t), x(P,t)) / (rs[r+1] * ShiftedBinomial(FF, b(P,r), x(P,r)));
+            end if;
+            eqn := GCD(eqn, neweqn);
+            if Degree(eqn) eq 0 then
+              return false;
+            end if;
+          end if;
+        end for;
+      end if;
+    end if;
+  end for;
+  return true, eqn;
+end intrinsic;
 
-// intrinsic SatisfiesPropertyA(P :: PadRamifPts) -> BoolElt
-//   {"}
-//   if not assigned P`propA then
-//     P`propA := _SatisfiesPropertyA(P);
-//   end if;
-//   return P`propA;
-// end intrinsic;
-
-// intrinsic _SatisfiesPropertyB(P :: PadRamifPts) -> BoolElt, ., .
-//   {True iff P satisfies case (b) of Proposition 3.9.}
-//   for i in [0..u(P)-1] do
-//     for j in [i+1..u(P)-1] do
-//       if b(P,i) eq b(P,j) then
-//         if a(P,i) - vbinnps(P,i) ne a(P,j) - vbinnps(P,j) then
-//           return false, i, j;
-//         end if;
-//       end if;
-//     end for;
-//   end for;
-//   return true, _, _;
-// end intrinsic;
-
-// intrinsic SatisfiesPropertyB(P :: PadRamifPts) -> BoolElt
-//   {"}
-//   if not assigned P`propB then
-//     P`propB := _SatisfiesPropertyB(P);
-//   end if;
-//   return P`propB;
-// end intrinsic;
-
-// intrinsic _SatisfiesPropertyC(P :: PadRamifPts) -> BoolElt, ., .
-//   {True iff P satisfies case (c) of Proposition 3.9.}
-//   for i in [0..u(P)-1] do
-//     for t in [0..u(P)-1] do
-//       lhs := a(P,i) - vbinbps(P,i,i);
-//       rhs := a(P,t) - vbinbps(P,i,t);
-//       assert J(P,t) ne 0;
-//       if b(P,i) ge b(P,t) then
-//         if lhs lt rhs then
-//           return false, i, t;
-//         end if;
-//       elif b(P,i) ge x(P,i) then
-//         if lhs lt 1+rhs then
-//           return false, i, t;
-//         end if;
-//       end if;
-//     end for;
-//   end for;
-//   return true, _, _;
-// end intrinsic;
-
-// intrinsic SatisfiesPropertyC(P :: PadRamifPts) -> BoolElt
-//   {"}
-//   if not assigned P`propC then
-//     P`propC := _SatisfiesPropertyC(P);
-//   end if;
-//   return P`propC;
-// end intrinsic;
-
-// intrinsic _SatisfiesPropertyD(P :: PadRamifPts) -> BoolElt, ., ., .
-//   {True iff P satisfies property (d) of Proposition 3.9.}
-//   for t in [0..u(P)-1] do
-//     for i in [s(P,t)+1..s(P,t+1)-1] do
-//       pi := p(P)^i;
-//       for k in [0..u(P)] do
-//         if b(P,k) ge pi then
-//           rhs := ((J(P,t+1) - J(P,t))*(pi - x(P,t))/(x(P,t+1) - x(P,t)) + J(P,t) - b(P,k))/n(P) - vbinbp(P,k,i) + vbinbps(P,k,k);
-//           // print i,k,t,a(P,k),rhs,((J(P,t+1) - J(P,t))*(x(P,t+1) - x(P,t))/(pi - x(P,t)) + J(P,t) - b(P,k))/n(P),vbinbp(P,k,i),vbinbps(P,k,k),J(P,t+1),J(P,t),x(P,t+1),x(P,t),pi,b(P,k),((J(P,t+1) - J(P,t))*(x(P,t+1) - x(P,t))/(pi - x(P,t)) + J(P,t) - b(P,k));
-//           if a(P,k) le rhs then
-//             return false, t, i, k;
-//           end if;
-//         end if;
-//       end for;
-//     end for;
-//   end for;
-//   return true, _, _, _;
-// end intrinsic;
-
-// intrinsic SatisfiesPropertyD(P :: PadRamifPts) -> BoolElt
-//   {"}
-//   if not assigned P`propD then
-//     P`propD := _SatisfiesPropertyD(P);
-//   end if;
-//   return P`propD;
-// end intrinsic;
-
-// intrinsic _LittleEll(P :: PadRamifPts, i :: RngIntElt, S :: RngIntElt) -> RngIntElt
-//   {The "little ell" bound of Definition 3.8.}
-//   require 0 le S and S le s(P,u(P)): "s out of bounds";
-//   require p(P)^S le i and i le n(P)-1: "i out of bounds";
-//   t := Max([t : t in [0..u(P)] | s(P,t) le S]);
-//   if s(P,t) eq S then
-//     return Max((i ge b(P,t) select 1 else 2) + a(P,t) - vbinp(P, i, S), 1);
-//   else
-//     assert s(P,t) lt S and S lt s(P,t+1);
-//     return Max(1+Floor(((J(P,t+1) - J(P,t))*(p(P)^S - x(P,t))/(x(P,t+1) - x(P,t)) + J(P,t) - i)/n(P) + 1 - vbinp(P, i, S)), 1);
-//   end if;  
-// end intrinsic;
-
-// intrinsic LittleEll(P :: PadRamifPts, i :: RngIntElt, s :: RngIntElt) -> RngIntElt
-//   {"}
-//   if not assigned P`little_ell then
-//     P`little_ell := AssociativeArray();
-//   end if;
-//   key := <i,s>;
-//   if not IsDefined(P`little_ell, key) then
-//     P`little_ell[key] := _LittleEll(P, i, s);
-//   end if;
-//   return P`little_ell[key];
-// end intrinsic;
-
-// intrinsic _BigEll(P :: PadRamifPts, i :: RngIntElt : Cache:=false) -> RngIntElt
-//   {The "big ell" bound of Definition 3.8.}
-//   require 0 le i and i le P`n: "i out of bounds";
-//   case i:
-//   when 0:
-//     return 1;
-//   when P`n:
-//     return 0;
-//   else
-//     return Max([(Cache select LittleEll else _LittleEll)(P, i, s) : s in [0..su(P)] | p(P)^s le i]);
-//   end case;
-// end intrinsic;
-
-// intrinsic BigEll(P :: PadRamifPts, i :: RngIntElt) -> RngIntElt
-//   {"}
-//   if not assigned P`big_ell then
-//     P`big_ell := AssociativeArray();
-//   end if;
-//   if not IsDefined(P`big_ell, i) then
-//     P`big_ell[i] := _BigEll(P, i : Cache);
-//   end if;
-//   return P`big_ell[i];
-// end intrinsic;
-
-// intrinsic _SatisfiesPropertyE(P :: PadRamifPts) -> BoolElt
-//   {True iff P satisfies property (e) of Proposition 3.9.}
-//   return P`tvs[2..#P`tvs] eq [<i,0> : i in [P`tvs[1][1]+1..P`n] | BinomialValuation(P`n, i, P`F`p) eq 0];
-// end intrinsic;
-
-// intrinsic SatisfiesPropertyE(P :: PadRamifPts) -> BoolElt
-//   {"}
-//   if not assigned P`propE then
-//     P`propE := _SatisfiesPropertyE(P);
-//   end if;
-//   return P`propE;
-// end intrinsic;
-
-// intrinsic FixPropertyE(P :: PadRamifPts) -> PadRamifPts
-//   {A copy of P with the tame part corrected to satisfy case (e) of Proposition 3.9.}
-//   P2 := RamificationPoints(P`F, P`wvs cat [<i,0> : i in [P`tvs[1][1]+1..P`n] | BinomialValuation(P`n, i, P`F`p) eq 0]);
-//   assert P2`n eq P`n;
-//   assert SatisfiesPropertyE(P2);
-//   return P2;
-// end intrinsic;
-
-// intrinsic _IsSemivalid(P :: PadRamifPts) -> BoolElt
-//   {True iff P satisfies properties (a)--(c) of Proposition 3.9.}
-//   return _SatisfiesPropertyA(P) and _SatisfiesPropertyB(P) and _SatisfiesPropertyC(P);
-// end intrinsic;
-
-// intrinsic IsSemivalid(P :: PadRamifPts) -> BoolElt
-//   {"}
-//   if not assigned P`semivalid then
-//     P`semivalid := SatisfiesPropertyA(P) and SatisfiesPropertyB(P) and SatisfiesPropertyC(P);
-//   end if;
-//   return P`semivalid;
-// end intrinsic;
-
-// intrinsic _IsValid(P :: PadRamifPts) -> BoolElt
-//   {True iff P satisfies Proposition 3.9.}
-//   return _SatisfiesPropertyA(P) and _SatisfiesPropertyB(P) and _SatisfiesPropertyC(P) and _SatisfiesPropertyD(P) and _SatisfiesPropertyE(P);
-// end intrinsic;
-
-// intrinsic IsValid(P :: PadRamifPts) -> BoolElt
-//   {"}
-//   if not assigned P`valid then
-//      P`valid := SatisfiesPropertyA(P) and SatisfiesPropertyB(P) and SatisfiesPropertyC(P) and SatisfiesPropertyD(P) and SatisfiesPropertyE(P);
-//   end if;
-//   return P`valid;
-// end intrinsic;
+intrinsic CorrectTameResidues(P :: PadRamifPts) -> []
+  {The correct tame residues of P, between `x_u` and `n`.}
+  rs := [ResidueClassField(P`F)|];
+  for i in [1..#P`tvs] do
+    i2 := i + #P`wvs - 1;
+    rs[i2] := Binomial(n(P), P`tvs[i][1]);
+  end for;
+  return rs;
+end intrinsic;
 
 ///## Enumeration
 
@@ -764,6 +733,30 @@ intrinsic AllRamificationPoints(F :: FldPadTmpl, n :: RngIntElt : J0:=false) -> 
     end if;
   end while;
   return ret;
+end intrinsic;
+
+intrinsic AllValidResidues(P :: PadRamifPts) -> []
+  {All the residues which are valid for P, paired with the leading coefficient polynomial.}
+  todo := [CorrectTameResidues(P)];
+  ret := [];
+  FF := ResidueClassField(P`F);
+  while #todo gt 0 do
+    rs := todo[1];
+    todo := todo[2..#todo];
+    if exists(i){i : i in [1..#P`wvs] | not IsDefined(rs, i)} then
+      for x in FF do
+        if x ne 0 then
+          rs[i] := x;
+          if IsValidResidues(P, rs : Partial) then
+            Append(~todo, rs);
+          end if;
+        end if;
+      end for;
+    else
+      Append(~ret, rs);
+    end if;
+  end while;
+  return [<rs,pol> where ok,pol:=IsValidResidues(P,rs) : rs in ret];
 end intrinsic;
 
 ///# Generating Eisenstein polynomials
