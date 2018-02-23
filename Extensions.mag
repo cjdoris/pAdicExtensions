@@ -77,7 +77,7 @@ intrinsic BinomialValuation(n :: RngIntElt, k :: RngIntElt, p :: RngIntElt) -> R
 end intrinsic;
 
 intrinsic UnitFactorial(F :: FldFin, n :: RngIntElt) -> FldFinElt
-  {The product of the integers up to n which are units in F. By Wilson's formula, if n=kn+r this is (-1)^k * r!.}
+  {The product of the integers up to n which are units in F. By Wilson's formula, if `n=kn+r` this is `(-1)^k * r!`.}
   require n ge 0: "n must be at least 0";
   p := Characteristic(F);
   if p eq 2 then
@@ -89,7 +89,7 @@ intrinsic UnitFactorial(F :: FldFin, n :: RngIntElt) -> FldFinElt
 end intrinsic;
 
 intrinsic ShiftedFactorial(F :: FldFin, n :: RngIntElt) -> FldFinElt
-  {The product of the integers up to n shifted down to be units of F. This is the product of UnitFactorial(n div p^i) for all i.}
+  {The product of the integers up to n shifted down to be units of F. This is the product of `UnitFactorial(n div p^i)` for all `i`.}
   require n ge 0: "n must be at least 0";
   p := Characteristic(F);
   if p eq 2 then
