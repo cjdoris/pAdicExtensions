@@ -13,7 +13,7 @@
 ## Creation
 {:#creation}
 
-<a id="TemplatepAdicField--RngIntElt--etc"></a><a id="TemplatepAdicField--RngIntElt--RngIntElt--RngIntElt"></a><a id="TemplatepAdicField"></a>
+<a id="TemplatepAdicField"></a><a id="TemplatepAdicField--RngIntElt--RngIntElt--RngIntElt"></a><a id="TemplatepAdicField--RngIntElt--etc"></a>
 > **TemplatepAdicField** (p :: *RngIntElt*, f :: *RngIntElt*, e :: *RngIntElt*)
 > 
 > -> *FldPadTmpl*
@@ -23,7 +23,7 @@
 A "template" `p`-adic field with residue degree `f` and ramification degree `e`.
 
 
-<a id="TemplatepAdicField--RngIntElt"></a><a id="TemplatepAdicField-2"></a>
+<a id="TemplatepAdicField-2"></a><a id="TemplatepAdicField--RngIntElt"></a>
 > **TemplatepAdicField** (p :: *RngIntElt*)
 > 
 > -> *FldPadTmpl*
@@ -46,7 +46,7 @@ A "template" version of `K`.
 ## Extensions
 {:#extensions}
 
-<a id="UnramifiedExtension--FldPadTmpl--RngIntElt"></a><a id="UnramifiedExtension"></a><a id="UnramifiedExtension--FldPadTmpl--etc"></a>
+<a id="UnramifiedExtension"></a><a id="UnramifiedExtension--FldPadTmpl--RngIntElt"></a><a id="UnramifiedExtension--FldPadTmpl--etc"></a>
 > **UnramifiedExtension** (F :: *FldPadTmpl*, n :: *RngIntElt*)
 > 
 > -> *FldPadTmpl*
@@ -56,7 +56,7 @@ A "template" version of `K`.
 An unramified extension of `F` of degree `n`.
 
 
-<a id="TotallyRamifiedExtension--FldPadTmpl--etc"></a><a id="TotallyRamifiedExtension"></a><a id="TotallyRamifiedExtension--FldPadTmpl--RngIntElt"></a>
+<a id="TotallyRamifiedExtension--FldPadTmpl--RngIntElt"></a><a id="TotallyRamifiedExtension"></a><a id="TotallyRamifiedExtension--FldPadTmpl--etc"></a>
 > **TotallyRamifiedExtension** (F :: *FldPadTmpl*, n :: *RngIntElt*)
 > 
 > -> *FldPadTmpl*
@@ -69,7 +69,7 @@ A totally ramified extension of `F` of degree `n`.
 ## Invariants
 {:#invariants}
 
-<a id="Prime"></a><a id="Prime--FldPadTmpl"></a>
+<a id="Prime--FldPadTmpl"></a><a id="Prime"></a>
 > **Prime** (F :: *FldPadTmpl*)
 > 
 > -> *RngIntElt*
@@ -79,7 +79,7 @@ A totally ramified extension of `F` of degree `n`.
 The prime `p`.
 
 
-<a id="AbsoluteDegree--FldPadTmpl"></a><a id="AbsoluteDegree"></a><a id="AbsoluteInertiaDegree--FldPadTmpl"></a><a id="AbsoluteRamificationDegree"></a><a id="AbsoluteRamificationDegree--FldPadTmpl"></a><a id="AbsoluteInertiaDegree"></a>
+<a id="AbsoluteDegree"></a><a id="AbsoluteRamificationDegree"></a><a id="AbsoluteInertiaDegree--FldPadTmpl"></a><a id="AbsoluteInertiaDegree"></a><a id="AbsoluteRamificationDegree--FldPadTmpl"></a><a id="AbsoluteDegree--FldPadTmpl"></a>
 > **AbsoluteDegree** (F :: *FldPadTmpl*)
 > 
 > **AbsoluteInertiaDegree** (F :: *FldPadTmpl*)
@@ -97,7 +97,7 @@ Absolute degree, inertia degree and ramification degree
 
 
 
-<a id="ResidueClassField--FldPadTmpl"></a><a id="ResidueClassField"></a>
+<a id="ResidueClassField"></a><a id="ResidueClassField--FldPadTmpl"></a>
 > **ResidueClassField** (F :: *FldPadTmpl*)
 > 
 > -> *FldFin*, *Map*
@@ -113,7 +113,7 @@ Residue class field. If `F` was created from an actual field, also returns the r
 
 If a template field was created from an actual field ([such as this](#TemplatepAdicField--FldPad)) then that field is remembered.
 
-<a id="HasActualField--FldPadTmpl"></a><a id="HasActualField"></a>
+<a id="HasActualField"></a><a id="HasActualField--FldPadTmpl"></a>
 > **HasActualField** (F :: *FldPadTmpl*)
 > 
 > -> *BoolElt*, *FldPad*
@@ -123,7 +123,7 @@ If a template field was created from an actual field ([such as this](#TemplatepA
 True if `F` is associated to an actual field. If so, also returns the field.
 
 
-<a id="ActualField"></a><a id="ActualField--FldPadTmpl"></a>
+<a id="ActualField--FldPadTmpl"></a><a id="ActualField"></a>
 > **ActualField** (F :: *FldPadTmpl*)
 > 
 > -> *FldPad*
@@ -156,7 +156,7 @@ True if there exists an extension of degree `n` of `F` whose ramification polygo
 True if there exists an extension of degree `n` and discriminant valuation `n+J-1` of `F`.
 
 
-<a id="OrePossibilities"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt--RngIntElt"></a><a id="OrePossibilities--FldPadTmpl--etc"></a>
+<a id="OrePossibilities--FldPadTmpl--RngIntElt--RngIntElt"></a><a id="OrePossibilities--FldPadTmpl--etc"></a><a id="OrePossibilities"></a>
 > **OrePossibilities** (F :: *FldPadTmpl*, n :: *RngIntElt*, s :: *RngIntElt*)
 > 
 > -> *BoolElt*
@@ -166,7 +166,7 @@ True if there exists an extension of degree `n` and discriminant valuation `n+J-
 The possible J such that `(F,n,J,s)` satisfy Ore'`s` conditions.
 
 
-<a id="OrePossibilities-2"></a><a id="OrePossibilities--FldPadTmpl--etc-2"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt"></a>
+<a id="OrePossibilities--FldPadTmpl--etc-2"></a><a id="OrePossibilities-2"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt"></a>
 > **OrePossibilities** (F :: *FldPadTmpl*, n :: *RngIntElt*)
 > 
 > -> []
