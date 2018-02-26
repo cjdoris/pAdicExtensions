@@ -435,6 +435,62 @@ intrinsic Embedding(F :: FldPadTmpl, A :: FldPad) -> Map
   return map<F -> A | x :-> FtoA(x), y :-> AtoF(y)>;
 end intrinsic;
 
+///
+/// **Note:** The embedding has an inverse defined, but it will enter an infinite loop unless the input can be represented as a finite polynomial in the uniformizer with coefficients representatives of the residue class field (i.e. the preimages of the residue map).
+/// 
+///param Place When given, this must be the prime ideal of A corresponding to the completion. By default it is computed from e, but the embedding depends on its generators, so you may get a nicer embedding using the original prime.
+///param ResidueMap When given, this must be the residue map from the integers of A to the residue class field of F. By default it is computed from Place.
+///param Uniformizer When given, this must be a uniformizing element for the prime. By default it is computed from Place.
+intrinsic Embedding(F :: FldPadTmpl, A :: FldNum, e :: Map : Place:=false, ResidueMap:=false, Uniformizer:=false) -> Map
+  {The embedding of F into A, where e is a completion map of A into a p-adic field.}
+  K := Codomain(e);
+  require Domain(e) cmpeq A and Type(K) eq FldPad: "e must be an completion of A into a p-adic field";
+  OA := Integers(A);
+  pidl := ideal<OA | Prime(K), UniformizingElement(K)@@e>;
+  require IsPrime(pidl): "e must be a completion of A into a p-adic field";
+  if Place cmpne false then
+    require Place eq pidl: "Place does not match the embedding";
+    pidl := Place;
+  end if;
+  if ResidueMap cmpeq false then
+    _, q := ResidueClassField(pidl);
+  else
+    q := ResidueMap;
+    require Type(q) eq Map and Domain(q) cmpeq Integers(A) and Codomain(q) cmpeq ResidueClassField(F) and forall{x : x in Generators(pidl) | x@q eq 0}: "ResidueMap is not a valid residue map";
+  end if;
+  if Uniformizer cmpeq false then
+    pi := UniformizingElement(pidl);
+  else
+    pi := Uniformizer;
+    require pi in A and Valuation(pi@e) eq 1: "Uniformizer must be a uniformizer in A";
+  end if;
+  function FtoA(x)
+    v := Valuation(x);
+    if v eq Infinity() then
+      return 0;
+    else
+      return pi^v * &+[pi^(i-1) * (x`coeffs[i] @@ q) : i in [1..#x`coeffs]];
+    end if;
+  end function;
+  function AtoF(y)
+    if y eq 0 then
+      return <0,[]>;
+    else
+      v := Valuation(y*OA, pidl);
+      z := y * pi^(-v);
+      assert Valuation(z*OA, pidl) eq 0;
+      cs := [];
+      while z ne 0 do
+        c := z @ q;
+        Append(~cs, c);
+        z := (z - (c @@ q)) / pi;
+      end while;
+      return <v,cs>;
+    end if;
+  end function;
+  return map<F -> A | x :-> FtoA(x), y :-> AtoF(y)>;
+end intrinsic;
+
 ///## Ore's conditions
 
 intrinsic OreConditions(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt, s :: RngIntElt) -> BoolElt
