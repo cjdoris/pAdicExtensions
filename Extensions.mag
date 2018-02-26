@@ -209,7 +209,7 @@ intrinsic TemplatepAdicField(:Prime:=false, Degree:=false, InertiaDegree:=false,
 end intrinsic;
 
 intrinsic TemplatepAdicField(p :: RngIntElt) -> FldPadTmpl
-  {The "template" prime p-adic field `Q_p`. Equivalent to `TemplatepAdicField(pAdicField(p)).}
+  {The "template" prime p-adic field `Q_p`. Equivalent to `TemplatepAdicField(pAdicField(p))`.}
   require p gt 0 and IsPrime(p): "p must be prime";
   return TemplatepAdicField(pAdicField(p));
 end intrinsic;
