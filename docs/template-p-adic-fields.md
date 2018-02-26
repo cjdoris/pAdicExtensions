@@ -31,6 +31,8 @@ Currently, the partial information we support is:
 > {:.ret}
 {:.intrinsic}
 
+A "template" p-adic field with data given by the parameters.
+
 **Parameters**
 - `Prime`
 - `Degree`
@@ -46,6 +48,8 @@ Currently, the partial information we support is:
 > {:.ret}
 {:.intrinsic}
 
+The "template" prime p-adic field `Q_p`. Equivalent to `TemplatepAdicField(pAdicField(p)).
+
 
 <a id="TemplatepAdicField-3"></a><a id="TemplatepAdicField--FldPad"></a>
 > **TemplatepAdicField** (K :: *FldPad*)
@@ -53,6 +57,8 @@ Currently, the partial information we support is:
 > -> *FldPadTmpl*
 > {:.ret}
 {:.intrinsic}
+
+A "template" version of K.
 
 
 ## Invariants
@@ -65,6 +71,8 @@ Currently, the partial information we support is:
 > {:.ret}
 {:.intrinsic}
 
+True if the prime of F is known.
+
 
 <a id="Prime"></a><a id="Prime--FldPadTmpl"></a>
 > **Prime** (F :: *FldPadTmpl*)
@@ -72,6 +80,8 @@ Currently, the partial information we support is:
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
+
+The prime `p`.
 
 
 <a id="HasAbsoluteDegree"></a><a id="HasAbsoluteDegree--FldPadTmpl"></a><a id="HasAbsoluteInertiaDegree"></a><a id="HasAbsoluteInertiaDegree--FldPadTmpl"></a><a id="HasAbsoluteRamificationDegree"></a><a id="HasAbsoluteRamificationDegree--FldPadTmpl"></a>
@@ -87,9 +97,9 @@ Currently, the partial information we support is:
 
 True if the absolute degree/inertia degree/ramification degree is known.
 
+True if the absolute inertia degree of F is known.
 
-
-
+True if the absolute ramification degree of F is known.
 
 
 <a id="AbsoluteDegree"></a><a id="AbsoluteDegree--FldPadTmpl"></a><a id="AbsoluteInertiaDegree"></a><a id="AbsoluteInertiaDegree--FldPadTmpl"></a><a id="AbsoluteRamificationDegree"></a><a id="AbsoluteRamificationDegree--FldPadTmpl"></a>
@@ -105,9 +115,9 @@ True if the absolute degree/inertia degree/ramification degree is known.
 
 Absolute degree, inertia degree and ramification degree.
 
+Absolute inertia degree.
 
-
-
+Absolute ramification degree.
 
 
 <a id="HasUniformizerResidue"></a><a id="HasUniformizerResidue--FldPadTmpl"></a>
@@ -117,6 +127,8 @@ Absolute degree, inertia degree and ramification degree.
 > {:.ret}
 {:.intrinsic}
 
+True if the uniformizer residue of F is known.
+
 
 <a id="UniformizerResidue"></a><a id="UniformizerResidue--FldPadTmpl"></a>
 > **UniformizerResidue** (F :: *FldPadTmpl*)
@@ -124,6 +136,8 @@ Absolute degree, inertia degree and ramification degree.
 > -> *FldFinElt*
 > {:.ret}
 {:.intrinsic}
+
+Uniformizer residue, the residue class of pi^e/p where pi is a uniformizer.
 
 
 <a id="HasResidueClassField"></a><a id="HasResidueClassField--FldPadTmpl"></a>
@@ -133,6 +147,8 @@ Absolute degree, inertia degree and ramification degree.
 > {:.ret}
 {:.intrinsic}
 
+True if the residue class field of F is known. If so, returns it and the quotient map.
+
 
 <a id="ResidueClassField"></a><a id="ResidueClassField--FldPadTmpl"></a>
 > **ResidueClassField** (F :: *FldPadTmpl*)
@@ -140,6 +156,8 @@ Absolute degree, inertia degree and ramification degree.
 > -> *FldFin*, *Map*
 > {:.ret}
 {:.intrinsic}
+
+Residue class field and the quotient map.
 
 
 <a id="HasActual"></a><a id="HasActual--FldPadTmpl"></a>
@@ -149,6 +167,8 @@ Absolute degree, inertia degree and ramification degree.
 > {:.ret}
 {:.intrinsic}
 
+True if F is associated to an actual field. If so, also returns the it and the embedding into it.
+
 
 <a id="Actual"></a><a id="Actual--FldPadTmpl"></a>
 > **Actual** (F :: *FldPadTmpl*)
@@ -157,6 +177,8 @@ Absolute degree, inertia degree and ramification degree.
 > {:.ret}
 {:.intrinsic}
 
+The actual field associated to F, if there is one.
+
 
 <a id="Embedding"></a><a id="Embedding--FldPadTmpl--etc"></a><a id="Embedding--FldPadTmpl--FldPad"></a>
 > **Embedding** (F :: *FldPadTmpl*, A :: *FldPad*)
@@ -164,6 +186,8 @@ Absolute degree, inertia degree and ramification degree.
 > -> *Map*
 > {:.ret}
 {:.intrinsic}
+
+The embedding of F into A, which must share the same residue class field.
 
 
 <a id="Embedding-2"></a><a id="Embedding--FldPadTmpl--etc-2"></a><a id="Embedding--FldPadTmpl--FldNum--Map"></a>
@@ -192,6 +216,8 @@ Absolute degree, inertia degree and ramification degree.
 > {:.ret}
 {:.intrinsic}
 
+True if there exists an extension of degree n of F whose ramification polygon has a point `(p^s, J)`.
+
 
 <a id="OreConditions-2"></a><a id="OreConditions--FldPadTmpl--etc-2"></a><a id="OreConditions--FldPadTmpl--RngIntElt--RngIntElt"></a>
 > **OreConditions** (F :: *FldPadTmpl*, n :: *RngIntElt*, J :: *RngIntElt*)
@@ -199,6 +225,8 @@ Absolute degree, inertia degree and ramification degree.
 > -> *BoolElt*
 > {:.ret}
 {:.intrinsic}
+
+True if there exists an extension of degree n and discriminant valuation `n+J-1` of F.
 
 
 <a id="OrePossibilities"></a><a id="OrePossibilities--FldPadTmpl--etc"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt--RngIntElt"></a>
@@ -208,6 +236,8 @@ Absolute degree, inertia degree and ramification degree.
 > {:.ret}
 {:.intrinsic}
 
+The possible J such that `(F,n,J,s)` satisfy Ore's conditions.
+
 
 <a id="OrePossibilities-2"></a><a id="OrePossibilities--FldPadTmpl--etc-2"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt"></a>
 > **OrePossibilities** (F :: *FldPadTmpl*, n :: *RngIntElt*)
@@ -215,6 +245,8 @@ Absolute degree, inertia degree and ramification degree.
 > -> []
 > {:.ret}
 {:.intrinsic}
+
+The possible J such that `(F,n,J)` satisfy Ore's conditions.
 
 
 ## Elements
@@ -247,6 +279,8 @@ Allows coercion into `F` any of the following:
 > {:.ret}
 {:.intrinsic}
 
+The field containing x.
+
 
 <a id="IsZero"></a><a id="IsZero--FldPadTmplElt"></a>
 > **IsZero** (x :: *FldPadTmplElt*)
@@ -254,6 +288,8 @@ Allows coercion into `F` any of the following:
 > -> *BoolElt*
 > {:.ret}
 {:.intrinsic}
+
+True iff x is zero.
 
 
 <a id="Valuation"></a><a id="Valuation--FldPadTmplElt"></a>
@@ -263,6 +299,8 @@ Allows coercion into `F` any of the following:
 > {:.ret}
 {:.intrinsic}
 
+The valuation of x.
+
 
 <a id="Actual-2"></a><a id="Actual--FldPadTmplElt"></a>
 > **Actual** (x :: *FldPadTmplElt*)
@@ -270,6 +308,8 @@ Allows coercion into `F` any of the following:
 > -> *FldPadElt*
 > {:.ret}
 {:.intrinsic}
+
+Coerces x into the actual field.
 
 
 ## Polynomial rings
@@ -282,6 +322,8 @@ Allows coercion into `F` any of the following:
 > {:.ret}
 {:.intrinsic}
 
+The univariate polynomial ring over F.
+
 
 <a id="BaseRing"></a><a id="BaseRing--RngUPol_FldPadTmpl"></a>
 > **BaseRing** (R :: *RngUPol_FldPadTmpl*)
@@ -289,6 +331,8 @@ Allows coercion into `F` any of the following:
 > -> *FldPadTmpl*
 > {:.ret}
 {:.intrinsic}
+
+The base ring.
 
 
 <a id="HasActual-2"></a><a id="HasActual--RngUPol_FldPadTmpl"></a>
@@ -298,6 +342,8 @@ Allows coercion into `F` any of the following:
 > {:.ret}
 {:.intrinsic}
 
+True if R has an actual ring.
+
 
 <a id="Actual-3"></a><a id="Actual--RngUPol_FldPadTmpl"></a>
 > **Actual** (R :: *RngUPol_FldPadTmpl*)
@@ -305,6 +351,8 @@ Allows coercion into `F` any of the following:
 > -> *RngUPol*, *Map*
 > {:.ret}
 {:.intrinsic}
+
+The actual ring of R.
 
 
 <a id="Embedding-3"></a><a id="Embedding--RngUPol_FldPadTmpl--etc"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad--Map"></a>
@@ -314,6 +362,8 @@ Allows coercion into `F` any of the following:
 > {:.ret}
 {:.intrinsic}
 
+The embedding of R into A extending the embedding m of base rings.
+
 
 <a id="Embedding-4"></a><a id="Embedding--RngUPol_FldPadTmpl--etc-2"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad"></a>
 > **Embedding** (R :: *RngUPol_FldPadTmpl*, A :: *RngUPol*[*FldPad*])
@@ -321,6 +371,8 @@ Allows coercion into `F` any of the following:
 > -> *Map*
 > {:.ret}
 {:.intrinsic}
+
+The embedding of R into A.
 
 
 ## Polynomials
@@ -347,6 +399,8 @@ We can coerce the following into `R`:
 > {:.ret}
 {:.intrinsic}
 
+The ring containing f.
+
 
 <a id="BaseRing-2"></a><a id="BaseRing--RngUPolElt_FldPadTmpl"></a>
 > **BaseRing** (f :: *RngUPolElt_FldPadTmpl*)
@@ -354,6 +408,8 @@ We can coerce the following into `R`:
 > -> *FldPadTmpl*
 > {:.ret}
 {:.intrinsic}
+
+The base ring of f.
 
 
 <a id="Coefficients"></a><a id="Coefficients--RngUPolElt_FldPadTmpl"></a>
@@ -363,6 +419,8 @@ We can coerce the following into `R`:
 > {:.ret}
 {:.intrinsic}
 
+The coefficients of f.
+
 
 <a id="Degree"></a><a id="Degree--RngUPolElt_FldPadTmpl"></a>
 > **Degree** (f :: *RngUPolElt_FldPadTmpl*)
@@ -370,6 +428,8 @@ We can coerce the following into `R`:
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
+
+The degree.
 
 
 <a id="IsZero-2"></a><a id="IsZero--RngUPolElt_FldPadTmpl"></a>
@@ -379,6 +439,8 @@ We can coerce the following into `R`:
 > {:.ret}
 {:.intrinsic}
 
+True iff f is zero.
+
 
 <a id="Actual-4"></a><a id="Actual--RngUPolElt_FldPadTmpl"></a>
 > **Actual** (f :: *RngUPolElt_FldPadTmpl*)
@@ -386,6 +448,8 @@ We can coerce the following into `R`:
 > -> *RngUPolElt*
 > {:.ret}
 {:.intrinsic}
+
+Coerces x into the actual ring.
 
 
 <a id="Extension"></a><a id="Extension--FldPad--etc"></a><a id="Extension--FldPad--RngUPolElt_FldPadTmpl--Map"></a>
@@ -395,6 +459,8 @@ We can coerce the following into `R`:
 > {:.ret}
 {:.intrinsic}
 
+The extension of K defined by f, with the polynomial embedding m.
+
 
 <a id="Extension-2"></a><a id="Extension--FldPad--etc-2"></a><a id="Extension--FldPad--RngUPolElt_FldPadTmpl"></a>
 > **Extension** (K :: *FldPad*, f :: *RngUPolElt_FldPadTmpl*)
@@ -403,6 +469,8 @@ We can coerce the following into `R`:
 > {:.ret}
 {:.intrinsic}
 
+The extension of K defined by f.
+
 
 <a id="ActualExtension"></a><a id="ActualExtension--RngUPolElt_FldPadTmpl"></a>
 > **ActualExtension** (f :: *RngUPolElt_FldPadTmpl*)
@@ -410,5 +478,7 @@ We can coerce the following into `R`:
 > -> *FldPad*
 > {:.ret}
 {:.intrinsic}
+
+The extension of the actual field defined by f.
 
 

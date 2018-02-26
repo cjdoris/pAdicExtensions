@@ -27,6 +27,8 @@ Additionally, we can assign a single non-zero element of the residue class field
 > {:.ret}
 {:.intrinsic}
 
+True if vs can be made into a ramification polygon over F. vs must be a list of `<x,y>` pairs of integers defining the points.
+
 
 <a id="RamificationPolygon"></a><a id="RamificationPolygon--FldPadTmpl--etc"></a><a id="RamificationPolygon--FldPadTmpl--seq"></a>
 > **RamificationPolygon** (F :: *FldPadTmpl*, vs :: [])
@@ -35,6 +37,8 @@ Additionally, we can assign a single non-zero element of the residue class field
 > {:.ret}
 {:.intrinsic}
 
+A ramification polygon over F.
+
 
 <a id="Copy"></a><a id="Copy--PadRamifPgon"></a>
 > **Copy** (P :: *PadRamifPgon*)
@@ -42,6 +46,8 @@ Additionally, we can assign a single non-zero element of the residue class field
 > -> *PadRamifPgon*
 > {:.ret}
 {:.intrinsic}
+
+Makes a copy of P.
 
 
 ## Invariants
@@ -66,15 +72,15 @@ Additionally, we can assign a single non-zero element of the residue class field
 
 n (degree), p (prime), e (absolute ramification degree), u (number of wild faces), x_u=p^s_u (wild degree)
 
+p
 
+e
 
+u
 
+s_u
 
-
-
-
-
-
+x_u
 
 
 <a id="J"></a><a id="J--PadRamifPgon--etc"></a><a id="J--PadRamifPgon--RngIntElt"></a><a id="a"></a><a id="a--PadRamifPgon--etc"></a><a id="a--PadRamifPgon--RngIntElt"></a><a id="b"></a><a id="b--PadRamifPgon--etc"></a><a id="b--PadRamifPgon--RngIntElt"></a><a id="s"></a><a id="s--PadRamifPgon--etc"></a><a id="s--PadRamifPgon--RngIntElt"></a><a id="x"></a><a id="x--PadRamifPgon--etc"></a><a id="x--PadRamifPgon--RngIntElt"></a>
@@ -94,13 +100,13 @@ n (degree), p (prime), e (absolute ramification degree), u (number of wild faces
 
 J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 
+a_i
 
+b_i
 
+s_i
 
-
-
-
-
+p^s_i
 
 
 ## Valuations of binomials
@@ -113,6 +119,8 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 > {:.ret}
 {:.intrinsic}
 
+Valuation of n choose k.
+
 
 <a id="vbinp"></a><a id="vbinp--PadRamifPgon--etc"></a><a id="vbinp--PadRamifPgon--RngIntElt--RngIntElt"></a>
 > **vbinp** (P :: *PadRamifPgon*, n :: *RngIntElt*, i :: *RngIntElt*)
@@ -120,6 +128,8 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
+
+Valuation of n choose `p^i`.
 
 
 <a id="vbinbp"></a><a id="vbinbp--PadRamifPgon--etc"></a><a id="vbinbp--PadRamifPgon--RngIntElt--RngIntElt"></a>
@@ -129,6 +139,8 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 > {:.ret}
 {:.intrinsic}
 
+Valuation of `b_j` choose `p^i`.
+
 
 <a id="vbinps"></a><a id="vbinps--PadRamifPgon--etc"></a><a id="vbinps--PadRamifPgon--RngIntElt--RngIntElt"></a>
 > **vbinps** (P :: *PadRamifPgon*, n :: *RngIntElt*, i :: *RngIntElt*)
@@ -136,6 +148,8 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
+
+The valuation of n choose `p^s_i`.
 
 
 <a id="vbinnps"></a><a id="vbinnps--PadRamifPgon--etc"></a><a id="vbinnps--PadRamifPgon--RngIntElt"></a>
@@ -145,6 +159,8 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 > {:.ret}
 {:.intrinsic}
 
+The valuation of `n` choose p^s_i.
+
 
 <a id="vbinbps"></a><a id="vbinbps--PadRamifPgon--etc"></a><a id="vbinbps--PadRamifPgon--RngIntElt--RngIntElt"></a>
 > **vbinbps** (P :: *PadRamifPgon*, j :: *RngIntElt*, i :: *RngIntElt*)
@@ -152,6 +168,8 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
+
+The valuation of `b_j` choose `p^s_i`.
 
 
 <a id="vbinbps-2"></a><a id="vbinbps--PadRamifPgon--etc-2"></a><a id="vbinbps--PadRamifPgon--RngIntElt"></a>
@@ -161,6 +179,8 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 > {:.ret}
 {:.intrinsic}
 
+The valuation of `b_i choose p^s_i`.
+
 
 <a id="sbinres"></a><a id="sbinres--PadRamifPgon--etc"></a><a id="sbinres--PadRamifPgon--RngIntElt--RngIntElt"></a>
 > **sbinres** (P :: *PadRamifPgon*, n :: *RngIntElt*, k :: *RngIntElt*)
@@ -168,6 +188,8 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 > -> *FldFinElt*
 > {:.ret}
 {:.intrinsic}
+
+The residue class of n choose k shifted down to a unit.
 
 
 ## Validity
@@ -187,6 +209,8 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > {:.ret}
 {:.intrinsic}
 
+True if P corresponds to an actual extension.
+
 **Parameters**
 - `Residues := true`: Only checks the residues (if they are assigned) when this is true
 
@@ -197,6 +221,8 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > {:.ret}
 {:.intrinsic}
 
+True if P satisfies the Ore, congruence and bounding conditions, which are necessary (but not sufficient) for being valid.
+
 
 <a id="SatisfiesOreCondition"></a><a id="SatisfiesOreCondition--PadRamifPgon"></a>
 > **SatisfiesOreCondition** (P :: *PadRamifPgon*)
@@ -204,6 +230,8 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > -> *BoolElt*
 > {:.ret}
 {:.intrinsic}
+
+True iff P satisfies the Ore conditions: `b_t=0 => a_t eq vB(n,p^s_t)`, `b_t>0 => B(b_t,p^s_t) le a_t le B(n,p^s_t)-1`.
 
 
 <a id="SatisfiesTameCondition"></a><a id="SatisfiesTameCondition--PadRamifPgon"></a>
@@ -213,6 +241,8 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > {:.ret}
 {:.intrinsic}
 
+True iff P satisfies the tame conditions: `p^s_u le j le n => (j,0) in P iff B(n,j)=0`.
+
 
 <a id="CorrectTamePoints"></a><a id="CorrectTamePoints--PadRamifPgon"></a>
 > **CorrectTamePoints** (P :: *PadRamifPgon*)
@@ -220,6 +250,8 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > -> []
 > {:.ret}
 {:.intrinsic}
+
+The correct tame points for a valid P of this degree.
 
 
 <a id="WithCorrectTamePoints"></a><a id="WithCorrectTamePoints--PadRamifPgon"></a>
@@ -229,6 +261,8 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > {:.ret}
 {:.intrinsic}
 
+A copy of P with the correct tame points.
+
 
 <a id="SatisfiesCongruenceCondition"></a><a id="SatisfiesCongruenceCondition--PadRamifPgon"></a>
 > **SatisfiesCongruenceCondition** (P :: *PadRamifPgon*)
@@ -236,6 +270,8 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > -> *BoolElt*
 > {:.ret}
 {:.intrinsic}
+
+True if P satisfies the congruence conditions: `b_t = b_r => a_t - B(b_t,p^s_t) = a_r - B(b_r,p^s_r)`.
 
 
 <a id="SatisfiesBoundingCondition"></a><a id="SatisfiesBoundingCondition--PadRamifPgon"></a>
@@ -245,6 +281,8 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > {:.ret}
 {:.intrinsic}
 
+True if P satisfies the bounding conditions: `b_r eq 0, p^s_r le b_t => a_t ge B(n,p^s_r) - B(b_t,p^s_r) + B(b_t,p^s_t)` and `b_r ne 0, p^s_r le b_t => a_t ge a_r - B(b_t,p^s_r) + B(b_t,p^s_t) + 1[b_t lt b_r]`.
+
 
 <a id="SatisfiesMissingCondition"></a><a id="SatisfiesMissingCondition--PadRamifPgon"></a>
 > **SatisfiesMissingCondition** (P :: *PadRamifPgon*)
@@ -252,6 +290,8 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > -> *BoolElt*
 > {:.ret}
 {:.intrinsic}
+
+True if P satisfies the "missing" conditions: `s_t lt s lt s_(t+1) => Floor(X/n) le B(n,p^s) - 1` and `s_t lt s_(t+1), p^s le b_r => a_r ge Floor((X-b_r)/n) + B(b_r,p^s_r) - B(b_r,p^s) + 1` where `X = J_t + (J_(t+1)-J_t)*(x_(t+1)-x_t)/(p^s-x_t)`.
 
 
 ## Residues
@@ -264,6 +304,8 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > {:.ret}
 {:.intrinsic}
 
+True if rs is a valid assignment of residues to P, i.e. if there exists an Eisenstein polynomial with these residues. When true, also returns a polynomial whose roots are the possible leading p-adic coefficients of the constant coefficient.
+
 **Parameters**
 - `Partial := false`: When true, rs may be a partial assignment (i.e. have some undefined entries) and the check becomes necessary but not sufficient for exisence.
 
@@ -273,6 +315,8 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > -> []
 > {:.ret}
 {:.intrinsic}
+
+The correct tame residues of P, between `x_u` and `n`.
 
 
 ## Enumeration
@@ -300,6 +344,8 @@ All possible ramification polygons of extensions of `F` of degree `n`.
 > {:.ret}
 {:.intrinsic}
 
+All the residues which are valid for P, paired with the leading coefficient polynomial.
+
 **Parameters**
 - `Classes := false`: When true, only return one per equivalence class.
 
@@ -309,6 +355,8 @@ All possible ramification polygons of extensions of `F` of degree `n`.
 > -> []
 > {:.ret}
 {:.intrinsic}
+
+Copies of P with valid residues attached.
 
 **Parameters**
 - `Classes := false`: When true, only return one per equivalence class.
@@ -320,6 +368,8 @@ All possible ramification polygons of extensions of `F` of degree `n`.
 > {:.ret}
 {:.intrinsic}
 
+All valid CC-residues for P.
+
 **Parameters**
 - `Residues`: When given, use these residues instead of the ones attached to P.
 - `Classes := false`: When true, only return one per equivalence class.
@@ -330,6 +380,8 @@ All possible ramification polygons of extensions of `F` of degree `n`.
 > -> []
 > {:.ret}
 {:.intrinsic}
+
+Copies of P with valid CC-residues attached.
 
 **Parameters**
 - `Classes := false`: When true, only return one per equivalence class.
