@@ -10,7 +10,7 @@
 ## Creation of templates
 {:#creation-of-templates}
 
-<a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--RngIntElt--RngIntElt"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--etc"></a>
+<a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--etc"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--RngIntElt--RngIntElt"></a>
 > **TemplateForEisensteinPolynomialsByDegreeAndDisciminant** (F :: *FldPadTmpl*, n :: *RngIntElt*, J :: *RngIntElt*)
 > 
 > -> *Tmpl_RngUPolElt_FldPadTmpl*
@@ -81,7 +81,7 @@
 {:.intrinsic}
 
 
-<a id="IndexSet--Tmpl_FldPadTmplElt"></a><a id="IndexSet"></a>
+<a id="IndexSet"></a><a id="IndexSet--Tmpl_FldPadTmplElt"></a>
 > **IndexSet** (T :: *Tmpl_FldPadTmplElt*)
 > 
 > -> Any
@@ -97,7 +97,7 @@
 {:.intrinsic}
 
 
-<a id="GetIndex--Tmpl_FldPadTmplElt--etc"></a><a id="GetIndex--Tmpl_FldPadTmplElt--any"></a><a id="GetIndex"></a>
+<a id="GetIndex"></a><a id="GetIndex--Tmpl_FldPadTmplElt--etc"></a><a id="GetIndex--Tmpl_FldPadTmplElt--any"></a>
 > **GetIndex** (T :: *Tmpl_FldPadTmplElt*, idx)
 > 
 > -> *FldPadTmplElt*
@@ -105,7 +105,7 @@
 {:.intrinsic}
 
 
-<a id="GetIndex--Tmpl_RngUPolElt_FldPadTmpl--any"></a><a id="GetIndex--Tmpl_RngUPolElt_FldPadTmpl--etc"></a><a id="GetIndex-2"></a>
+<a id="GetIndex-2"></a><a id="GetIndex--Tmpl_RngUPolElt_FldPadTmpl--etc"></a><a id="GetIndex--Tmpl_RngUPolElt_FldPadTmpl--any"></a>
 > **GetIndex** (T :: *Tmpl_RngUPolElt_FldPadTmpl*, idx)
 > 
 > -> *RngUPolElt_FldPadTmpl*

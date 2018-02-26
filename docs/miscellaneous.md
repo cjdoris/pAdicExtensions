@@ -1,7 +1,7 @@
 # Miscellaneous
 {:#miscellaneous}
 
-<a id="FloorLog--RngIntElt--etc"></a><a id="FloorLog"></a><a id="FloorLog--RngIntElt--RngIntElt"></a>
+<a id="FloorLog"></a><a id="FloorLog--RngIntElt--etc"></a><a id="FloorLog--RngIntElt--RngIntElt"></a>
 > **FloorLog** (b :: *RngIntElt*, x :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -17,7 +17,7 @@
 {:.intrinsic}
 
 
-<a id="Evaluate--NwtnPgon--RngIntElt"></a><a id="Evaluate-2"></a><a id="Evaluate--NwtnPgon--etc-2"></a>
+<a id="Evaluate-2"></a><a id="Evaluate--NwtnPgon--etc-2"></a><a id="Evaluate--NwtnPgon--RngIntElt"></a>
 > **Evaluate** (P :: *NwtnPgon*, x :: *RngIntElt*)
 > 
 > -> *FldRatElt*
@@ -25,7 +25,7 @@
 {:.intrinsic}
 
 
-<a id="FactorialValuation"></a><a id="FactorialValuation--RngIntElt--RngIntElt"></a><a id="FactorialValuation--RngIntElt--etc"></a>
+<a id="FactorialValuation"></a><a id="FactorialValuation--RngIntElt--etc"></a><a id="FactorialValuation--RngIntElt--RngIntElt"></a>
 > **FactorialValuation** (n :: *RngIntElt*, p :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -33,7 +33,7 @@
 {:.intrinsic}
 
 
-<a id="BinomialValuation--RngIntElt--RngIntElt--RngIntElt"></a><a id="BinomialValuation"></a><a id="BinomialValuation--RngIntElt--etc"></a>
+<a id="BinomialValuation"></a><a id="BinomialValuation--RngIntElt--etc"></a><a id="BinomialValuation--RngIntElt--RngIntElt--RngIntElt"></a>
 > **BinomialValuation** (n :: *RngIntElt*, k :: *RngIntElt*, p :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -41,7 +41,7 @@
 {:.intrinsic}
 
 
-<a id="UnitFactorial--FldFin--RngIntElt"></a><a id="UnitFactorial"></a><a id="UnitFactorial--FldFin--etc"></a>
+<a id="UnitFactorial"></a><a id="UnitFactorial--FldFin--etc"></a><a id="UnitFactorial--FldFin--RngIntElt"></a>
 > **UnitFactorial** (F :: *FldFin*, n :: *RngIntElt*)
 > 
 > -> *FldFinElt*
@@ -57,7 +57,7 @@
 {:.intrinsic}
 
 
-<a id="ShiftedBinomial--FldFin--RngIntElt--RngIntElt"></a><a id="ShiftedBinomial--FldFin--etc"></a><a id="ShiftedBinomial"></a>
+<a id="ShiftedBinomial"></a><a id="ShiftedBinomial--FldFin--etc"></a><a id="ShiftedBinomial--FldFin--RngIntElt--RngIntElt"></a>
 > **ShiftedBinomial** (F :: *FldFin*, n :: *RngIntElt*, k :: *RngIntElt*)
 > 
 > -> *FldFinElt*

@@ -61,10 +61,14 @@ with coefficients
 (0; 1)*x^9 + (1; 1)*x^6 + (2; 2)*x^4 + (1; 1 2)*x^3 + (2; 2)*x + (1; 1 2)
 >
 > // Coerce it into the actual 3-adic field
-> // NOTE: If F were defined like TemplatepAdicField(pAdicField(3))
-> //   then this is equivalent to Actual(f)
-> m := Embedding(Parent(f), PolynomialRing(pAdicField(3)));
+> // NOTE: In this case, this is equivalent to Actual(f)
+> K := pAdicField(3);
+> m := Embedding(Parent(f), PolynomialRing(K));
 > m(f);
 (1 + O(3^20))*$.1^9 + (3 + O(3^21))*$.1^6 + (2*3^2 + O(3^22))*$.1^4 + (7*3 + 
   O(3^21))*$.1^3 + (2*3^2 + O(3^22))*$.1 + 7*3 + O(3^21)
+>
+> // Make the corresponding extension
+> // NOTE: In this case, this is equivalent to ActualExtension(f)
+> L<pi> := Extension(K, f, m);
 ```

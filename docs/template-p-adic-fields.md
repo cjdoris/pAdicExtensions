@@ -39,7 +39,7 @@ Currently, the partial information we support is:
 - `UniformizerResidue`
 - `Actual`
 
-<a id="TemplatepAdicField--RngIntElt"></a><a id="TemplatepAdicField-2"></a>
+<a id="TemplatepAdicField-2"></a><a id="TemplatepAdicField--RngIntElt"></a>
 > **TemplatepAdicField** (p :: *RngIntElt*)
 > 
 > -> *FldPadTmpl*
@@ -58,7 +58,7 @@ Currently, the partial information we support is:
 ## Invariants
 {:#invariants}
 
-<a id="HasPrime--FldPadTmpl"></a><a id="HasPrime"></a>
+<a id="HasPrime"></a><a id="HasPrime--FldPadTmpl"></a>
 > **HasPrime** (F :: *FldPadTmpl*)
 > 
 > -> *BoolElt*, *RngIntElt*
@@ -74,7 +74,7 @@ Currently, the partial information we support is:
 {:.intrinsic}
 
 
-<a id="HasAbsoluteDegree"></a><a id="HasAbsoluteRamificationDegree"></a><a id="HasAbsoluteInertiaDegree--FldPadTmpl"></a><a id="HasAbsoluteDegree--FldPadTmpl"></a><a id="HasAbsoluteInertiaDegree"></a><a id="HasAbsoluteRamificationDegree--FldPadTmpl"></a>
+<a id="HasAbsoluteDegree"></a><a id="HasAbsoluteDegree--FldPadTmpl"></a><a id="HasAbsoluteInertiaDegree"></a><a id="HasAbsoluteInertiaDegree--FldPadTmpl"></a><a id="HasAbsoluteRamificationDegree"></a><a id="HasAbsoluteRamificationDegree--FldPadTmpl"></a>
 > **HasAbsoluteDegree** (F :: *FldPadTmpl*)
 > 
 > **HasAbsoluteInertiaDegree** (F :: *FldPadTmpl*)
@@ -92,7 +92,7 @@ True if the absolute degree/inertia degree/ramification degree is known.
 
 
 
-<a id="AbsoluteInertiaDegree--FldPadTmpl"></a><a id="AbsoluteInertiaDegree"></a><a id="AbsoluteRamificationDegree--FldPadTmpl"></a><a id="AbsoluteDegree--FldPadTmpl"></a><a id="AbsoluteDegree"></a><a id="AbsoluteRamificationDegree"></a>
+<a id="AbsoluteDegree"></a><a id="AbsoluteDegree--FldPadTmpl"></a><a id="AbsoluteInertiaDegree"></a><a id="AbsoluteInertiaDegree--FldPadTmpl"></a><a id="AbsoluteRamificationDegree"></a><a id="AbsoluteRamificationDegree--FldPadTmpl"></a>
 > **AbsoluteDegree** (F :: *FldPadTmpl*)
 > 
 > **AbsoluteInertiaDegree** (F :: *FldPadTmpl*)
@@ -118,7 +118,7 @@ Absolute degree, inertia degree and ramification degree.
 {:.intrinsic}
 
 
-<a id="UniformizerResidue--FldPadTmpl"></a><a id="UniformizerResidue"></a>
+<a id="UniformizerResidue"></a><a id="UniformizerResidue--FldPadTmpl"></a>
 > **UniformizerResidue** (F :: *FldPadTmpl*)
 > 
 > -> *FldFinElt*
@@ -150,7 +150,7 @@ Absolute degree, inertia degree and ramification degree.
 {:.intrinsic}
 
 
-<a id="Actual--FldPadTmpl"></a><a id="Actual"></a>
+<a id="Actual"></a><a id="Actual--FldPadTmpl"></a>
 > **Actual** (F :: *FldPadTmpl*)
 > 
 > -> *FldPad*, *Map*
@@ -158,7 +158,7 @@ Absolute degree, inertia degree and ramification degree.
 {:.intrinsic}
 
 
-<a id="Embedding--FldPadTmpl--FldPad"></a><a id="Embedding--FldPadTmpl--etc"></a><a id="Embedding"></a>
+<a id="Embedding"></a><a id="Embedding--FldPadTmpl--etc"></a><a id="Embedding--FldPadTmpl--FldPad"></a>
 > **Embedding** (F :: *FldPadTmpl*, A :: *FldPad*)
 > 
 > -> *Map*
@@ -185,7 +185,7 @@ Absolute degree, inertia degree and ramification degree.
 {:.intrinsic}
 
 
-<a id="OrePossibilities--FldPadTmpl--RngIntElt--RngIntElt"></a><a id="OrePossibilities--FldPadTmpl--etc"></a><a id="OrePossibilities"></a>
+<a id="OrePossibilities"></a><a id="OrePossibilities--FldPadTmpl--etc"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt--RngIntElt"></a>
 > **OrePossibilities** (F :: *FldPadTmpl*, n :: *RngIntElt*, s :: *RngIntElt*)
 > 
 > -> *BoolElt*
@@ -193,7 +193,7 @@ Absolute degree, inertia degree and ramification degree.
 {:.intrinsic}
 
 
-<a id="OrePossibilities--FldPadTmpl--etc-2"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt"></a><a id="OrePossibilities-2"></a>
+<a id="OrePossibilities-2"></a><a id="OrePossibilities--FldPadTmpl--etc-2"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt"></a>
 > **OrePossibilities** (F :: *FldPadTmpl*, n :: *RngIntElt*)
 > 
 > -> []
@@ -267,7 +267,7 @@ Allows coercion into `F` any of the following:
 {:.intrinsic}
 
 
-<a id="BaseRing--RngUPol_FldPadTmpl"></a><a id="BaseRing"></a>
+<a id="BaseRing"></a><a id="BaseRing--RngUPol_FldPadTmpl"></a>
 > **BaseRing** (R :: *RngUPol_FldPadTmpl*)
 > 
 > -> *FldPadTmpl*
@@ -283,7 +283,7 @@ Allows coercion into `F` any of the following:
 {:.intrinsic}
 
 
-<a id="Actual--RngUPol_FldPadTmpl"></a><a id="Actual-3"></a>
+<a id="Actual-3"></a><a id="Actual--RngUPol_FldPadTmpl"></a>
 > **Actual** (R :: *RngUPol_FldPadTmpl*)
 > 
 > -> *RngUPol*, *Map*
@@ -291,7 +291,7 @@ Allows coercion into `F` any of the following:
 {:.intrinsic}
 
 
-<a id="Embedding--RngUPol_FldPadTmpl--etc"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad--Map"></a><a id="Embedding-2"></a>
+<a id="Embedding-2"></a><a id="Embedding--RngUPol_FldPadTmpl--etc"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad--Map"></a>
 > **Embedding** (R :: *RngUPol_FldPadTmpl*, A :: *RngUPol*[*FldPad*], m :: *Map*)
 > 
 > -> *Map*
@@ -299,7 +299,7 @@ Allows coercion into `F` any of the following:
 {:.intrinsic}
 
 
-<a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad"></a><a id="Embedding--RngUPol_FldPadTmpl--etc-2"></a><a id="Embedding-3"></a>
+<a id="Embedding-3"></a><a id="Embedding--RngUPol_FldPadTmpl--etc-2"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad"></a>
 > **Embedding** (R :: *RngUPol_FldPadTmpl*, A :: *RngUPol*[*FldPad*])
 > 
 > -> *Map*
@@ -310,7 +310,7 @@ Allows coercion into `F` any of the following:
 ## Polynomials
 {:#polynomials}
 
-<a id="IsCoercible-2"></a><a id="IsCoercible--RngUPol_FldPadTmpl--any"></a><a id="IsCoercible--RngUPol_FldPadTmpl--etc"></a>
+<a id="IsCoercible-2"></a><a id="IsCoercible--RngUPol_FldPadTmpl--etc"></a><a id="IsCoercible--RngUPol_FldPadTmpl--any"></a>
 > **IsCoercible** (R :: *RngUPol_FldPadTmpl*, X)
 > 
 > -> *BoolElt*, Any
@@ -332,7 +332,7 @@ We can coerce the following into `R`:
 {:.intrinsic}
 
 
-<a id="BaseRing--RngUPolElt_FldPadTmpl"></a><a id="BaseRing-2"></a>
+<a id="BaseRing-2"></a><a id="BaseRing--RngUPolElt_FldPadTmpl"></a>
 > **BaseRing** (f :: *RngUPolElt_FldPadTmpl*)
 > 
 > -> *FldPadTmpl*
@@ -340,7 +340,7 @@ We can coerce the following into `R`:
 {:.intrinsic}
 
 
-<a id="Coefficients--RngUPolElt_FldPadTmpl"></a><a id="Coefficients"></a>
+<a id="Coefficients"></a><a id="Coefficients--RngUPolElt_FldPadTmpl"></a>
 > **Coefficients** (f :: *RngUPolElt_FldPadTmpl*)
 > 
 > -> []
@@ -356,7 +356,7 @@ We can coerce the following into `R`:
 {:.intrinsic}
 
 
-<a id="IsZero--RngUPolElt_FldPadTmpl"></a><a id="IsZero-2"></a>
+<a id="IsZero-2"></a><a id="IsZero--RngUPolElt_FldPadTmpl"></a>
 > **IsZero** (f :: *RngUPolElt_FldPadTmpl*)
 > 
 > -> *BoolElt*
@@ -364,10 +364,34 @@ We can coerce the following into `R`:
 {:.intrinsic}
 
 
-<a id="Actual--RngUPolElt_FldPadTmpl"></a><a id="Actual-4"></a>
+<a id="Actual-4"></a><a id="Actual--RngUPolElt_FldPadTmpl"></a>
 > **Actual** (f :: *RngUPolElt_FldPadTmpl*)
 > 
 > -> *RngUPolElt*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Extension"></a><a id="Extension--FldPad--etc"></a><a id="Extension--FldPad--RngUPolElt_FldPadTmpl--Map"></a>
+> **Extension** (K :: *FldPad*, f :: *RngUPolElt_FldPadTmpl*, m :: *Map*)
+> 
+> -> *FldPad*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Extension-2"></a><a id="Extension--FldPad--etc-2"></a><a id="Extension--FldPad--RngUPolElt_FldPadTmpl"></a>
+> **Extension** (K :: *FldPad*, f :: *RngUPolElt_FldPadTmpl*)
+> 
+> -> *FldPad*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="ActualExtension"></a><a id="ActualExtension--RngUPolElt_FldPadTmpl"></a>
+> **ActualExtension** (f :: *RngUPolElt_FldPadTmpl*)
+> 
+> -> *FldPad*
 > {:.ret}
 {:.intrinsic}
 

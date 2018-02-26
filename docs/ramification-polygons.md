@@ -20,7 +20,7 @@ Additionally, we can assign a single non-zero element of the residue class field
 ## Creation
 {:#creation}
 
-<a id="IsCoercible_RamificationPolygon--FldPadTmpl--etc"></a><a id="IsCoercible_RamificationPolygon--FldPadTmpl--seq"></a><a id="IsCoercible_RamificationPolygon"></a>
+<a id="IsCoercible_RamificationPolygon"></a><a id="IsCoercible_RamificationPolygon--FldPadTmpl--etc"></a><a id="IsCoercible_RamificationPolygon--FldPadTmpl--seq"></a>
 > **IsCoercible_RamificationPolygon** (F :: *FldPadTmpl*, vs :: [])
 > 
 > -> *BoolElt*, *PadRamifPgon*
@@ -28,7 +28,7 @@ Additionally, we can assign a single non-zero element of the residue class field
 {:.intrinsic}
 
 
-<a id="RamificationPolygon--FldPadTmpl--etc"></a><a id="RamificationPolygon"></a><a id="RamificationPolygon--FldPadTmpl--seq"></a>
+<a id="RamificationPolygon"></a><a id="RamificationPolygon--FldPadTmpl--etc"></a><a id="RamificationPolygon--FldPadTmpl--seq"></a>
 > **RamificationPolygon** (F :: *FldPadTmpl*, vs :: [])
 > 
 > -> *PadRamifPgon*
@@ -47,7 +47,7 @@ Additionally, we can assign a single non-zero element of the residue class field
 ## Invariants
 {:#invariants}
 
-<a id="xu--PadRamifPgon"></a><a id="n"></a><a id="e--PadRamifPgon"></a><a id="su--PadRamifPgon"></a><a id="n--PadRamifPgon"></a><a id="u--PadRamifPgon"></a><a id="su"></a><a id="p"></a><a id="p--PadRamifPgon"></a><a id="e"></a><a id="u"></a><a id="xu"></a>
+<a id="n"></a><a id="n--PadRamifPgon"></a><a id="p"></a><a id="p--PadRamifPgon"></a><a id="e"></a><a id="e--PadRamifPgon"></a><a id="u"></a><a id="u--PadRamifPgon"></a><a id="su"></a><a id="su--PadRamifPgon"></a><a id="xu"></a><a id="xu--PadRamifPgon"></a>
 > **n** (P :: *PadRamifPgon*)
 > 
 > **p** (P :: *PadRamifPgon*)
@@ -77,7 +77,7 @@ n (degree), p (prime), e (absolute ramification degree), u (number of wild faces
 
 
 
-<a id="s--PadRamifPgon--RngIntElt"></a><a id="x--PadRamifPgon--RngIntElt"></a><a id="J--PadRamifPgon--RngIntElt"></a><a id="a--PadRamifPgon--RngIntElt"></a><a id="a--PadRamifPgon--etc"></a><a id="b--PadRamifPgon--RngIntElt"></a><a id="x"></a><a id="s--PadRamifPgon--etc"></a><a id="J--PadRamifPgon--etc"></a><a id="b--PadRamifPgon--etc"></a><a id="a"></a><a id="J"></a><a id="b"></a><a id="s"></a><a id="x--PadRamifPgon--etc"></a>
+<a id="J"></a><a id="J--PadRamifPgon--etc"></a><a id="J--PadRamifPgon--RngIntElt"></a><a id="a"></a><a id="a--PadRamifPgon--etc"></a><a id="a--PadRamifPgon--RngIntElt"></a><a id="b"></a><a id="b--PadRamifPgon--etc"></a><a id="b--PadRamifPgon--RngIntElt"></a><a id="s"></a><a id="s--PadRamifPgon--etc"></a><a id="s--PadRamifPgon--RngIntElt"></a><a id="x"></a><a id="x--PadRamifPgon--etc"></a><a id="x--PadRamifPgon--RngIntElt"></a>
 > **J** (P :: *PadRamifPgon*, i :: *RngIntElt*)
 > 
 > **a** (P :: *PadRamifPgon*, i :: *RngIntElt*)
@@ -106,7 +106,7 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 ## Valuations of binomials
 {:#valuations-of-binomials}
 
-<a id="vbin--PadRamifPgon--etc"></a><a id="vbin"></a><a id="vbin--PadRamifPgon--RngIntElt--RngIntElt"></a>
+<a id="vbin"></a><a id="vbin--PadRamifPgon--etc"></a><a id="vbin--PadRamifPgon--RngIntElt--RngIntElt"></a>
 > **vbin** (P :: *PadRamifPgon*, n :: *RngIntElt*, k :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -114,7 +114,7 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 {:.intrinsic}
 
 
-<a id="vbinp--PadRamifPgon--RngIntElt--RngIntElt"></a><a id="vbinp--PadRamifPgon--etc"></a><a id="vbinp"></a>
+<a id="vbinp"></a><a id="vbinp--PadRamifPgon--etc"></a><a id="vbinp--PadRamifPgon--RngIntElt--RngIntElt"></a>
 > **vbinp** (P :: *PadRamifPgon*, n :: *RngIntElt*, i :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -130,7 +130,7 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 {:.intrinsic}
 
 
-<a id="vbinps--PadRamifPgon--etc"></a><a id="vbinps--PadRamifPgon--RngIntElt--RngIntElt"></a><a id="vbinps"></a>
+<a id="vbinps"></a><a id="vbinps--PadRamifPgon--etc"></a><a id="vbinps--PadRamifPgon--RngIntElt--RngIntElt"></a>
 > **vbinps** (P :: *PadRamifPgon*, n :: *RngIntElt*, i :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -146,7 +146,7 @@ J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 {:.intrinsic}
 
 
-<a id="vbinbps"></a><a id="vbinbps--PadRamifPgon--RngIntElt--RngIntElt"></a><a id="vbinbps--PadRamifPgon--etc"></a>
+<a id="vbinbps"></a><a id="vbinbps--PadRamifPgon--etc"></a><a id="vbinbps--PadRamifPgon--RngIntElt--RngIntElt"></a>
 > **vbinbps** (P :: *PadRamifPgon*, j :: *RngIntElt*, i :: *RngIntElt*)
 > 
 > -> *RngIntElt*
@@ -180,7 +180,7 @@ A polygon which satisfies the Ore, Congruence and Bounding conditions is called 
 
 We provide intrinsics to check for validity, semivalidity, and the 5 individual conditions. Each intrinsic also has a version with a leading underscore; this version does not cache its answer, but does provide more information in the case of failure.
 
-<a id="IsValid--PadRamifPgon"></a><a id="IsValid"></a>
+<a id="IsValid"></a><a id="IsValid--PadRamifPgon"></a>
 > **IsValid** (P :: *PadRamifPgon*)
 > 
 > -> *BoolElt*
@@ -190,7 +190,7 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 **Parameters**
 - `Residues := true`: Only checks the residues (if they are assigned) when this is true
 
-<a id="IsSemivalid--PadRamifPgon"></a><a id="IsSemivalid"></a>
+<a id="IsSemivalid"></a><a id="IsSemivalid--PadRamifPgon"></a>
 > **IsSemivalid** (P :: *PadRamifPgon*)
 > 
 > -> *BoolElt*
@@ -206,7 +206,7 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 {:.intrinsic}
 
 
-<a id="SatisfiesTameCondition--PadRamifPgon"></a><a id="SatisfiesTameCondition"></a>
+<a id="SatisfiesTameCondition"></a><a id="SatisfiesTameCondition--PadRamifPgon"></a>
 > **SatisfiesTameCondition** (P :: *PadRamifPgon*)
 > 
 > -> *BoolElt*
@@ -230,7 +230,7 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 {:.intrinsic}
 
 
-<a id="SatisfiesCongruenceCondition--PadRamifPgon"></a><a id="SatisfiesCongruenceCondition"></a>
+<a id="SatisfiesCongruenceCondition"></a><a id="SatisfiesCongruenceCondition--PadRamifPgon"></a>
 > **SatisfiesCongruenceCondition** (P :: *PadRamifPgon*)
 > 
 > -> *BoolElt*
@@ -246,7 +246,7 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 {:.intrinsic}
 
 
-<a id="SatisfiesMissingCondition--PadRamifPgon"></a><a id="SatisfiesMissingCondition"></a>
+<a id="SatisfiesMissingCondition"></a><a id="SatisfiesMissingCondition--PadRamifPgon"></a>
 > **SatisfiesMissingCondition** (P :: *PadRamifPgon*)
 > 
 > -> *BoolElt*
@@ -257,7 +257,7 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 ## Residues
 {:#residues}
 
-<a id="IsValidResidues"></a><a id="IsValidResidues--PadRamifPgon--seq-FldFinElt"></a><a id="IsValidResidues--PadRamifPgon--etc"></a>
+<a id="IsValidResidues"></a><a id="IsValidResidues--PadRamifPgon--etc"></a><a id="IsValidResidues--PadRamifPgon--seq-FldFinElt"></a>
 > **IsValidResidues** (P :: *PadRamifPgon*, rs :: [*FldFinElt*])
 > 
 > -> *BoolElt*
@@ -278,7 +278,7 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 ## Enumeration
 {:#enumeration}
 
-<a id="AllRamificationPolygons"></a><a id="AllRamificationPolygons--FldPadTmpl--RngIntElt"></a><a id="AllRamificationPolygons--FldPadTmpl--etc"></a>
+<a id="AllRamificationPolygons"></a><a id="AllRamificationPolygons--FldPadTmpl--etc"></a><a id="AllRamificationPolygons--FldPadTmpl--RngIntElt"></a>
 > **AllRamificationPolygons** (F :: *FldPadTmpl*, n :: *RngIntElt*)
 > 
 > -> []
