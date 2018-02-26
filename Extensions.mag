@@ -512,7 +512,7 @@ end intrinsic;
 
 intrinsic OrePossibilities(F :: FldPadTmpl, n :: RngIntElt, s :: RngIntElt) -> BoolElt
   {The possible J such that `(F,n,J,s)` satisfy Ore's conditions.}
-  return [J : J in [0..n * AbsoluteRamificationDegree(F) * BinomialValuation(n, Prime(F)^s, Prime(F))]];
+  return [J : J in [0..n * AbsoluteRamificationDegree(F) * BinomialValuation(n, Prime(F)^s, Prime(F))] | OreConditions(F,n,J,s)];
 end intrinsic;
 
 intrinsic OrePossibilities(F :: FldPadTmpl, n :: RngIntElt) -> []
