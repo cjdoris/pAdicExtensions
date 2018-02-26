@@ -84,8 +84,8 @@ with coefficients
 >
 > // Find out which discriminants are possible
 > tK := TemplatepAdicField(K);
-> OrePossibilities(tK, 8);                      
-[ 0, 1, 2, 3, 4, ..., 42, 43, 44, 45, 46, 47, 48 ]
+> OrePossibilities(tK, 8);
+[ 1, 3, 5, 7, 9, 11, 13, 15, ..., 42, 43, 44, 45, 46, 47, 48 ]
 >
 > // Generate all ramification polygons with discriminant 45, and with all possible residues and CC-residues
 > Ps := AllRamificationPolygons(tK, 8 : J0:=45, WithCCResidues, Classes);
