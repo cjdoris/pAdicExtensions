@@ -48,7 +48,7 @@ A "template" p-adic field with data given by the parameters.
 > {:.ret}
 {:.intrinsic}
 
-The "template" prime p-adic field `Q_p`. Equivalent to `TemplatepAdicField(pAdicField(p)).
+The "template" prime `p`-adic field `Q_p`. Equivalent to `TemplatepAdicField(pAdicField(p))`.
 
 
 <a id="TemplatepAdicField-3"></a><a id="TemplatepAdicField--FldPad"></a>
@@ -58,7 +58,7 @@ The "template" prime p-adic field `Q_p`. Equivalent to `TemplatepAdicField(pAdic
 > {:.ret}
 {:.intrinsic}
 
-A "template" version of K.
+A "template" version of `K`.
 
 
 ## Invariants
@@ -71,7 +71,7 @@ A "template" version of K.
 > {:.ret}
 {:.intrinsic}
 
-True if the prime of F is known.
+True if the prime of `F` is known.
 
 
 <a id="Prime"></a><a id="Prime--FldPadTmpl"></a>
@@ -97,9 +97,9 @@ The prime `p`.
 
 True if the absolute degree/inertia degree/ramification degree is known.
 
-True if the absolute inertia degree of F is known.
 
-True if the absolute ramification degree of F is known.
+
+
 
 
 <a id="AbsoluteDegree"></a><a id="AbsoluteDegree--FldPadTmpl"></a><a id="AbsoluteInertiaDegree"></a><a id="AbsoluteInertiaDegree--FldPadTmpl"></a><a id="AbsoluteRamificationDegree"></a><a id="AbsoluteRamificationDegree--FldPadTmpl"></a>
@@ -115,9 +115,9 @@ True if the absolute ramification degree of F is known.
 
 Absolute degree, inertia degree and ramification degree.
 
-Absolute inertia degree.
 
-Absolute ramification degree.
+
+
 
 
 <a id="HasUniformizerResidue"></a><a id="HasUniformizerResidue--FldPadTmpl"></a>
@@ -127,7 +127,7 @@ Absolute ramification degree.
 > {:.ret}
 {:.intrinsic}
 
-True if the uniformizer residue of F is known.
+True if the uniformizer residue of `F` is known.
 
 
 <a id="UniformizerResidue"></a><a id="UniformizerResidue--FldPadTmpl"></a>
@@ -147,7 +147,7 @@ Uniformizer residue, the residue class of pi^e/p where pi is a uniformizer.
 > {:.ret}
 {:.intrinsic}
 
-True if the residue class field of F is known. If so, returns it and the quotient map.
+True if the residue class field of `F` is known. If so, returns it and the quotient map.
 
 
 <a id="ResidueClassField"></a><a id="ResidueClassField--FldPadTmpl"></a>
@@ -167,7 +167,7 @@ Residue class field and the quotient map.
 > {:.ret}
 {:.intrinsic}
 
-True if F is associated to an actual field. If so, also returns the it and the embedding into it.
+True if `F` is associated to an actual field. If so, also returns the it and the embedding into it.
 
 
 <a id="Actual"></a><a id="Actual--FldPadTmpl"></a>
@@ -177,7 +177,7 @@ True if F is associated to an actual field. If so, also returns the it and the e
 > {:.ret}
 {:.intrinsic}
 
-The actual field associated to F, if there is one.
+The actual field associated to `F`, if there is one.
 
 
 <a id="Embedding"></a><a id="Embedding--FldPadTmpl--etc"></a><a id="Embedding--FldPadTmpl--FldPad"></a>
@@ -187,7 +187,7 @@ The actual field associated to F, if there is one.
 > {:.ret}
 {:.intrinsic}
 
-The embedding of F into A, which must share the same residue class field.
+The embedding of `F` into `A`, which must share the same residue class field.
 
 
 <a id="Embedding-2"></a><a id="Embedding--FldPadTmpl--etc-2"></a><a id="Embedding--FldPadTmpl--FldNum--Map"></a>
@@ -216,7 +216,7 @@ The embedding of F into A, which must share the same residue class field.
 > {:.ret}
 {:.intrinsic}
 
-True if there exists an extension of degree n of F whose ramification polygon has a point `(p^s, J)`.
+True if there exists an extension of degree `n` of `F` whose ramification polygon has a point `(p^s, J)`.
 
 
 <a id="OreConditions-2"></a><a id="OreConditions--FldPadTmpl--etc-2"></a><a id="OreConditions--FldPadTmpl--RngIntElt--RngIntElt"></a>
@@ -226,7 +226,7 @@ True if there exists an extension of degree n of F whose ramification polygon ha
 > {:.ret}
 {:.intrinsic}
 
-True if there exists an extension of degree n and discriminant valuation `n+J-1` of F.
+True if there exists an extension of degree `n` and discriminant valuation `n+J-1` of `F`.
 
 
 <a id="OrePossibilities"></a><a id="OrePossibilities--FldPadTmpl--etc"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt--RngIntElt"></a>
@@ -236,7 +236,7 @@ True if there exists an extension of degree n and discriminant valuation `n+J-1`
 > {:.ret}
 {:.intrinsic}
 
-The possible J such that `(F,n,J,s)` satisfy Ore's conditions.
+The possible J such that `(F,n,J,s)` satisfy Ore'`s` conditions.
 
 
 <a id="OrePossibilities-2"></a><a id="OrePossibilities--FldPadTmpl--etc-2"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt"></a>
@@ -279,7 +279,7 @@ Allows coercion into `F` any of the following:
 > {:.ret}
 {:.intrinsic}
 
-The field containing x.
+The field containing `x`.
 
 
 <a id="IsZero"></a><a id="IsZero--FldPadTmplElt"></a>
@@ -289,7 +289,7 @@ The field containing x.
 > {:.ret}
 {:.intrinsic}
 
-True iff x is zero.
+True iff `x` is zero.
 
 
 <a id="Valuation"></a><a id="Valuation--FldPadTmplElt"></a>
@@ -299,7 +299,7 @@ True iff x is zero.
 > {:.ret}
 {:.intrinsic}
 
-The valuation of x.
+The valuation of `x`.
 
 
 <a id="Actual-2"></a><a id="Actual--FldPadTmplElt"></a>
@@ -309,7 +309,7 @@ The valuation of x.
 > {:.ret}
 {:.intrinsic}
 
-Coerces x into the actual field.
+Coerces `x` into the actual field.
 
 
 ## Polynomial rings
@@ -322,7 +322,7 @@ Coerces x into the actual field.
 > {:.ret}
 {:.intrinsic}
 
-The univariate polynomial ring over F.
+The univariate polynomial ring over `F`.
 
 
 <a id="BaseRing"></a><a id="BaseRing--RngUPol_FldPadTmpl"></a>
@@ -342,7 +342,7 @@ The base ring.
 > {:.ret}
 {:.intrinsic}
 
-True if R has an actual ring.
+True if `R` has an actual ring.
 
 
 <a id="Actual-3"></a><a id="Actual--RngUPol_FldPadTmpl"></a>
@@ -352,7 +352,7 @@ True if R has an actual ring.
 > {:.ret}
 {:.intrinsic}
 
-The actual ring of R.
+The actual ring of `R`.
 
 
 <a id="Embedding-3"></a><a id="Embedding--RngUPol_FldPadTmpl--etc"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad--Map"></a>
@@ -362,7 +362,7 @@ The actual ring of R.
 > {:.ret}
 {:.intrinsic}
 
-The embedding of R into A extending the embedding m of base rings.
+The embedding of `R` into `A` extending the embedding `m` of base rings.
 
 
 <a id="Embedding-4"></a><a id="Embedding--RngUPol_FldPadTmpl--etc-2"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad"></a>
@@ -372,7 +372,7 @@ The embedding of R into A extending the embedding m of base rings.
 > {:.ret}
 {:.intrinsic}
 
-The embedding of R into A.
+The embedding of `R` into `A`.
 
 
 ## Polynomials
@@ -399,7 +399,7 @@ We can coerce the following into `R`:
 > {:.ret}
 {:.intrinsic}
 
-The ring containing f.
+The ring containing `f`.
 
 
 <a id="BaseRing-2"></a><a id="BaseRing--RngUPolElt_FldPadTmpl"></a>
@@ -409,7 +409,7 @@ The ring containing f.
 > {:.ret}
 {:.intrinsic}
 
-The base ring of f.
+The base ring of `f`.
 
 
 <a id="Coefficients"></a><a id="Coefficients--RngUPolElt_FldPadTmpl"></a>
@@ -419,7 +419,7 @@ The base ring of f.
 > {:.ret}
 {:.intrinsic}
 
-The coefficients of f.
+The coefficients of `f`.
 
 
 <a id="Degree"></a><a id="Degree--RngUPolElt_FldPadTmpl"></a>
@@ -439,7 +439,7 @@ The degree.
 > {:.ret}
 {:.intrinsic}
 
-True iff f is zero.
+True iff `f` is zero.
 
 
 <a id="Actual-4"></a><a id="Actual--RngUPolElt_FldPadTmpl"></a>
@@ -459,7 +459,7 @@ Coerces x into the actual ring.
 > {:.ret}
 {:.intrinsic}
 
-The extension of K defined by f, with the polynomial embedding m.
+The extension of `K` defined by `f`, with the polynomial embedding `m`.
 
 
 <a id="Extension-2"></a><a id="Extension--FldPad--etc-2"></a><a id="Extension--FldPad--RngUPolElt_FldPadTmpl"></a>
@@ -469,7 +469,7 @@ The extension of K defined by f, with the polynomial embedding m.
 > {:.ret}
 {:.intrinsic}
 
-The extension of K defined by f.
+The extension of `K` defined by `f`.
 
 
 <a id="ActualExtension"></a><a id="ActualExtension--RngUPolElt_FldPadTmpl"></a>
@@ -479,6 +479,6 @@ The extension of K defined by f.
 > {:.ret}
 {:.intrinsic}
 
-The extension of the actual field defined by f.
+The extension of the actual field defined by `f`.
 
 

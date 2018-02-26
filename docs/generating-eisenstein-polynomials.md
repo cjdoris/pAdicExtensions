@@ -17,7 +17,7 @@
 > {:.ret}
 {:.intrinsic}
 
-Template for Eisenstein polynomials of degree n, discriminant valuation `n+J-1` over F.
+Template for Eisenstein polynomials of degree `n`, discriminant valuation `n+J-1` over `F`.
 
 
 <a id="TemplateForEisensteinPolynomials"></a><a id="TemplateForEisensteinPolynomials--PadRamifPgon"></a>
@@ -60,7 +60,7 @@ The number of elements in the template.
 > {:.ret}
 {:.intrinsic}
 
-The elements of T as a sequence.
+The elements of `T` as a sequence.
 
 
 
@@ -77,7 +77,7 @@ The elements of T as a sequence.
 > {:.ret}
 {:.intrinsic}
 
-A random element of T.
+A random element of `T`.
 
 
 
@@ -91,7 +91,7 @@ A random element of T.
 > {:.ret}
 {:.intrinsic}
 
-A set of indices for elements of T. This is quick to generate and can be iterated over.
+A set of indices for elements of `T`. This is quick to generate and can be iterated over.
 
 
 
@@ -108,7 +108,7 @@ A set of indices for elements of T. This is quick to generate and can be iterate
 > {:.ret}
 {:.intrinsic}
 
-Gets the element of T at index idx (which should be an element of the index set).
+Gets the element of `T` at index `idx` (which should be an element of the index set).
 
 
 

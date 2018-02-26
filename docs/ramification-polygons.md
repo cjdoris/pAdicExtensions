@@ -27,7 +27,7 @@ Additionally, we can assign a single non-zero element of the residue class field
 > {:.ret}
 {:.intrinsic}
 
-True if vs can be made into a ramification polygon over F. vs must be a list of `<x,y>` pairs of integers defining the points.
+True if `vs` can be made into a ramification polygon over `F`. `vs` must be a list of `<x,y>` pairs of integers defining the points.
 
 
 <a id="RamificationPolygon"></a><a id="RamificationPolygon--FldPadTmpl--etc"></a><a id="RamificationPolygon--FldPadTmpl--seq"></a>
@@ -37,7 +37,7 @@ True if vs can be made into a ramification polygon over F. vs must be a list of 
 > {:.ret}
 {:.intrinsic}
 
-A ramification polygon over F.
+A ramification polygon over `F`.
 
 
 <a id="Copy"></a><a id="Copy--PadRamifPgon"></a>
@@ -47,7 +47,7 @@ A ramification polygon over F.
 > {:.ret}
 {:.intrinsic}
 
-Makes a copy of P.
+Makes a copy of `P`.
 
 
 ## Invariants
@@ -72,15 +72,15 @@ Makes a copy of P.
 
 n (degree), p (prime), e (absolute ramification degree), u (number of wild faces), x_u=p^s_u (wild degree)
 
-p
 
-e
 
-u
 
-s_u
 
-x_u
+
+
+
+
+
 
 
 <a id="J"></a><a id="J--PadRamifPgon--etc"></a><a id="J--PadRamifPgon--RngIntElt"></a><a id="a"></a><a id="a--PadRamifPgon--etc"></a><a id="a--PadRamifPgon--RngIntElt"></a><a id="b"></a><a id="b--PadRamifPgon--etc"></a><a id="b--PadRamifPgon--RngIntElt"></a><a id="s"></a><a id="s--PadRamifPgon--etc"></a><a id="s--PadRamifPgon--RngIntElt"></a><a id="x"></a><a id="x--PadRamifPgon--etc"></a><a id="x--PadRamifPgon--RngIntElt"></a>
@@ -100,13 +100,13 @@ x_u
 
 J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
 
-a_i
 
-b_i
 
-s_i
 
-p^s_i
+
+
+
+
 
 
 ## Valuations of binomials
@@ -119,7 +119,7 @@ p^s_i
 > {:.ret}
 {:.intrinsic}
 
-Valuation of n choose k.
+Valuation of `n` choose `k`.
 
 
 <a id="vbinp"></a><a id="vbinp--PadRamifPgon--etc"></a><a id="vbinp--PadRamifPgon--RngIntElt--RngIntElt"></a>
@@ -129,7 +129,7 @@ Valuation of n choose k.
 > {:.ret}
 {:.intrinsic}
 
-Valuation of n choose `p^i`.
+Valuation of `n` choose `p^i`.
 
 
 <a id="vbinbp"></a><a id="vbinbp--PadRamifPgon--etc"></a><a id="vbinbp--PadRamifPgon--RngIntElt--RngIntElt"></a>
@@ -149,7 +149,7 @@ Valuation of `b_j` choose `p^i`.
 > {:.ret}
 {:.intrinsic}
 
-The valuation of n choose `p^s_i`.
+The valuation of `n` choose `p^s_i`.
 
 
 <a id="vbinnps"></a><a id="vbinnps--PadRamifPgon--etc"></a><a id="vbinnps--PadRamifPgon--RngIntElt"></a>
@@ -189,7 +189,7 @@ The valuation of `b_i choose p^s_i`.
 > {:.ret}
 {:.intrinsic}
 
-The residue class of n choose k shifted down to a unit.
+The residue class of `n` choose `k` shifted down to a unit.
 
 
 ## Validity
@@ -209,7 +209,7 @@ We provide intrinsics to check for validity, semivalidity, and the 5 individual 
 > {:.ret}
 {:.intrinsic}
 
-True if P corresponds to an actual extension.
+True if `P` corresponds to an actual extension.
 
 **Parameters**
 - `Residues := true`: Only checks the residues (if they are assigned) when this is true
@@ -221,7 +221,7 @@ True if P corresponds to an actual extension.
 > {:.ret}
 {:.intrinsic}
 
-True if P satisfies the Ore, congruence and bounding conditions, which are necessary (but not sufficient) for being valid.
+True if `P` satisfies the Ore, congruence and bounding conditions, which are necessary (but not sufficient) for being valid.
 
 
 <a id="SatisfiesOreCondition"></a><a id="SatisfiesOreCondition--PadRamifPgon"></a>
@@ -231,7 +231,7 @@ True if P satisfies the Ore, congruence and bounding conditions, which are neces
 > {:.ret}
 {:.intrinsic}
 
-True iff P satisfies the Ore conditions: `b_t=0 => a_t eq vB(n,p^s_t)`, `b_t>0 => B(b_t,p^s_t) le a_t le B(n,p^s_t)-1`.
+True iff `P` satisfies the Ore conditions: `b_t=0 => a_t eq vB(n,p^s_t)`, `b_t>0 => B(b_t,p^s_t) le a_t le B(n,p^s_t)-1`.
 
 
 <a id="SatisfiesTameCondition"></a><a id="SatisfiesTameCondition--PadRamifPgon"></a>
@@ -241,7 +241,7 @@ True iff P satisfies the Ore conditions: `b_t=0 => a_t eq vB(n,p^s_t)`, `b_t>0 =
 > {:.ret}
 {:.intrinsic}
 
-True iff P satisfies the tame conditions: `p^s_u le j le n => (j,0) in P iff B(n,j)=0`.
+True iff `P` satisfies the tame conditions: `p^s_u le j le n => (j,0) in P iff B(n,j)=0`.
 
 
 <a id="CorrectTamePoints"></a><a id="CorrectTamePoints--PadRamifPgon"></a>
@@ -251,7 +251,7 @@ True iff P satisfies the tame conditions: `p^s_u le j le n => (j,0) in P iff B(n
 > {:.ret}
 {:.intrinsic}
 
-The correct tame points for a valid P of this degree.
+The correct tame points for a valid `P` of this degree.
 
 
 <a id="WithCorrectTamePoints"></a><a id="WithCorrectTamePoints--PadRamifPgon"></a>
@@ -261,7 +261,7 @@ The correct tame points for a valid P of this degree.
 > {:.ret}
 {:.intrinsic}
 
-A copy of P with the correct tame points.
+A copy of `P` with the correct tame points.
 
 
 <a id="SatisfiesCongruenceCondition"></a><a id="SatisfiesCongruenceCondition--PadRamifPgon"></a>
@@ -271,7 +271,7 @@ A copy of P with the correct tame points.
 > {:.ret}
 {:.intrinsic}
 
-True if P satisfies the congruence conditions: `b_t = b_r => a_t - B(b_t,p^s_t) = a_r - B(b_r,p^s_r)`.
+True if `P` satisfies the congruence conditions: `b_t = b_r => a_t - B(b_t,p^s_t) = a_r - B(b_r,p^s_r)`.
 
 
 <a id="SatisfiesBoundingCondition"></a><a id="SatisfiesBoundingCondition--PadRamifPgon"></a>
@@ -281,7 +281,7 @@ True if P satisfies the congruence conditions: `b_t = b_r => a_t - B(b_t,p^s_t) 
 > {:.ret}
 {:.intrinsic}
 
-True if P satisfies the bounding conditions: `b_r eq 0, p^s_r le b_t => a_t ge B(n,p^s_r) - B(b_t,p^s_r) + B(b_t,p^s_t)` and `b_r ne 0, p^s_r le b_t => a_t ge a_r - B(b_t,p^s_r) + B(b_t,p^s_t) + 1[b_t lt b_r]`.
+True if `P` satisfies the bounding conditions: `b_r eq 0, p^s_r le b_t => a_t ge B(n,p^s_r) - B(b_t,p^s_r) + B(b_t,p^s_t)` and `b_r ne 0, p^s_r le b_t => a_t ge a_r - B(b_t,p^s_r) + B(b_t,p^s_t) + 1[b_t lt b_r]`.
 
 
 <a id="SatisfiesMissingCondition"></a><a id="SatisfiesMissingCondition--PadRamifPgon"></a>
@@ -291,7 +291,7 @@ True if P satisfies the bounding conditions: `b_r eq 0, p^s_r le b_t => a_t ge B
 > {:.ret}
 {:.intrinsic}
 
-True if P satisfies the "missing" conditions: `s_t lt s lt s_(t+1) => Floor(X/n) le B(n,p^s) - 1` and `s_t lt s_(t+1), p^s le b_r => a_r ge Floor((X-b_r)/n) + B(b_r,p^s_r) - B(b_r,p^s) + 1` where `X = J_t + (J_(t+1)-J_t)*(x_(t+1)-x_t)/(p^s-x_t)`.
+True if `P` satisfies the "missing" conditions: `s_t lt s lt s_(t+1) => Floor(X/n) le B(n,p^s) - 1` and `s_t lt s_(t+1), p^s le b_r => a_r ge Floor((X-b_r)/n) + B(b_r,p^s_r) - B(b_r,p^s) + 1` where `X = J_t + (J_(t+1)-J_t)*(x_(t+1)-x_t)/(p^s-x_t)`.
 
 
 ## Residues
@@ -304,7 +304,7 @@ True if P satisfies the "missing" conditions: `s_t lt s lt s_(t+1) => Floor(X/n)
 > {:.ret}
 {:.intrinsic}
 
-True if rs is a valid assignment of residues to P, i.e. if there exists an Eisenstein polynomial with these residues. When true, also returns a polynomial whose roots are the possible leading p-adic coefficients of the constant coefficient.
+True if `rs` is a valid assignment of residues to `P`, i.e. if there exists an Eisenstein polynomial with these residues. When true, also returns a polynomial whose roots are the possible leading p-adic coefficients of the constant coefficient.
 
 **Parameters**
 - `Partial := false`: When true, rs may be a partial assignment (i.e. have some undefined entries) and the check becomes necessary but not sufficient for exisence.
@@ -316,7 +316,7 @@ True if rs is a valid assignment of residues to P, i.e. if there exists an Eisen
 > {:.ret}
 {:.intrinsic}
 
-The correct tame residues of P, between `x_u` and `n`.
+The correct tame residues of `P`, between `x_u` and `n`.
 
 
 ## Enumeration
@@ -344,7 +344,7 @@ All possible ramification polygons of extensions of `F` of degree `n`.
 > {:.ret}
 {:.intrinsic}
 
-All the residues which are valid for P, paired with the leading coefficient polynomial.
+All the residues which are valid for `P`, paired with the leading coefficient polynomial.
 
 **Parameters**
 - `Classes := false`: When true, only return one per equivalence class.
@@ -356,7 +356,7 @@ All the residues which are valid for P, paired with the leading coefficient poly
 > {:.ret}
 {:.intrinsic}
 
-Copies of P with valid residues attached.
+Copies of `P` with valid residues attached.
 
 **Parameters**
 - `Classes := false`: When true, only return one per equivalence class.
@@ -368,7 +368,7 @@ Copies of P with valid residues attached.
 > {:.ret}
 {:.intrinsic}
 
-All valid CC-residues for P.
+All valid CC-residues for `P`.
 
 **Parameters**
 - `Residues`: When given, use these residues instead of the ones attached to P.
@@ -381,7 +381,7 @@ All valid CC-residues for P.
 > {:.ret}
 {:.intrinsic}
 
-Copies of P with valid CC-residues attached.
+Copies of `P` with valid CC-residues attached.
 
 **Parameters**
 - `Classes := false`: When true, only return one per equivalence class.

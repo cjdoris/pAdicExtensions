@@ -20,7 +20,7 @@ Equivalent to `Floor(Log(b,x))` but avoids any floating point arithmetic.
 > {:.ret}
 {:.intrinsic}
 
-Treating P as a piecewise-linear function, evaluates it at x.
+Treating `P` as a piecewise-linear function, evaluates it at `x`.
 
 
 
@@ -32,7 +32,7 @@ Treating P as a piecewise-linear function, evaluates it at x.
 > {:.ret}
 {:.intrinsic}
 
-The p-adic valuation of `n!` (equivalent to `Valuation(Factorial(n),p)` but more efficient).
+The `p`-adic valuation of `n!` (equivalent to `Valuation(Factorial(n),p)` but more efficient).
 
 
 <a id="BinomialValuation"></a><a id="BinomialValuation--RngIntElt--etc"></a><a id="BinomialValuation--RngIntElt--RngIntElt--RngIntElt"></a>
@@ -42,7 +42,7 @@ The p-adic valuation of `n!` (equivalent to `Valuation(Factorial(n),p)` but more
 > {:.ret}
 {:.intrinsic}
 
-The p-adic valuation of n choose k.
+The `p`-adic valuation of `n` choose `k`.
 
 
 <a id="UnitFactorial"></a><a id="UnitFactorial--FldFin--etc"></a><a id="UnitFactorial--FldFin--RngIntElt"></a>
@@ -52,7 +52,7 @@ The p-adic valuation of n choose k.
 > {:.ret}
 {:.intrinsic}
 
-The product of the integers up to n which are units in F. By Wilson's formula, if `n=kn+r` this is `(-1)^k * r!`.
+The product of the integers up to `n` which are units in `F`. By Wilson's formula, if `n=kn+r` this is `(-1)^k * r!`.
 
 
 <a id="ShiftedFactorial"></a><a id="ShiftedFactorial--FldFin--etc"></a><a id="ShiftedFactorial--FldFin--RngIntElt"></a>
@@ -62,7 +62,7 @@ The product of the integers up to n which are units in F. By Wilson's formula, i
 > {:.ret}
 {:.intrinsic}
 
-The product of the integers up to n shifted down to be units of F. This is the product of `UnitFactorial(n div p^i)` for all `i`.
+The product of the integers up to `n` shifted down to be units of `F`. This is the product of `UnitFactorial(n div p^i)` for all `i`.
 
 
 <a id="ShiftedBinomial"></a><a id="ShiftedBinomial--FldFin--etc"></a><a id="ShiftedBinomial--FldFin--RngIntElt--RngIntElt"></a>
@@ -72,6 +72,6 @@ The product of the integers up to n shifted down to be units of F. This is the p
 > {:.ret}
 {:.intrinsic}
 
-The binomial coefficient n choose k shifted down to be a unit of F.
+The binomial coefficient `n` choose `k` shifted down to be a unit of `F`.
 
 
