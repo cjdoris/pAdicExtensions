@@ -166,6 +166,22 @@ Absolute degree, inertia degree and ramification degree.
 {:.intrinsic}
 
 
+<a id="Embedding-2"></a><a id="Embedding--FldPadTmpl--etc-2"></a><a id="Embedding--FldPadTmpl--FldNum--Map"></a>
+> **Embedding** (F :: *FldPadTmpl*, A :: *FldNum*, e :: *Map*)
+> 
+> -> *Map*
+> {:.ret}
+{:.intrinsic}
+
+
+**Note:** The embedding has an inverse defined, but it will enter an infinite loop unless the input can be represented as a finite polynomial in the uniformizer with coefficients representatives of the residue class field (i.`e`. the preimages of the residue map).
+
+
+**Parameters**
+- `Place`: When given, this must be the prime ideal of A corresponding to the completion. By default it is computed from e, but the embedding depends on its generators, so you may get a nicer embedding using the original prime.
+- `ResidueMap`: When given, this must be the residue map from the integers of A to the residue class field of F. By default it is computed from Place.
+- `Uniformizer`: When given, this must be a uniformizing element for the prime. By default it is computed from Place.
+
 ## Ore's conditions
 {:#ores-conditions}
 
@@ -291,7 +307,7 @@ Allows coercion into `F` any of the following:
 {:.intrinsic}
 
 
-<a id="Embedding-2"></a><a id="Embedding--RngUPol_FldPadTmpl--etc"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad--Map"></a>
+<a id="Embedding-3"></a><a id="Embedding--RngUPol_FldPadTmpl--etc"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad--Map"></a>
 > **Embedding** (R :: *RngUPol_FldPadTmpl*, A :: *RngUPol*[*FldPad*], m :: *Map*)
 > 
 > -> *Map*
@@ -299,7 +315,7 @@ Allows coercion into `F` any of the following:
 {:.intrinsic}
 
 
-<a id="Embedding-3"></a><a id="Embedding--RngUPol_FldPadTmpl--etc-2"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad"></a>
+<a id="Embedding-4"></a><a id="Embedding--RngUPol_FldPadTmpl--etc-2"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad"></a>
 > **Embedding** (R :: *RngUPol_FldPadTmpl*, A :: *RngUPol*[*FldPad*])
 > 
 > -> *Map*
