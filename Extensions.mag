@@ -186,6 +186,9 @@ intrinsic TemplatepAdicField(:Prime:=false, Degree:=false, InertiaDegree:=false,
     RamificationDegree := 1;
     InertiaDegree := 1;
   end if;
+  if Prime cmpne false and RamificationDegree cmpne false and RamificationDegree eq 1 and InertiaDegree cmpne false then
+    return TemplatepAdicField(Degree eq 1 select pAdicField(Prime) else ext<pAdicField(Prime) | Degree>);
+  end if;
   F := New(FldPadTmpl);
   if Prime cmpne false then
     F`prime := Prime;
@@ -206,8 +209,9 @@ intrinsic TemplatepAdicField(:Prime:=false, Degree:=false, InertiaDegree:=false,
 end intrinsic;
 
 intrinsic TemplatepAdicField(p :: RngIntElt) -> FldPadTmpl
-  {The "template" prime p-adic field `Q_p`.}
-  return TemplatepAdicField(: Prime:=p, Degree:=1);
+  {The "template" prime p-adic field `Q_p`. Equivalent to `TemplatepAdicField(pAdicField(p)).}
+  require p gt 0 and IsPrime(p): "p must be prime";
+  return TemplatepAdicField(pAdicField(p));
 end intrinsic;
 
 intrinsic TemplatepAdicField(K :: FldPad) -> FldPadTmpl
@@ -736,6 +740,32 @@ intrinsic Actual(f :: RngUPolElt_FldPadTmpl) -> RngUPolElt
   ok, A, m := HasActual(Parent(f));
   require ok: A;
   return f @ m;
+end intrinsic;
+
+intrinsic Extension(K :: FldPad, f :: RngUPolElt_FldPadTmpl, m :: Map) -> FldPad
+  {The extension of K defined by f, with the polynomial embedding m.}
+  require Domain(m) eq Parent(f) and Type(Codomain(m)) eq RngUPol and BaseRing(Codomain(m)) eq K: "m must map polynomials over the base ring of f to polynomials over K";
+  if Precision(K) eq Infinity() then
+    function mf(k)
+      K2 := K;
+      K2`DefaultPrecision := k;
+      return m(f);
+    end function;
+    return ext<K | map<Z -> Codomain(m) | k :-> mf(k)>>;
+  else
+    return ext<K | m(f)>;
+  end if;
+end intrinsic;
+
+intrinsic Extension(K :: FldPad, f :: RngUPolElt_FldPadTmpl) -> FldPad
+  {The extension of K defined by f.}
+  return Extension(K, f, Embedding(Parent(f), PolynomialRing(K)));
+end intrinsic;
+
+intrinsic ActualExtension(f :: RngUPolElt_FldPadTmpl) -> FldPad
+  {The extension of the actual field defined by f.}
+  A, m := Actual(Parent(f));
+  return Extension(BaseRing(A), f, m);
 end intrinsic;
 
 ///# Ramification polygons
