@@ -2,26 +2,42 @@
 {:#template-p-adic-fields}
 
 
+A "template" p-adic field represents a p-adic field K with only partial information known, such as its prime and absolute degree. For example, the number of extensions of K of a given degree d only depends on d, p, and the absolute inertia and ramification degrees, and so it is useful to have a representation of a field with such limited information.
+
+Currently, the partial information we support is:
+- The prime, `p`
+- The absolute degree, `(K:Q_p)`
+- The absolute inertia degree, `f(K:Q_p)`
+- The absolute ramification degree, `e(K:Q_p)`
+- The "uniformizer residue class", which is `pi^e/p` where `pi` is a uniformizer; this is well-defined up to a multiple by a `e`th power
+- The actual field `K`, as a standard `FldPad` such as is returned by `pAdicField`.
+
 
 **Contents**
 * [Creation](#creation)
-* [Extensions](#extensions)
 * [Invariants](#invariants)
-* [Actual field](#actual-field)
 * [Ore's conditions](#ores-conditions)
+* [Elements](#elements)
+* [Polynomial rings](#polynomial-rings)
+* [Polynomials](#polynomials)
 
 ## Creation
 {:#creation}
 
-<a id="TemplatepAdicField--RngIntElt--RngIntElt--RngIntElt"></a><a id="TemplatepAdicField"></a><a id="TemplatepAdicField--RngIntElt--etc"></a>
-> **TemplatepAdicField** (p :: *RngIntElt*, f :: *RngIntElt*, e :: *RngIntElt*)
+<a id="TemplatepAdicField"></a><a id="TemplatepAdicField--noargs"></a>
+> **TemplatepAdicField** ()
 > 
 > -> *FldPadTmpl*
 > {:.ret}
 {:.intrinsic}
 
-A "template" `p`-adic field with residue degree `f` and ramification degree `e`.
-
+**Parameters**
+- `Prime`
+- `Degree`
+- `InertiaDegree`
+- `RamificationDegree`
+- `UniformizerResidue`
+- `Actual`
 
 <a id="TemplatepAdicField--RngIntElt"></a><a id="TemplatepAdicField-2"></a>
 > **TemplatepAdicField** (p :: *RngIntElt*)
@@ -29,8 +45,6 @@ A "template" `p`-adic field with residue degree `f` and ramification degree `e`.
 > -> *FldPadTmpl*
 > {:.ret}
 {:.intrinsic}
-
-A "template" `p`-adic field.
 
 
 <a id="TemplatepAdicField-3"></a><a id="TemplatepAdicField--FldPad"></a>
@@ -40,34 +54,17 @@ A "template" `p`-adic field.
 > {:.ret}
 {:.intrinsic}
 
-A "template" version of `K`.
-
-
-## Extensions
-{:#extensions}
-
-<a id="UnramifiedExtension--FldPadTmpl--RngIntElt"></a><a id="UnramifiedExtension--FldPadTmpl--etc"></a><a id="UnramifiedExtension"></a>
-> **UnramifiedExtension** (F :: *FldPadTmpl*, n :: *RngIntElt*)
-> 
-> -> *FldPadTmpl*
-> {:.ret}
-{:.intrinsic}
-
-An unramified extension of `F` of degree `n`.
-
-
-<a id="TotallyRamifiedExtension--FldPadTmpl--RngIntElt"></a><a id="TotallyRamifiedExtension--FldPadTmpl--etc"></a><a id="TotallyRamifiedExtension"></a>
-> **TotallyRamifiedExtension** (F :: *FldPadTmpl*, n :: *RngIntElt*)
-> 
-> -> *FldPadTmpl*
-> {:.ret}
-{:.intrinsic}
-
-A totally ramified extension of `F` of degree `n`.
-
 
 ## Invariants
 {:#invariants}
+
+<a id="HasPrime--FldPadTmpl"></a><a id="HasPrime"></a>
+> **HasPrime** (F :: *FldPadTmpl*)
+> 
+> -> *BoolElt*, *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
 
 <a id="Prime"></a><a id="Prime--FldPadTmpl"></a>
 > **Prime** (F :: *FldPadTmpl*)
@@ -76,10 +73,26 @@ A totally ramified extension of `F` of degree `n`.
 > {:.ret}
 {:.intrinsic}
 
-The prime `p`.
+
+<a id="HasAbsoluteDegree"></a><a id="HasAbsoluteRamificationDegree"></a><a id="HasAbsoluteInertiaDegree--FldPadTmpl"></a><a id="HasAbsoluteDegree--FldPadTmpl"></a><a id="HasAbsoluteInertiaDegree"></a><a id="HasAbsoluteRamificationDegree--FldPadTmpl"></a>
+> **HasAbsoluteDegree** (F :: *FldPadTmpl*)
+> 
+> **HasAbsoluteInertiaDegree** (F :: *FldPadTmpl*)
+> 
+> **HasAbsoluteRamificationDegree** (F :: *FldPadTmpl*)
+> 
+> -> *BoolElt*, *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+True if the absolute degree/inertia degree/ramification degree is known.
 
 
-<a id="AbsoluteInertiaDegree"></a><a id="AbsoluteDegree--FldPadTmpl"></a><a id="AbsoluteDegree"></a><a id="AbsoluteRamificationDegree--FldPadTmpl"></a><a id="AbsoluteRamificationDegree"></a><a id="AbsoluteInertiaDegree--FldPadTmpl"></a>
+
+
+
+
+<a id="AbsoluteInertiaDegree--FldPadTmpl"></a><a id="AbsoluteInertiaDegree"></a><a id="AbsoluteRamificationDegree--FldPadTmpl"></a><a id="AbsoluteDegree--FldPadTmpl"></a><a id="AbsoluteDegree"></a><a id="AbsoluteRamificationDegree"></a>
 > **AbsoluteDegree** (F :: *FldPadTmpl*)
 > 
 > **AbsoluteInertiaDegree** (F :: *FldPadTmpl*)
@@ -90,80 +103,94 @@ The prime `p`.
 > {:.ret}
 {:.intrinsic}
 
-Absolute degree, inertia degree and ramification degree
+Absolute degree, inertia degree and ramification degree.
 
 
 
 
 
 
-<a id="ResidueClassField--FldPadTmpl"></a><a id="ResidueClassField"></a>
+<a id="HasUniformizerResidue"></a><a id="HasUniformizerResidue--FldPadTmpl"></a>
+> **HasUniformizerResidue** (F :: *FldPadTmpl*)
+> 
+> -> *BoolElt*, *FldFinElt*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="UniformizerResidue--FldPadTmpl"></a><a id="UniformizerResidue"></a>
+> **UniformizerResidue** (F :: *FldPadTmpl*)
+> 
+> -> *FldFinElt*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="HasResidueClassField"></a><a id="HasResidueClassField--FldPadTmpl"></a>
+> **HasResidueClassField** (F :: *FldPadTmpl*)
+> 
+> -> *BoolElt*, *FldFin*, *Map*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="ResidueClassField"></a><a id="ResidueClassField--FldPadTmpl"></a>
 > **ResidueClassField** (F :: *FldPadTmpl*)
 > 
 > -> *FldFin*, *Map*
 > {:.ret}
 {:.intrinsic}
 
-Residue class field. If `F` was created from an actual field, also returns the residue map.
 
-
-## Actual field
-{:#actual-field}
-
-
-If a template field was created from an actual field ([such as this](#TemplatepAdicField--FldPad)) then that field is remembered.
-
-<a id="HasActualField"></a><a id="HasActualField--FldPadTmpl"></a>
-> **HasActualField** (F :: *FldPadTmpl*)
+<a id="HasActual"></a><a id="HasActual--FldPadTmpl"></a>
+> **HasActual** (F :: *FldPadTmpl*)
 > 
-> -> *BoolElt*, *FldPad*
+> -> *BoolElt*, *FldPad*, *Map*
 > {:.ret}
 {:.intrinsic}
 
-True if `F` is associated to an actual field. If so, also returns the field.
 
-
-<a id="ActualField--FldPadTmpl"></a><a id="ActualField"></a>
-> **ActualField** (F :: *FldPadTmpl*)
+<a id="Actual--FldPadTmpl"></a><a id="Actual"></a>
+> **Actual** (F :: *FldPadTmpl*)
 > 
-> -> *FldPad*
+> -> *FldPad*, *Map*
 > {:.ret}
 {:.intrinsic}
 
-The actual field associated to `F`, if there is one.
+
+<a id="Embedding--FldPadTmpl--FldPad"></a><a id="Embedding--FldPadTmpl--etc"></a><a id="Embedding"></a>
+> **Embedding** (F :: *FldPadTmpl*, A :: *FldPad*)
+> 
+> -> *Map*
+> {:.ret}
+{:.intrinsic}
 
 
 ## Ore's conditions
 {:#ores-conditions}
 
-<a id="OreConditions--FldPadTmpl--etc"></a><a id="OreConditions"></a><a id="OreConditions--FldPadTmpl--RngIntElt--RngIntElt--RngIntElt"></a>
+<a id="OreConditions"></a><a id="OreConditions--FldPadTmpl--etc"></a><a id="OreConditions--FldPadTmpl--RngIntElt--RngIntElt--RngIntElt"></a>
 > **OreConditions** (F :: *FldPadTmpl*, n :: *RngIntElt*, J :: *RngIntElt*, s :: *RngIntElt*)
 > 
 > -> *BoolElt*
 > {:.ret}
 {:.intrinsic}
 
-True if there exists an extension of degree `n` of `F` whose ramification polygon has a point `(p^s, J)`.
 
-
-<a id="OreConditions--FldPadTmpl--etc-2"></a><a id="OreConditions-2"></a><a id="OreConditions--FldPadTmpl--RngIntElt--RngIntElt"></a>
+<a id="OreConditions-2"></a><a id="OreConditions--FldPadTmpl--etc-2"></a><a id="OreConditions--FldPadTmpl--RngIntElt--RngIntElt"></a>
 > **OreConditions** (F :: *FldPadTmpl*, n :: *RngIntElt*, J :: *RngIntElt*)
 > 
 > -> *BoolElt*
 > {:.ret}
 {:.intrinsic}
 
-True if there exists an extension of degree `n` and discriminant valuation `n+J-1` of `F`.
 
-
-<a id="OrePossibilities--FldPadTmpl--etc"></a><a id="OrePossibilities"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt--RngIntElt"></a>
+<a id="OrePossibilities--FldPadTmpl--RngIntElt--RngIntElt"></a><a id="OrePossibilities--FldPadTmpl--etc"></a><a id="OrePossibilities"></a>
 > **OrePossibilities** (F :: *FldPadTmpl*, n :: *RngIntElt*, s :: *RngIntElt*)
 > 
 > -> *BoolElt*
 > {:.ret}
 {:.intrinsic}
-
-The possible J such that `(F,n,J,s)` satisfy Ore'`s` conditions.
 
 
 <a id="OrePossibilities--FldPadTmpl--etc-2"></a><a id="OrePossibilities--FldPadTmpl--RngIntElt"></a><a id="OrePossibilities-2"></a>
@@ -173,6 +200,175 @@ The possible J such that `(F,n,J,s)` satisfy Ore'`s` conditions.
 > {:.ret}
 {:.intrinsic}
 
-The possible J such that `(F,n,J)` satisfy Ore's conditions.
+
+## Elements
+{:#elements}
+
+
+Elements of a template p-adic field are represented by their valuation and a finite sequence of p-adic coefficients, which are elements of the residue class field.
+
+When the actual field is known, we provide maps between the template and actual field (accessible by the `Actual` intrinsic). For each element of the residue class field, we choose a representative in the actual field (specifically, we use the inverse of the map returned by `ResidueClassField` on the actual field). If `R` is the set of representatives, then the sequence of p-adic coefficients may be interpreted as a polynomial with coefficients in `R`. Evaluating this at the uniformizer of the actual field gives an integral element, which is then shifted by the valuation.
+
+<a id="IsCoercible"></a><a id="IsCoercible--FldPadTmpl--etc"></a><a id="IsCoercible--FldPadTmpl--any"></a>
+> **IsCoercible** (F :: *FldPadTmpl*, X)
+> 
+> -> *BoolElt*, Any
+> {:.ret}
+{:.intrinsic}
+
+Allows coercion into `F` any of the following:
+- An element of `F`
+- An element of the actual field of `F` (if defined)
+- A sequence [c0,c1,...] of p-adic coefficients
+- A tuple <v,[c0,c1,...]> of valuation and p-adic coefficients
+- The integer 0
+
+
+<a id="Parent"></a><a id="Parent--FldPadTmplElt"></a>
+> **Parent** (x :: *FldPadTmplElt*)
+> 
+> -> *FldPadTmpl*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="IsZero"></a><a id="IsZero--FldPadTmplElt"></a>
+> **IsZero** (x :: *FldPadTmplElt*)
+> 
+> -> *BoolElt*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Valuation"></a><a id="Valuation--FldPadTmplElt"></a>
+> **Valuation** (x :: *FldPadTmplElt*)
+> 
+> -> *BoolElt*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Actual-2"></a><a id="Actual--FldPadTmplElt"></a>
+> **Actual** (x :: *FldPadTmplElt*)
+> 
+> -> *FldPadElt*
+> {:.ret}
+{:.intrinsic}
+
+
+## Polynomial rings
+{:#polynomial-rings}
+
+<a id="PolynomialRing"></a><a id="PolynomialRing--FldPadTmpl"></a>
+> **PolynomialRing** (F :: *FldPadTmpl*)
+> 
+> -> *RngUPol_FldPadTmpl*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="BaseRing--RngUPol_FldPadTmpl"></a><a id="BaseRing"></a>
+> **BaseRing** (R :: *RngUPol_FldPadTmpl*)
+> 
+> -> *FldPadTmpl*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="HasActual-2"></a><a id="HasActual--RngUPol_FldPadTmpl"></a>
+> **HasActual** (R :: *RngUPol_FldPadTmpl*)
+> 
+> -> *BoolElt*, *RngUPol*, *Map*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Actual--RngUPol_FldPadTmpl"></a><a id="Actual-3"></a>
+> **Actual** (R :: *RngUPol_FldPadTmpl*)
+> 
+> -> *RngUPol*, *Map*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Embedding--RngUPol_FldPadTmpl--etc"></a><a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad--Map"></a><a id="Embedding-2"></a>
+> **Embedding** (R :: *RngUPol_FldPadTmpl*, A :: *RngUPol*[*FldPad*], m :: *Map*)
+> 
+> -> *Map*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Embedding--RngUPol_FldPadTmpl--RngUPol-FldPad"></a><a id="Embedding--RngUPol_FldPadTmpl--etc-2"></a><a id="Embedding-3"></a>
+> **Embedding** (R :: *RngUPol_FldPadTmpl*, A :: *RngUPol*[*FldPad*])
+> 
+> -> *Map*
+> {:.ret}
+{:.intrinsic}
+
+
+## Polynomials
+{:#polynomials}
+
+<a id="IsCoercible-2"></a><a id="IsCoercible--RngUPol_FldPadTmpl--any"></a><a id="IsCoercible--RngUPol_FldPadTmpl--etc"></a>
+> **IsCoercible** (R :: *RngUPol_FldPadTmpl*, X)
+> 
+> -> *BoolElt*, Any
+> {:.ret}
+{:.intrinsic}
+
+We can coerce the following into `R`:
+- Elements of `R`
+- Elements of the actual ring of `R` (if defined)
+- Polynomials over anything coercible to the base ring of `R`
+- Sequences of anything coercible to the base ring of `R`
+
+
+<a id="Parent-2"></a><a id="Parent--RngUPolElt_FldPadTmpl"></a>
+> **Parent** (f :: *RngUPolElt_FldPadTmpl*)
+> 
+> -> *RngUPol_FldPadTmpl*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="BaseRing--RngUPolElt_FldPadTmpl"></a><a id="BaseRing-2"></a>
+> **BaseRing** (f :: *RngUPolElt_FldPadTmpl*)
+> 
+> -> *FldPadTmpl*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Coefficients--RngUPolElt_FldPadTmpl"></a><a id="Coefficients"></a>
+> **Coefficients** (f :: *RngUPolElt_FldPadTmpl*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Degree"></a><a id="Degree--RngUPolElt_FldPadTmpl"></a>
+> **Degree** (f :: *RngUPolElt_FldPadTmpl*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="IsZero--RngUPolElt_FldPadTmpl"></a><a id="IsZero-2"></a>
+> **IsZero** (f :: *RngUPolElt_FldPadTmpl*)
+> 
+> -> *BoolElt*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Actual--RngUPolElt_FldPadTmpl"></a><a id="Actual-4"></a>
+> **Actual** (f :: *RngUPolElt_FldPadTmpl*)
+> 
+> -> *RngUPolElt*
+> {:.ret}
+{:.intrinsic}
 
 

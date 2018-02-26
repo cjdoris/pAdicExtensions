@@ -10,64 +10,106 @@
 ## Creation of templates
 {:#creation-of-templates}
 
-<a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--etc"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--RngIntElt--RngIntElt"></a>
+<a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--RngIntElt--RngIntElt"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--etc"></a>
 > **TemplateForEisensteinPolynomialsByDegreeAndDisciminant** (F :: *FldPadTmpl*, n :: *RngIntElt*, J :: *RngIntElt*)
 > 
-> -> *EisenTmpl*
+> -> *Tmpl_RngUPolElt_FldPadTmpl*
 > {:.ret}
 {:.intrinsic}
 
-Template for Eisenstein polynomials of degree `n`, discriminant valuation `n+J-1` over `F`.
 
-
-<a id="TemplateForEisensteinPolynomials"></a><a id="TemplateForEisensteinPolynomials--PadRamifPts"></a>
-> **TemplateForEisensteinPolynomials** (P :: *PadRamifPts*)
+<a id="TemplateForEisensteinPolynomials"></a><a id="TemplateForEisensteinPolynomials--PadRamifPgon"></a>
+> **TemplateForEisensteinPolynomials** (P :: *PadRamifPgon*)
 > 
-> -> *EisenTmpl*
+> -> *Tmpl_RngUPolElt_FldPadTmpl*
 > {:.ret}
 {:.intrinsic}
-
-A template for Eisenstein polynomials with this ramification polygon.
 
 **Parameters**
-- `Residues`
-- `CCResidue`
-- `Shrink`
+- `Residues`: When given, use these residues instead of the ones attached to P.
+- `CCResidue`: When given, use this CC-residue instead of the one attached to P.
+- `Shrink := true`: When true, returns the smallest template possible; when false, just uses the discriminant to bound the template.
 
 ## Creation of polynomials
 {:#creation-of-polynomials}
 
-<a id="#"></a><a id="#--EisenTmpl"></a><a id="#--EisenTmplCoeff"></a>
-> **\'#\'** (C :: *EisenTmplCoeff*)
-> 
-> **\'#\'** (T :: *EisenTmpl*)
+<a id="#"></a><a id="#--Tmpl_FldPadTmplElt"></a>
+> **\'#\'** (T :: *Tmpl_FldPadTmplElt*)
 > 
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
-Size of the template.
 
-
-
-
-<a id="Random--EisenTmplCoeff--FldPad"></a><a id="Random--EisenTmplCoeff--etc"></a><a id="Random"></a>
-> **Random** (C :: *EisenTmplCoeff*, K :: *FldPad*)
+<a id="#-2"></a><a id="#--Tmpl_RngUPolElt_FldPadTmpl"></a>
+> **\'#\'** (T :: *Tmpl_RngUPolElt_FldPadTmpl*)
 > 
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
-A random element from `C` of `K`.
 
-
-<a id="Random--EisenTmpl--etc"></a><a id="Random-2"></a><a id="Random--EisenTmpl--FldPad"></a>
-> **Random** (T :: *EisenTmpl*, K :: *FldPad*)
+<a id="ToSequence"></a><a id="ToSequence--Tmpl_FldPadTmplElt"></a>
+> **ToSequence** (T :: *Tmpl_FldPadTmplElt*)
 > 
-> -> *RngIntElt*
+> -> []
 > {:.ret}
 {:.intrinsic}
 
-A random polynomial from `T` over the field `K`.
+
+<a id="ToSequence-2"></a><a id="ToSequence--Tmpl_RngUPolElt_FldPadTmpl"></a>
+> **ToSequence** (T :: *Tmpl_RngUPolElt_FldPadTmpl*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Random"></a><a id="Random--Tmpl_FldPadTmplElt"></a>
+> **Random** (T :: *Tmpl_FldPadTmplElt*)
+> 
+> -> *FldPadTmplElt*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="Random-2"></a><a id="Random--Tmpl_RngUPolElt_FldPadTmpl"></a>
+> **Random** (T :: *Tmpl_RngUPolElt_FldPadTmpl*)
+> 
+> -> *RngUPolElt_FldPadTmpl*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="IndexSet--Tmpl_FldPadTmplElt"></a><a id="IndexSet"></a>
+> **IndexSet** (T :: *Tmpl_FldPadTmplElt*)
+> 
+> -> Any
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="IndexSet-2"></a><a id="IndexSet--Tmpl_RngUPolElt_FldPadTmpl"></a>
+> **IndexSet** (T :: *Tmpl_RngUPolElt_FldPadTmpl*)
+> 
+> -> Any
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="GetIndex--Tmpl_FldPadTmplElt--etc"></a><a id="GetIndex--Tmpl_FldPadTmplElt--any"></a><a id="GetIndex"></a>
+> **GetIndex** (T :: *Tmpl_FldPadTmplElt*, idx)
+> 
+> -> *FldPadTmplElt*
+> {:.ret}
+{:.intrinsic}
+
+
+<a id="GetIndex--Tmpl_RngUPolElt_FldPadTmpl--any"></a><a id="GetIndex--Tmpl_RngUPolElt_FldPadTmpl--etc"></a><a id="GetIndex-2"></a>
+> **GetIndex** (T :: *Tmpl_RngUPolElt_FldPadTmpl*, idx)
+> 
+> -> *RngUPolElt_FldPadTmpl*
+> {:.ret}
+{:.intrinsic}
 
 
