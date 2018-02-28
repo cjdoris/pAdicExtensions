@@ -2,8 +2,14 @@ function error_func(msg)
   error msg;
 end function;
 
+function xdiv(x, y)
+  ok, z := IsDivisibleBy(x, y);
+  assert ok;
+  return z;
+end function;
+
 declare type PadRamifPgon;
-declare attributes PadRamifPgon: F, vs, tvs, wvs, n, u, Js, bs, as, ss, pgon, valid_ore, valid_tame, valid_cong, valid_bound, valid_missing, is_valid, is_semivalid, residues, ccrespol, ccres;
+declare attributes PadRamifPgon: F, vs, xs, tvs, wvs, n, u, Js, bs, as, ss, pgon, valid_ore, valid_tame, valid_cong, valid_bound, valid_missing, is_valid, is_semivalid, residues, ccrespol, ccres, residual_polynomials, slopes, faces, vertices;
 
 declare type Tmpl_RngUPolElt_FldPadTmpl;
 declare attributes Tmpl_RngUPolElt_FldPadTmpl: R, coeffs, index_set;
@@ -791,6 +797,12 @@ intrinsic IsZero(f :: RngUPolElt_FldPadTmpl) -> BoolElt
   return #f`coeffs eq 0;
 end intrinsic;
 
+intrinsic IsEisenstein(f :: RngUPolElt_FldPadTmpl) -> BoolElt
+  {True iff f is Eisenstein.}
+  cs := Coefficients(f);
+  return #cs ge 2 and Valuation(cs[1]) eq 1 and Valuation(cs[#cs]) eq 0 and forall{i : i in [2..#cs-1] | Valuation(cs[i]) ge 1};
+end intrinsic;
+
 intrinsic Actual(f :: RngUPolElt_FldPadTmpl) -> RngUPolElt
   {Coerces x into the actual ring.}
   ok, A, m := HasActual(Parent(f));
@@ -833,6 +845,78 @@ end intrinsic;
 /// Additionally, we can assign a single non-zero element of the residue class field, which we call the *constant coefficient residue*, abbreviated to *CC-residue*, which is the leading p-adic coefficient of the constant coefficient of the corresponding Eisenstein polynomial `f`.
 /// 
 ///toc
+
+function n(P)
+  return P`n;
+end function;
+
+function p(P)
+  return Prime(P`F);
+end function;
+
+function e(P)
+  return AbsoluteRamificationDegree(P`F);
+end function;
+
+function u(P)
+  return P`u;
+end function;
+
+function s(P, i)
+  return P`ss[i+1];
+end function;
+
+function su(P)
+  return s(P,u(P));
+end function;
+
+function x(P, i)
+  return P`vs[i+1][1];
+end function;
+
+function xu(P)
+  return x(P, u(P));
+end function;
+
+function J(P, i)
+  return P`Js[i+1];
+end function;
+
+function a(P, i)
+  return P`as[i+1];
+end function;
+
+function b(P, i)
+  return P`bs[i+1];
+end function;
+
+function vbin(P, n, k)
+  return e(P) * BinomialValuation(n, k, p(P));
+end function;
+
+function vbinp(P, n, i)
+  return vbin(P, n, p(P)^i);
+end function;
+
+function vbinbp(P, j, i)
+  return vbin(P, b(P,j), p(P)^i);
+end function;
+
+function vbinps(P, n, i)
+  return vbin(P, n, x(P,i));
+end function;
+
+function vbinnps(P, i)
+  return vbinps(P, n(P), i);
+end function;
+
+function vbinbps(P, j, i)
+  return vbinps(P, b(P,j), i);
+end function;
+
+function sbinres(P, n, k)
+  return ShiftedBinomial(ResidueClassField(P`F), n, k) / UniformizerResidue(P`F)^BinomialValuation(n, k, Prime(P`F));
+end function;
 
 ///hide
 intrinsic Print(P :: PadRamifPgon)
@@ -894,6 +978,7 @@ intrinsic IsCoercible_RamificationPolygon(F :: FldPadTmpl, vs :: []) -> BoolElt,
   P := New(PadRamifPgon);
   P`F := F;
   P`vs := vs;
+  P`xs := [v[1] : v in vs];
   P`tvs := tvs;
   P`wvs := wvs;
   P`n := n;
@@ -913,6 +998,34 @@ intrinsic RamificationPolygon(F :: FldPadTmpl, vs :: []) -> PadRamifPgon
   return P;
 end intrinsic;
 
+intrinsic RamificationPolygon(f :: RngUPolElt_FldPadTmpl) -> PadRamifPgon
+  {The ramification polygon of f, which must be Eisenstein.}
+  require IsEisenstein(f): "f must be an Eisenstein polynomial";
+  R := Parent(f);
+  K := BaseRing(R);
+  n := Degree(f);
+  p := Prime(K);
+  su := Valuation(n, p);
+  psu := p^su;
+  cs := Coefficients(f);
+  e := AbsoluteRamificationDegree(K);
+  Fs := [* Valuation(cs[i+1]) : i in [1..n] *];
+  Rs := [* Min([n*(e*BinomialValuation(i,j,p) + Fs[i] - 1) + i : i in [j..n] | Fs[i] lt Infinity()]) : j in [1..n] *];
+  rp := NewtonPolygon([<i,Rs[i]> : i in [1..#Rs]] : Faces:="Lower");
+  P := RamificationPolygon(K, [<i,Rs[i]> : i in [1..#Rs] | Evaluate(rp,i) eq Rs[i]]);
+  // cc-residue
+  P`ccres := -cs[1]`coeffs[1] / cs[n+1]`coeffs[1];
+  // residues
+  if HasUniformizerResidue(K) then
+    ures := P`ccres^e * UniformizerResidue(K);
+    FF := ResidueClassField(K);
+    P`residues := [b eq 0 select ures^-BinomialValuation(n,x,p) * ShiftedBinomial(FF,n,x) else ures^-BinomialValuation(b,x,p) * P`ccres^-Fs[b] * ShiftedBinomial(FF,b,x) * cs[b+1]`coeffs[1] / cs[n+1]`coeffs[1] where a,b:=Quotrem(J,n) where x,J:=Explode(v) : v in P`vs];
+    assert IsValid(P) and Evaluate(P`ccrespol, P`ccres) eq 0;
+  end if;
+  assert IsValid(P);
+  return P;
+end intrinsic;
+
 intrinsic Copy(P :: PadRamifPgon) -> PadRamifPgon
   {Makes a copy of P.}
   P2 := New(PadRamifPgon);
@@ -920,6 +1033,7 @@ intrinsic Copy(P :: PadRamifPgon) -> PadRamifPgon
   P2`vs := P`vs;
   P2`tvs := P`tvs;
   P2`wvs := P`wvs;
+  P2`xs := P`xs;
   P2`n := P`n;
   P2`u := P`u;
   P2`Js := P`Js;
@@ -939,115 +1053,245 @@ intrinsic Copy(P :: PadRamifPgon) -> PadRamifPgon
   return P2;
 end intrinsic;
 
-///## Invariants
+///## Basic properties
 
-/// n (degree), p (prime), e (absolute ramification degree), u (number of wild faces), x_u=p^s_u (wild degree)
-intrinsic n(P :: PadRamifPgon) -> RngIntElt
-  {n}
+intrinsic Degree(P :: PadRamifPgon) -> RngIntElt
+  {The degree of P.}
   return P`n;
 end intrinsic;
 
-///ditto
-intrinsic p(P :: PadRamifPgon) -> RngIntElt
-  {p}
-  return Prime(P`F);
+intrinsic WildDegree(P :: PadRamifPgon) -> RngIntElt
+  {The wild degree of P.}
+  return P`wvs[#P`wvs][1];
 end intrinsic;
 
-///ditto
-intrinsic e(P :: PadRamifPgon) -> RngIntElt
-  {e}
-  return AbsoluteRamificationDegree(P`F);
+intrinsic BaseField(P :: PadRamifPgon) -> RngIntElt
+  {The base field of P.}
+  return P`F;
 end intrinsic;
 
-///ditto
-intrinsic u(P :: PadRamifPgon) -> RngIntElt
-  {u}
-  return P`u;
+intrinsic NumberOfPoints(P :: PadRamifPgon) -> RngIntElt
+  {The number of points on P.}
+  return #P`vs;
 end intrinsic;
 
-///ditto
-intrinsic su(P :: PadRamifPgon) -> RngIntElt
-  {s_u}
-  return s(P,u(P));
+intrinsic NumberOfWildPoints(P :: PadRamifPgon) -> RngIntElt
+  {The number of wild points on P.}
+  return #P`wvs;
 end intrinsic;
 
-///ditto
-intrinsic xu(P :: PadRamifPgon) -> RngIntElt
-  {x_u}
-  return x(P, u(P));
+intrinsic Point(P :: PadRamifPgon, i :: RngIntElt) -> Tup
+  {The ith point on P.}
+  return P`vs[i];
 end intrinsic;
 
-/// J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
-intrinsic J(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
-  {J_i}
-  return P`Js[i+1];
+intrinsic Points(P :: PadRamifPgon) -> []
+  {The points on P.}
+  return P`vs;
 end intrinsic;
 
-///ditto
-intrinsic a(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
-  {a_i}
-  return P`as[i+1];
+intrinsic WildPoints(P :: PadRamifPgon) -> []
+  {The wild points of P.}
+  return P`wvs;
 end intrinsic;
 
-///ditto
-intrinsic b(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
-  {b_i}
-  return P`bs[i+1];
+intrinsic TamePoints(P :: PadRamifPgon) -> []
+  {The tame points of P.}
+  return P`tvs;
 end intrinsic;
 
-///ditto
-intrinsic s(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
-  {s_i}
-  return P`ss[i+1];
+intrinsic Polygon(P :: PadRamifPgon) -> NwtnPgon
+  {The polygon of P.}
+  return P`pgon;
 end intrinsic;
 
-///ditto
-intrinsic x(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
-  {p^s_i}
-  return P`vs[i+1][1];
+intrinsic Vertex(P :: PadRamifPgon, i :: RngIntElt) -> Tup
+  {The ith vertex of P.}
+  return Vertices(P)[i];
 end intrinsic;
 
-///## Valuations of binomials
-
-intrinsic vbin(P :: PadRamifPgon, n :: RngIntElt, k :: RngIntElt) -> RngIntElt
-  {Valuation of n choose k.}
-  return e(P) * BinomialValuation(n, k, p(P));
+intrinsic Vertices(P :: PadRamifPgon) -> []
+  {The vertices of P.}
+  if not assigned P`vertices then
+    P`vertices := Vertices(P`pgon);
+  end if;
+  return P`vertices;
 end intrinsic;
 
-intrinsic vbinp(P :: PadRamifPgon, n :: RngIntElt, i :: RngIntElt) -> RngIntElt
-  {Valuation of n choose `p^i`.}
-  return vbin(P, n, p(P)^i);
+intrinsic WildVertices(P :: PadRamifPgon) -> []
+  {The wild vertices of P.}
+  vs := Vertices(P);
+  return WildDegree(P) eq Degree(P) select vs else vs[1..#vs-1];
 end intrinsic;
 
-intrinsic vbinbp(P :: PadRamifPgon, j :: RngIntElt, i :: RngIntElt) -> RngIntElt
-  {Valuation of `b_j` choose `p^i`.}
-  return vbin(P, b(P,j), p(P)^i);
+intrinsic NumberOfFaces(P :: PadRamifPgon) -> RngIntElt
+  {The number of faces of P.}
+  return #Faces(P);
 end intrinsic;
 
-intrinsic vbinps(P :: PadRamifPgon, n :: RngIntElt, i :: RngIntElt) -> RngIntElt
-  {The valuation of n choose `p^s_i`.}
-  return vbin(P, n, x(P,i));
+intrinsic NumberOfWildFaces(P :: PadRamifPgon) -> RngIntElt
+  {The number of wild faces of P.}
+  return Degree(P) eq WildDegree(P) select NumberOfFaces(P) else NumberOfFaces(P) - 1;
 end intrinsic;
 
-intrinsic vbinnps(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
-  {The valuation of `n` choose p^s_i.}
-  return vbinps(P, n(P), i);
+intrinsic Face(P :: PadRamifPgon, i :: RngIntElt) -> NwtnPgonFace
+  {The ith face of P.}
+  return Faces(P)[i];
 end intrinsic;
 
-intrinsic vbinbps(P :: PadRamifPgon, j :: RngIntElt, i :: RngIntElt) -> RngIntElt
-  {The valuation of `b_j` choose `p^s_i`.}
-  return vbinps(P, b(P,j), i);
+intrinsic Faces(P :: PadRamifPgon) -> []
+  {The faces of P.}
+  if not assigned P`faces then
+    P`faces := Faces(P`pgon);
+  end if;
+  return P`faces;
 end intrinsic;
 
-intrinsic vbinbps(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
-  {The valuation of `b_i choose p^s_i`.}
-  return vbinbps(P, i, i);
+intrinsic WildFaces(P :: PadRamifPgon) -> []
+  {The wild faces of P.}
+  fs := Faces(P);
+  return WildDegree(P) eq Degree(P) select fs else fs[1..#fs-1];
 end intrinsic;
 
-intrinsic sbinres(P :: PadRamifPgon, n :: RngIntElt, k :: RngIntElt) -> FldFinElt
-  {The residue class of n choose k shifted down to a unit.}
-  return ShiftedBinomial(ResidueClassField(P`F), n, k) / UniformizerResidue(P`F)^BinomialValuation(n, k, Prime(P`F));
+intrinsic Slope(P :: PadRamifPgon, i :: RngIntElt) -> FldRatElt
+  {The slope of the ith face of P.}
+  return Slopes(P)[i];
 end intrinsic;
+
+intrinsic Slopes(P :: PadRamifPgon) -> []
+  {The slopes of faces of P.}
+  if not assigned P`slopes then
+    P`slopes := [(evs[2][2] - evs[1][2]) / (evs[2][1] - evs[1][1]) where evs:=EndVertices(f) : f in Faces(P)];
+  end if;
+  return P`slopes;
+end intrinsic;
+
+intrinsic SlopeIsIntegral(P :: PadRamifPgon, i :: RngIntElt) -> BoolElt, RngIntElt
+  {True if the slope of the ith face is integral.}
+  return IsCoercible(Z, Slope(P, i));
+end intrinsic;
+
+intrinsic Abscissa(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
+  {The abscissa of the ith point.}
+  return P`xs[i];
+end intrinsic;
+
+intrinsic Abscissas(P :: PadRamifPgon) -> []
+  {The abscissas of points of P.}
+  return P`xs;
+end intrinsic;
+
+intrinsic LogAbscissa(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
+  {The power s where the ith (wild) abscissa of P is `p^s`.}
+  return P`ss[i];
+end intrinsic;
+
+intrinsic LogAbscissas(P :: PadRamifPgon) -> []
+  {The log abscissas of P.}
+  return P`ss;
+end intrinsic;
+
+intrinsic Ordinate(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
+  {The ordinate of the ith point.}
+  return P`Js[i];
+end intrinsic;
+
+intrinsic Ordinates(P :: PadRamifPgon) -> []
+  {The ordinates of points of P.}
+  return P`Js;
+end intrinsic;
+
+intrinsic OrdinateModDegree(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
+  {The ith ordinate of P mod the degree of P.}
+  return P`bs[i];
+end intrinsic;
+
+intrinsic OrdinatesModDegree(P :: PadRamifPgon) -> []
+  {The ordinates of P mod the degree of P.}
+  return P`bs;
+end intrinsic;
+
+intrinsic OrdinateDivDegree(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
+  {The ith ordinate of P div the degree of P.}
+  return P`as[i];
+end intrinsic;
+
+intrinsic OrdinatesDivDegree(P :: PadRamifPgon) -> []
+  {The ordinates of P mod the degree of P.}
+  return P`as;
+end intrinsic;
+
+intrinsic HasResidues(P :: PadRamifPgon) -> BoolElt, []
+  {True iff P has residues assigned. If so, also returns them.}
+  if assigned P`residues then
+    return true, P`residues;
+  else
+    return false, _;
+  end if;
+end intrinsic;
+
+intrinsic Residue(P :: PadRamifPgon, i :: RngIntElt) -> FldFinElt
+  {The residue of the ith point of P.}
+  require assigned P`residues: "residues not assigned";
+  return P`residues[i];
+end intrinsic;
+
+intrinsic Residues(P :: PadRamifPgon) -> []
+  {The residues of points of P.}
+  require assigned P`residues: "residues not assigned";
+  return P`residues;
+end intrinsic;
+
+intrinsic ResidualPolynomial(P :: PadRamifPgon, i :: RngIntElt) -> RngUPolElt
+  {The residual polynomial of the ith face of P.}
+  return ResidualPolynomials(P)[i];
+end intrinsic;
+
+intrinsic ResidualPolynomials(P :: PadRamifPgon) -> []
+  {The residual polynomials of each face of P.}
+  if not assigned P`residual_polynomials then
+    require assigned P`residues: "residues not assigned";
+    P`residual_polynomials := [&+[P`residues[i] * (R.1)^xdiv(P`xs[i] - P`xs[idxs[1]], e) : i in idxs] where R:=PolynomialRing(ResidueClassField(P`F)) where idxs:=[i : i in [1..#P`xs] | evs[1][1] le P`xs[i] and P`xs[i] le evs[2][1]] where e:=Denominator(Slope(P,i)) where evs:=EndVertices(Face(P,i)) : i in [1..NumberOfFaces(P)]];
+  end if;
+  return P`residual_polynomials;
+end intrinsic;
+
+intrinsic SlopePolynomial(P :: PadRamifPgon, m :: RngIntElt) -> RngUPolElt
+  {Add a slope of m to P and form a polynomial from the residues of the lowest points. Is an additive polynomial for `m>0`. When `-m` is a slope, it is the corresponding residual polynomial, multiplied by some power of `x`; otherwise it is `x^(p^k)` for some `k`.}
+  FF := ResidueClassField(BaseField(P));
+  R := PolynomialRing(FF);
+  if m lt 0 then
+    return R.1 ^ Degree(P);
+  elif m gt -Slope(P, 1) then
+    return R.1;
+  end if;
+  vs := [<v[1], v[2] + v[1] * m> : v in Points(P)];
+  h := Min([v[2] : v in vs]);
+  r := &+[Residue(P, i) * (R.1)^vs[i][1] : i in [1..#vs] | vs[i][2] eq h];
+  if m eq 0 then
+    assert Degree(r) eq Degree(P);
+  else
+    assert m gt 0;
+    p := Prime(BaseField(P));
+    assert forall{i : i in [0..Degree(r)] | IsPowerOf(i,p) or Coefficient(r,i) eq 0};
+  end if;
+  return r;
+end intrinsic;
+
+intrinsic SlopeMap(P :: PadRamifPgon, m :: RngIntElt) -> Map, RngUPolElt, Map
+  {For positive m, treating the residue class field as a `F_p` vector space `V`, returns the linear map from `V` to `V` defined by the slope polynomial, which is additive. Also returns the slope polynomial and the map from the residue class field to `V`.}
+  require m gt 0: "m must be positive";
+  r := SlopePolynomial(P, m);
+  FF := ResidueClassField(BaseField(P));
+  F0 := PrimeField(FF);
+  V, m := VectorSpace(FF, F0);
+  rmap := hom<V -> V | [Evaluate(r, (V.i)@@m)@m : i in [1..Dimension(V)]]>;
+  return rmap, r, m;
+end intrinsic;
+
+// intrinsic SlopeMapIsSurjective(P :: PadRamifPgon, m :: RngIntElt) -> BoolElt
+//   {True if the slope polynomial of slope m is surjective.}
+// end intrinsic;
 
 ///## Validity
 ///
