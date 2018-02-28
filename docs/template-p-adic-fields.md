@@ -442,6 +442,16 @@ The degree.
 True iff `f` is zero.
 
 
+<a id="IsEisenstein"></a><a id="IsEisenstein--RngUPolElt_FldPadTmpl"></a>
+> **IsEisenstein** (f :: *RngUPolElt_FldPadTmpl*)
+> 
+> -> *BoolElt*
+> {:.ret}
+{:.intrinsic}
+
+True iff `f` is Eisenstein.
+
+
 <a id="Actual-4"></a><a id="Actual--RngUPolElt_FldPadTmpl"></a>
 > **Actual** (f :: *RngUPolElt_FldPadTmpl*)
 > 

@@ -11,8 +11,7 @@ Additionally, we can assign a single non-zero element of the residue class field
 
 **Contents**
 * [Creation](#creation)
-* [Invariants](#invariants)
-* [Valuations of binomials](#valuations-of-binomials)
+* [Basic properties](#basic-properties)
 * [Validity](#validity)
 * [Residues](#residues)
 * [Enumeration](#enumeration)
@@ -40,6 +39,16 @@ True if `vs` can be made into a ramification polygon over `F`. `vs` must be a li
 A ramification polygon over `F`.
 
 
+<a id="RamificationPolygon-2"></a><a id="RamificationPolygon--RngUPolElt_FldPadTmpl"></a>
+> **RamificationPolygon** (f :: *RngUPolElt_FldPadTmpl*)
+> 
+> -> *PadRamifPgon*
+> {:.ret}
+{:.intrinsic}
+
+The ramification polygon of `f`, which must be Eisenstein.
+
+
 <a id="Copy"></a><a id="Copy--PadRamifPgon"></a>
 > **Copy** (P :: *PadRamifPgon*)
 > 
@@ -50,146 +59,387 @@ A ramification polygon over `F`.
 Makes a copy of `P`.
 
 
-## Invariants
-{:#invariants}
+## Basic properties
+{:#basic-properties}
 
-<a id="n"></a><a id="n--PadRamifPgon"></a><a id="p"></a><a id="p--PadRamifPgon"></a><a id="e"></a><a id="e--PadRamifPgon"></a><a id="u"></a><a id="u--PadRamifPgon"></a><a id="su"></a><a id="su--PadRamifPgon"></a><a id="xu"></a><a id="xu--PadRamifPgon"></a>
-> **n** (P :: *PadRamifPgon*)
-> 
-> **p** (P :: *PadRamifPgon*)
-> 
-> **e** (P :: *PadRamifPgon*)
-> 
-> **u** (P :: *PadRamifPgon*)
-> 
-> **su** (P :: *PadRamifPgon*)
-> 
-> **xu** (P :: *PadRamifPgon*)
+<a id="Degree"></a><a id="Degree--PadRamifPgon"></a>
+> **Degree** (P :: *PadRamifPgon*)
 > 
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
-n (degree), p (prime), e (absolute ramification degree), u (number of wild faces), x_u=p^s_u (wild degree)
+The degree of `P`.
 
 
-
-
-
-
-
-
-
-
-
-
-<a id="J"></a><a id="J--PadRamifPgon--etc"></a><a id="J--PadRamifPgon--RngIntElt"></a><a id="a"></a><a id="a--PadRamifPgon--etc"></a><a id="a--PadRamifPgon--RngIntElt"></a><a id="b"></a><a id="b--PadRamifPgon--etc"></a><a id="b--PadRamifPgon--RngIntElt"></a><a id="s"></a><a id="s--PadRamifPgon--etc"></a><a id="s--PadRamifPgon--RngIntElt"></a><a id="x"></a><a id="x--PadRamifPgon--etc"></a><a id="x--PadRamifPgon--RngIntElt"></a>
-> **J** (P :: *PadRamifPgon*, i :: *RngIntElt*)
-> 
-> **a** (P :: *PadRamifPgon*, i :: *RngIntElt*)
-> 
-> **b** (P :: *PadRamifPgon*, i :: *RngIntElt*)
-> 
-> **s** (P :: *PadRamifPgon*, i :: *RngIntElt*)
-> 
-> **x** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+<a id="WildDegree"></a><a id="WildDegree--PadRamifPgon"></a>
+> **WildDegree** (P :: *PadRamifPgon*)
 > 
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
-J_i = n a_i + b_i (heights of vertices), x_i = p^s_i (abscissas)
+The wild degree of `P`.
 
 
-
-
-
-
-
-
-
-
-## Valuations of binomials
-{:#valuations-of-binomials}
-
-<a id="vbin"></a><a id="vbin--PadRamifPgon--etc"></a><a id="vbin--PadRamifPgon--RngIntElt--RngIntElt"></a>
-> **vbin** (P :: *PadRamifPgon*, n :: *RngIntElt*, k :: *RngIntElt*)
+<a id="BaseField"></a><a id="BaseField--PadRamifPgon"></a>
+> **BaseField** (P :: *PadRamifPgon*)
 > 
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
-Valuation of `n` choose `k`.
+The base field of `P`.
 
 
-<a id="vbinp"></a><a id="vbinp--PadRamifPgon--etc"></a><a id="vbinp--PadRamifPgon--RngIntElt--RngIntElt"></a>
-> **vbinp** (P :: *PadRamifPgon*, n :: *RngIntElt*, i :: *RngIntElt*)
+<a id="NumberOfPoints"></a><a id="NumberOfPoints--PadRamifPgon"></a>
+> **NumberOfPoints** (P :: *PadRamifPgon*)
 > 
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
-Valuation of `n` choose `p^i`.
+The number of points on `P`.
 
 
-<a id="vbinbp"></a><a id="vbinbp--PadRamifPgon--etc"></a><a id="vbinbp--PadRamifPgon--RngIntElt--RngIntElt"></a>
-> **vbinbp** (P :: *PadRamifPgon*, j :: *RngIntElt*, i :: *RngIntElt*)
+<a id="NumberOfWildPoints"></a><a id="NumberOfWildPoints--PadRamifPgon"></a>
+> **NumberOfWildPoints** (P :: *PadRamifPgon*)
 > 
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
-Valuation of `b_j` choose `p^i`.
+The number of wild points on `P`.
 
 
-<a id="vbinps"></a><a id="vbinps--PadRamifPgon--etc"></a><a id="vbinps--PadRamifPgon--RngIntElt--RngIntElt"></a>
-> **vbinps** (P :: *PadRamifPgon*, n :: *RngIntElt*, i :: *RngIntElt*)
+<a id="Point"></a><a id="Point--PadRamifPgon--etc"></a><a id="Point--PadRamifPgon--RngIntElt"></a>
+> **Point** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+> 
+> -> *Tup*
+> {:.ret}
+{:.intrinsic}
+
+The `i`th point on `P`.
+
+
+<a id="Points"></a><a id="Points--PadRamifPgon"></a>
+> **Points** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The points on `P`.
+
+
+<a id="WildPoints"></a><a id="WildPoints--PadRamifPgon"></a>
+> **WildPoints** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The wild points of `P`.
+
+
+<a id="TamePoints"></a><a id="TamePoints--PadRamifPgon"></a>
+> **TamePoints** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The tame points of `P`.
+
+
+<a id="Polygon"></a><a id="Polygon--PadRamifPgon"></a>
+> **Polygon** (P :: *PadRamifPgon*)
+> 
+> -> *NwtnPgon*
+> {:.ret}
+{:.intrinsic}
+
+The polygon of `P`.
+
+
+<a id="Vertex"></a><a id="Vertex--PadRamifPgon--etc"></a><a id="Vertex--PadRamifPgon--RngIntElt"></a>
+> **Vertex** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+> 
+> -> *Tup*
+> {:.ret}
+{:.intrinsic}
+
+The `i`th vertex of `P`.
+
+
+<a id="Vertices"></a><a id="Vertices--PadRamifPgon"></a>
+> **Vertices** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The vertices of `P`.
+
+
+<a id="WildVertices"></a><a id="WildVertices--PadRamifPgon"></a>
+> **WildVertices** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The wild vertices of `P`.
+
+
+<a id="NumberOfFaces"></a><a id="NumberOfFaces--PadRamifPgon"></a>
+> **NumberOfFaces** (P :: *PadRamifPgon*)
 > 
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
-The valuation of `n` choose `p^s_i`.
+The number of faces of `P`.
 
 
-<a id="vbinnps"></a><a id="vbinnps--PadRamifPgon--etc"></a><a id="vbinnps--PadRamifPgon--RngIntElt"></a>
-> **vbinnps** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+<a id="NumberOfWildFaces"></a><a id="NumberOfWildFaces--PadRamifPgon"></a>
+> **NumberOfWildFaces** (P :: *PadRamifPgon*)
 > 
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
-The valuation of `n` choose p^s_i.
+The number of wild faces of `P`.
 
 
-<a id="vbinbps"></a><a id="vbinbps--PadRamifPgon--etc"></a><a id="vbinbps--PadRamifPgon--RngIntElt--RngIntElt"></a>
-> **vbinbps** (P :: *PadRamifPgon*, j :: *RngIntElt*, i :: *RngIntElt*)
+<a id="Face"></a><a id="Face--PadRamifPgon--etc"></a><a id="Face--PadRamifPgon--RngIntElt"></a>
+> **Face** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+> 
+> -> *NwtnPgonFace*
+> {:.ret}
+{:.intrinsic}
+
+The `i`th face of `P`.
+
+
+<a id="Faces"></a><a id="Faces--PadRamifPgon"></a>
+> **Faces** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The faces of `P`.
+
+
+<a id="WildFaces"></a><a id="WildFaces--PadRamifPgon"></a>
+> **WildFaces** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The wild faces of `P`.
+
+
+<a id="Slope"></a><a id="Slope--PadRamifPgon--etc"></a><a id="Slope--PadRamifPgon--RngIntElt"></a>
+> **Slope** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+> 
+> -> *FldRatElt*
+> {:.ret}
+{:.intrinsic}
+
+The slope of the `i`th face of `P`.
+
+
+<a id="Slopes"></a><a id="Slopes--PadRamifPgon"></a>
+> **Slopes** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The slopes of faces of `P`.
+
+
+<a id="SlopeIsIntegral"></a><a id="SlopeIsIntegral--PadRamifPgon--etc"></a><a id="SlopeIsIntegral--PadRamifPgon--RngIntElt"></a>
+> **SlopeIsIntegral** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+> 
+> -> *BoolElt*, *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+True if the slope of the `i`th face is integral.
+
+
+<a id="Abscissa"></a><a id="Abscissa--PadRamifPgon--etc"></a><a id="Abscissa--PadRamifPgon--RngIntElt"></a>
+> **Abscissa** (P :: *PadRamifPgon*, i :: *RngIntElt*)
 > 
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
-The valuation of `b_j` choose `p^s_i`.
+The abscissa of the `i`th point.
 
 
-<a id="vbinbps-2"></a><a id="vbinbps--PadRamifPgon--etc-2"></a><a id="vbinbps--PadRamifPgon--RngIntElt"></a>
-> **vbinbps** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+<a id="Abscissas"></a><a id="Abscissas--PadRamifPgon"></a>
+> **Abscissas** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The abscissas of points of `P`.
+
+
+<a id="LogAbscissa"></a><a id="LogAbscissa--PadRamifPgon--etc"></a><a id="LogAbscissa--PadRamifPgon--RngIntElt"></a>
+> **LogAbscissa** (P :: *PadRamifPgon*, i :: *RngIntElt*)
 > 
 > -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
-The valuation of `b_i choose p^s_i`.
+The power s where the `i`th (wild) abscissa of `P` is `p^s`.
 
 
-<a id="sbinres"></a><a id="sbinres--PadRamifPgon--etc"></a><a id="sbinres--PadRamifPgon--RngIntElt--RngIntElt"></a>
-> **sbinres** (P :: *PadRamifPgon*, n :: *RngIntElt*, k :: *RngIntElt*)
+<a id="LogAbscissas"></a><a id="LogAbscissas--PadRamifPgon"></a>
+> **LogAbscissas** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The log abscissas of `P`.
+
+
+<a id="Ordinate"></a><a id="Ordinate--PadRamifPgon--etc"></a><a id="Ordinate--PadRamifPgon--RngIntElt"></a>
+> **Ordinate** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The ordinate of the `i`th point.
+
+
+<a id="Ordinates"></a><a id="Ordinates--PadRamifPgon"></a>
+> **Ordinates** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The ordinates of points of `P`.
+
+
+<a id="OrdinateModDegree"></a><a id="OrdinateModDegree--PadRamifPgon--etc"></a><a id="OrdinateModDegree--PadRamifPgon--RngIntElt"></a>
+> **OrdinateModDegree** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The `i`th ordinate of `P` mod the degree of `P`.
+
+
+<a id="OrdinatesModDegree"></a><a id="OrdinatesModDegree--PadRamifPgon"></a>
+> **OrdinatesModDegree** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The ordinates of `P` mod the degree of `P`.
+
+
+<a id="OrdinateDivDegree"></a><a id="OrdinateDivDegree--PadRamifPgon--etc"></a><a id="OrdinateDivDegree--PadRamifPgon--RngIntElt"></a>
+> **OrdinateDivDegree** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The `i`th ordinate of `P` div the degree of `P`.
+
+
+<a id="OrdinatesDivDegree"></a><a id="OrdinatesDivDegree--PadRamifPgon"></a>
+> **OrdinatesDivDegree** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The ordinates of `P` mod the degree of `P`.
+
+
+<a id="HasResidues"></a><a id="HasResidues--PadRamifPgon"></a>
+> **HasResidues** (P :: *PadRamifPgon*)
+> 
+> -> *BoolElt*, []
+> {:.ret}
+{:.intrinsic}
+
+True iff `P` has residues assigned. If so, also returns them.
+
+
+<a id="Residue"></a><a id="Residue--PadRamifPgon--etc"></a><a id="Residue--PadRamifPgon--RngIntElt"></a>
+> **Residue** (P :: *PadRamifPgon*, i :: *RngIntElt*)
 > 
 > -> *FldFinElt*
 > {:.ret}
 {:.intrinsic}
 
-The residue class of `n` choose `k` shifted down to a unit.
+The residue of the `i`th point of `P`.
+
+
+<a id="Residues"></a><a id="Residues--PadRamifPgon"></a>
+> **Residues** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The residues of points of `P`.
+
+
+<a id="ResidualPolynomial"></a><a id="ResidualPolynomial--PadRamifPgon--etc"></a><a id="ResidualPolynomial--PadRamifPgon--RngIntElt"></a>
+> **ResidualPolynomial** (P :: *PadRamifPgon*, i :: *RngIntElt*)
+> 
+> -> *RngUPolElt*
+> {:.ret}
+{:.intrinsic}
+
+The residual polynomial of the `i`th face of `P`.
+
+
+<a id="ResidualPolynomials"></a><a id="ResidualPolynomials--PadRamifPgon"></a>
+> **ResidualPolynomials** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The residual polynomials of each face of `P`.
+
+
+<a id="SlopePolynomial"></a><a id="SlopePolynomial--PadRamifPgon--etc"></a><a id="SlopePolynomial--PadRamifPgon--RngIntElt"></a>
+> **SlopePolynomial** (P :: *PadRamifPgon*, m :: *RngIntElt*)
+> 
+> -> *RngUPolElt*
+> {:.ret}
+{:.intrinsic}
+
+Add a slope of `m` to `P` and form a polynomial from the residues of the lowest points. Is an additive polynomial for `m>0`. When `-m` is a slope, it is the corresponding residual polynomial, multiplied by some power of `x`; otherwise it is `x^(p^k)` for some `k`.
+
+
+<a id="SlopeMap"></a><a id="SlopeMap--PadRamifPgon--etc"></a><a id="SlopeMap--PadRamifPgon--RngIntElt"></a>
+> **SlopeMap** (P :: *PadRamifPgon*, m :: *RngIntElt*)
+> 
+> -> *Map*, *RngUPolElt*, *Map*
+> {:.ret}
+{:.intrinsic}
+
+For positive `m`, treating the residue class field as a `F_p` vector space `V`, returns the linear map from `V` to `V` defined by the slope polynomial, which is additive. Also returns the slope polynomial and the map from the residue class field to `V`.
 
 
 ## Validity
