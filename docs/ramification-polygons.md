@@ -4,14 +4,13 @@
 
 A `PadRamifPgon` represents a set of points defining a ramification polygon, which is the Newton polygon of the *ramification polygon* `r(x) = f(pi x + pi) / pi^n` of the Eisenstein polynomial `f(x)` of degree `n`. Some of the points need not be vertices, but can lie on the interior of faces, and therefore this is a more refined invariant than just the polygon itself. The points must be of the form `[<1, J_0>, <p^s_1, J_1>, ..., <p^s_u, 0>, ..., <n, 0>]` where `s_u = v_p(n)`.
 
-To each point, we can also assign a non-zero element of the residue class field, which is the leading p-adic coefficients of the corresponding ramification polygon. These are collectively called the *residues* of the ramification polygon. If we multiply the uniformizer of the corresponding extension by the residue `u`, then the residues are all multplied by `u^n`. This defines an equivalence relation between different sets of residues.
+To each point, we can also assign a non-zero element of the residue class field, which is the leading p-adic coefficient of the corresponding ramification polygon. These are collectively called the *residues* of the ramification polygon. If we multiply the uniformizer of the corresponding extension by the residue `u`, then the residues are all multplied by `u^n`. This defines an equivalence relation between different sets of residues.
 
-Additionally, we can assign a single non-zero element of the residue class field, which we call the *constant coefficient residue*, abbreviated to *CC-residue*, which is the leading p-adic coefficient of the constant coefficient of the corresponding Eisenstein polynomial `f`.
+Additionally, we can assign a single non-zero element of the residue class field, which is the *uniformizer residue* (as defined [here]({{site.baseurl}}/template-p-adic-fields)) of an extension defined by `f`. That is, it is the leading p-adic coefficient of the constant coefficient of `f`.
 
 
 **Contents**
 * [Creation](#creation)
-* [Basic properties](#basic-properties)
 * [Validity](#validity)
 * [Enumeration](#enumeration)
 
@@ -28,9 +27,9 @@ Additionally, we can assign a single non-zero element of the residue class field
 The ramification polygon of `f`.
 
 **Parameters**
-- `Fine`
-- `Res`
-- `URes`
+- `Fine := false`: When true, creates the fine ramification polygon
+- `Res := false`: When true, creates the fine ramification polygon with residues (implies Fine)
+- `URes := false`: When true, assigns the uniformizer residue
 
 <a id="RamificationPolygon-2"></a><a id="RamificationPolygon--FldPadTmpl--etc"></a><a id="RamificationPolygon--FldPadTmpl--any"></a>
 > **RamificationPolygon** (F :: *FldPadTmpl*, X)
@@ -39,40 +38,58 @@ The ramification polygon of `f`.
 > {:.ret}
 {:.intrinsic}
 
-A ramification polygon over `F`.
+A ramification polygon over `F`, defined by `X`, which must be one of:
+- A sequence or list of points (defined below)
+- A Newton polygon
+
+A point is a tuple `<j,R_j,ord,res>` where:
+- `j` and `R_j` have the meaning defined at the top of this section
+- `ord` (optional) when given it must be one of:
+  - `"eq"` meaning the point is present
+  - `"gt"` meaning the point is not present
+  - `"ge"` meaning the point may or may not be present
+  At vertices, it is assumed to be `"eq"`, and otherwise `"ge"`.
+- `res` (optional) when given is the residue to attach to the point. If it is zero, then `ord` must be consistent with `"gt"` and otherwise it must be consistent with `"eq"`.
+
 
 **Parameters**
-- `Fine`
+- `Fine := false`: When true, creates a fine ramification polygon. In particular, `ord` is assumed to be `"gt"` for any points not specified, whereas the default behaviour is to assume `"ge"`.
 
-<a id="IsCoercibleToRamificationPolygon"></a><a id="IsCoercibleToRamificationPolygon--FldPadTmpl--etc"></a><a id="IsCoercibleToRamificationPolygon--FldPadTmpl--any"></a><a id="IsCoercibleToRamificationPolygon--FldPadTmpl--List"></a><a id="IsCoercibleToRamificationPolygon--FldPadTmpl--seq"></a><a id="IsCoercibleToRamificationPolygon--FldPadTmpl--NwtnPgon"></a>
+<a id="IsCoercibleToRamificationPolygon"></a><a id="IsCoercibleToRamificationPolygon--FldPadTmpl--etc"></a><a id="IsCoercibleToRamificationPolygon--FldPadTmpl--any"></a>
 > **IsCoercibleToRamificationPolygon** (F :: *FldPadTmpl*, X)
-> 
-> **IsCoercibleToRamificationPolygon** (F :: *FldPadTmpl*, X :: *List*)
-> 
-> **IsCoercibleToRamificationPolygon** (F :: *FldPadTmpl*, X :: [])
-> 
-> **IsCoercibleToRamificationPolygon** (F :: *FldPadTmpl*, X :: *NwtnPgon*)
 > 
 > -> *BoolElt*, Any
 > {:.ret}
 {:.intrinsic}
 
-True if `X` is coercible to a ramification polygon over `F`.
+True if `X` is coercible to a ramification polygon.
+
+The inputs and parameters are as in `RamificationPolygon` above.
 
 
-
-
-
-
-
-**Parameters**
-- `Fine`
-
-## Basic properties
-{:#basic-properties}
 
 ## Validity
 {:#validity}
+
+<a id="IsValid"></a><a id="IsValid--PadRamifPgon"></a>
+> **IsValid** (P :: *PadRamifPgon*)
+> 
+> -> *BoolElt*
+> {:.ret}
+{:.intrinsic}
+
+True if `P` is valid.
+
+
+<a id="IsWeaklyValid"></a><a id="IsWeaklyValid--PadRamifPgon"></a>
+> **IsWeaklyValid** (P :: *PadRamifPgon*)
+> 
+> -> *BoolElt*
+> {:.ret}
+{:.intrinsic}
+
+True if `P` is weakly valid.
+
 
 <a id="IsValid_Points"></a><a id="IsValid_Points--PadRamifPgon"></a>
 > **IsValid_Points** (P :: *PadRamifPgon*)
@@ -102,26 +119,6 @@ True if the points of `P` are weakly valid.
 {:.intrinsic}
 
 True if the residues of `P` are valid. If true, also returns `<k,y>` such that the uniformizer residue is a `k`th root of `y`.
-
-
-<a id="IsValid"></a><a id="IsValid--PadRamifPgon"></a>
-> **IsValid** (P :: *PadRamifPgon*)
-> 
-> -> *BoolElt*
-> {:.ret}
-{:.intrinsic}
-
-True if `P` is valid.
-
-
-<a id="IsWeaklyValid"></a><a id="IsWeaklyValid--PadRamifPgon"></a>
-> **IsWeaklyValid** (P :: *PadRamifPgon*)
-> 
-> -> *BoolElt*
-> {:.ret}
-{:.intrinsic}
-
-True if `P` is weakly valid.
 
 
 <a id="LowerBoundOnEisensteinCoefficient"></a><a id="LowerBoundOnEisensteinCoefficient--PadRamifPgon--etc"></a><a id="LowerBoundOnEisensteinCoefficient--PadRamifPgon--RngIntElt--RngIntElt"></a>
@@ -210,7 +207,7 @@ All valid assignments of residues to `P`.
 All valid assignments of uniformizer residues to `P`.
 
 **Parameters**
-- `Classes`
+- `Classes := false`: When true, returns one per equivalence class
 
 <a id="CorrectTamePoints"></a><a id="CorrectTamePoints--PadRamifPgon"></a>
 > **CorrectTamePoints** (P :: *PadRamifPgon*)

@@ -905,9 +905,9 @@ end intrinsic;
 ///
 /// A `PadRamifPgon` represents a set of points defining a ramification polygon, which is the Newton polygon of the *ramification polygon* `r(x) = f(pi x + pi) / pi^n` of the Eisenstein polynomial `f(x)` of degree `n`. Some of the points need not be vertices, but can lie on the interior of faces, and therefore this is a more refined invariant than just the polygon itself. The points must be of the form `[<1, J_0>, <p^s_1, J_1>, ..., <p^s_u, 0>, ..., <n, 0>]` where `s_u = v_p(n)`.
 /// 
-/// To each point, we can also assign a non-zero element of the residue class field, which is the leading p-adic coefficients of the corresponding ramification polygon. These are collectively called the *residues* of the ramification polygon. If we multiply the uniformizer of the corresponding extension by the residue `u`, then the residues are all multplied by `u^n`. This defines an equivalence relation between different sets of residues.
+/// To each point, we can also assign a non-zero element of the residue class field, which is the leading p-adic coefficient of the corresponding ramification polygon. These are collectively called the *residues* of the ramification polygon. If we multiply the uniformizer of the corresponding extension by the residue `u`, then the residues are all multplied by `u^n`. This defines an equivalence relation between different sets of residues.
 /// 
-/// Additionally, we can assign a single non-zero element of the residue class field, which we call the *constant coefficient residue*, abbreviated to *CC-residue*, which is the leading p-adic coefficient of the constant coefficient of the corresponding Eisenstein polynomial `f`.
+/// Additionally, we can assign a single non-zero element of the residue class field, which is the *uniformizer residue* (as defined [here]({{site.baseurl}}/template-p-adic-fields)) of an extension defined by `f`. That is, it is the leading p-adic coefficient of the constant coefficient of `f`.
 /// 
 ///toc
 
@@ -1033,6 +1033,9 @@ intrinsic ToTuple(pt :: PadRamifPgonPt) -> Tup
   end if;
 end intrinsic;
 
+///param Fine:=false When true, creates the fine ramification polygon
+///param Res:=false When true, creates the fine ramification polygon with residues (implies Fine)
+///param URes:=false When true, assigns the uniformizer residue
 intrinsic RamificationPolygon(f :: RngUPolElt_FldPadTmpl : Fine:=false, Res:=false, URes:=false) -> PadRamifPgon
   {The ramification polygon of f.}
   require IsEisenstein(f): "f must be Eisenstein";
@@ -1060,6 +1063,20 @@ intrinsic RamificationPolygon(f :: RngUPolElt_FldPadTmpl : Fine:=false, Res:=fal
   return P;
 end intrinsic;
 
+/// A ramification polygon over F, defined by X, which must be one of:
+/// - A sequence or list of points (defined below)
+/// - A Newton polygon
+/// 
+/// A point is a tuple `<j,R_j,ord,res>` where:
+/// - `j` and `R_j` have the meaning defined at the top of this section
+/// - `ord` (optional) when given it must be one of:
+///   - `"eq"` meaning the point is present
+///   - `"gt"` meaning the point is not present
+///   - `"ge"` meaning the point may or may not be present
+///   At vertices, it is assumed to be `"eq"`, and otherwise `"ge"`.
+/// - `res` (optional) when given is the residue to attach to the point. If it is zero, then `ord` must be consistent with `"gt"` and otherwise it must be consistent with `"eq"`.
+///
+///param Fine:=false When true, creates a fine ramification polygon. In particular, `ord` is assumed to be `"gt"` for any points not specified, whereas the default behaviour is to assume `"ge"`.
 intrinsic RamificationPolygon(F :: FldPadTmpl, X : Fine:=false) -> PadRamifPgon
   {A ramification polygon over F.}
   ok, P := IsCoercibleToRamificationPolygon(F, X : Fine:=Fine);
@@ -1067,11 +1084,17 @@ intrinsic RamificationPolygon(F :: FldPadTmpl, X : Fine:=false) -> PadRamifPgon
   return P;
 end intrinsic;
 
+/// True if X is coercible to a ramification polygon.
+/// 
+/// The inputs and parameters are as in `RamificationPolygon` above.
+/// 
+///param Fine /hide
 intrinsic IsCoercibleToRamificationPolygon(F :: FldPadTmpl, X : Fine:=false) -> BoolElt, .
   {True if X is coercible to a ramification polygon over F.}
   return false, "wrong type";
 end intrinsic;
 
+///hide
 intrinsic IsCoercibleToRamificationPolygon(F :: FldPadTmpl, X :: List : Fine:=false) -> BoolElt, .
   {"}
   P := New(PadRamifPgon);
@@ -1202,11 +1225,13 @@ intrinsic IsCoercibleToRamificationPolygon(F :: FldPadTmpl, X :: List : Fine:=fa
   return true, P;
 end intrinsic;
 
+///hide
 intrinsic IsCoercibleToRamificationPolygon(F :: FldPadTmpl, X :: [] : Fine:=false) -> BoolElt, .
   {"}
   return IsCoercibleToRamificationPolygon(F, [* x : x in X *] : Fine:=Fine);
 end intrinsic;
 
+///hide
 intrinsic IsCoercibleToRamificationPolygon(F :: FldPadTmpl, X :: NwtnPgon : Fine:=false) -> BoolElt, .
   {"}
   if Fine then
@@ -1215,7 +1240,7 @@ intrinsic IsCoercibleToRamificationPolygon(F :: FldPadTmpl, X :: NwtnPgon : Fine
   return IsCoercibleToRamificationPolygon(F, Vertices(X));
 end intrinsic;
 
-///## Basic properties
+// ///## Basic properties
 
 ///## Validity
 
@@ -1337,6 +1362,22 @@ function is_valid_uniformizer_residue(P)
   return u^k eq y;
 end function;
 
+intrinsic IsValid(P :: PadRamifPgon) -> BoolElt
+  {True if P is valid.}
+  if not assigned P`is_valid then
+    P`is_valid := IsValid_Points(P) and IsValid_Residues(P) and ((not assigned P`uniformizer_residue) or is_valid_uniformizer_residue(P));
+  end if;
+  return P`is_valid;
+end intrinsic;
+
+intrinsic IsWeaklyValid(P :: PadRamifPgon) -> BoolElt
+  {True if P is weakly valid.}
+  if not assigned P`is_weakly_valid then
+    P`is_weakly_valid := IsWeaklyValid_Points(P) and IsValid_Residues(P) and ((not assigned P`uniformizer_residue) or is_valid_uniformizer_residue(P));
+  end if;
+  return P`is_weakly_valid;
+end intrinsic;
+
 intrinsic IsValid_Points(P :: PadRamifPgon) -> BoolElt
   {True if the points of P are valid.}
   if not assigned P`is_valid_points then
@@ -1369,22 +1410,6 @@ intrinsic IsValid_Residues(P :: PadRamifPgon) -> BoolElt, Tup
   else
     return false, _;
   end if;
-end intrinsic;
-
-intrinsic IsValid(P :: PadRamifPgon) -> BoolElt
-  {True if P is valid.}
-  if not assigned P`is_valid then
-    P`is_valid := IsValid_Points(P) and IsValid_Residues(P) and ((not assigned P`uniformizer_residue) or is_valid_uniformizer_residue(P));
-  end if;
-  return P`is_valid;
-end intrinsic;
-
-intrinsic IsWeaklyValid(P :: PadRamifPgon) -> BoolElt
-  {True if P is weakly valid.}
-  if not assigned P`is_weakly_valid then
-    P`is_weakly_valid := IsWeaklyValid_Points(P) and IsValid_Residues(P) and ((not assigned P`uniformizer_residue) or is_valid_uniformizer_residue(P));
-  end if;
-  return P`is_weakly_valid;
 end intrinsic;
 
 intrinsic LowerBoundOnEisensteinCoefficient(P :: PadRamifPgon, i :: RngIntElt, s :: RngIntElt) -> RngIntElt
@@ -1625,6 +1650,7 @@ intrinsic WithAllResidues(P :: PadRamifPgon : Classes:=false, URes:=false) -> []
   return ret;
 end intrinsic;
 
+///param Classes:=false When true, returns one per equivalence class
 intrinsic WithAllUniformizerResidues(P :: PadRamifPgon : Classes:=false) -> []
   {All valid assignments of uniformizer residues to P.}
   require IsValid(P): "P must be valid";
