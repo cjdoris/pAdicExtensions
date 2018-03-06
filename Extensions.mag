@@ -519,6 +519,29 @@ intrinsic BinomialValuation(K :: FldPadTmpl, n :: RngIntElt, k :: RngIntElt) -> 
   return AbsoluteRamificationDegree(K) * BinomialValuation(n, k, Prime(K));
 end intrinsic;
 
+intrinsic ShiftedBinomialResidue(K :: FldPadTmpl, n :: RngIntElt, k :: RngIntElt) -> RngIntElt
+  {The residue class of n choose k shifted in K down to a unit.}
+  require n ge 0: "n must be at least 0";
+  require 0 le k and k le n: "k must be in the range [0..n]";
+  FF := ResidueClassField(K);
+  p := Prime(K);
+  return ShiftedBinomial(FF, n, k) * UniformizerResidue(K)^(-BinomialValuation(n,k,p));
+end intrinsic;
+
+intrinsic BinomialResidue(K :: FldPadTmpl, n :: RngIntElt, k :: RngIntElt) -> RngIntElt
+  {The residue class of n choose k.}
+  require n ge 0: "n must be at least 0";
+  FF := ResidueClassField(K);
+  p := Prime(K);
+  if k lt 0 or k gt n then
+    return FF ! 0;
+  elif BinomialValuation(n, k, p) eq 0 then
+    return ShiftedBinomial(FF, n, k);
+  else
+    return FF ! 0;
+  end if;
+end intrinsic;
+
 ///## Ore's conditions
 
 intrinsic OreConditions(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt, s :: RngIntElt) -> BoolElt
@@ -896,9 +919,14 @@ declare attributes PadRamifPgon
   , degree
   , smax
   , vertices
+  , uniformizer_residue
   // cache
   , ellss
   , ells
+  , is_valid_points
+  , is_weakly_valid_points
+  , is_valid_residues
+  , uniformizer_residue_eqn
   , is_valid
   , is_weakly_valid
   , is_critical_coeff
@@ -911,7 +939,7 @@ declare attributes PadRamifPgonPt
   , x               // the abscissa
   , J               // the ordinate
   , is_equal        // true if R_x = J (else R_x >= J)
-  , is_inequal      // true if R_x > J (else R_x >= J)
+  , is_unequal      // true if R_x > J (else R_x >= J)
   , is_vertex       // true if it's a vertex (implies is_equal)
   , residue         // the residue, if known
   , exponent        // s in x=p^s
@@ -922,13 +950,16 @@ declare attributes PadRamifPgonPt
 ///hide
 intrinsic Print(pt :: PadRamifPgonPt)
   {Print.}
-  printf "(%o, %o)%o", assigned pt`exponent and pt`exponent le pt`parent`smax and pt`exponent gt 0 select Sprintf("%o^%o", Prime(pt`parent`base_field), pt`exponent) else pt`x, pt`J, pt`is_vertex select "*" else pt`is_equal select "" else pt`is_inequal select "x" else "?";
+  printf "(%o)%o", Join([Sprintf("%o",x) : x in xs] where xs:=[* assigned pt`exponent and pt`exponent le pt`parent`smax and pt`exponent gt 0 select Sprintf("%o^%o", Prime(pt`parent`base_field), pt`exponent) else pt`x, pt`J *] cat (assigned pt`residue select [*pt`residue*] else [**]), ", "), pt`is_vertex select "*" else pt`is_equal select "" else pt`is_unequal select "x" else "?";
 end intrinsic;
 
 ///hide
 intrinsic Print(P :: PadRamifPgon)
   {Print.}
-  printf "Ramification polygon with points [%o]", Join([Sprintf("%o", pt) : pt in P`points | not pt`is_inequal], ", ");
+  printf "Ramification polygon with points [%o]", Join([Sprintf("%o", pt) : pt in P`points | not pt`is_unequal], ", ");
+  if assigned P`uniformizer_residue then
+    printf " and uniformizer residue %o", P`uniformizer_residue;
+  end if;
 end intrinsic;
 
 ///hide
@@ -944,7 +975,7 @@ end intrinsic;
 intrinsic Hash(pt :: PadRamifPgonPt) -> RngIntElt
   {Hash.}
   if not assigned pt`hash then
-    pt`hash := Hash(<pt`x, pt`J, pt`is_equal, pt`is_inequal, assigned pt`residue select pt`residue else -1>);
+    pt`hash := Hash(<pt`x, pt`J, pt`is_equal, pt`is_unequal, assigned pt`residue select pt`residue else -1>);
   end if;
   return pt`hash;
 end intrinsic;
@@ -952,7 +983,7 @@ end intrinsic;
 ///hide
 intrinsic 'eq'(P1 :: PadRamifPgon, P2 :: PadRamifPgon) -> BoolElt
   {Equality.}
-  return P1`base_field eq P2`base_field and [ToTuple(pt) : pt in P1`points] eq [ToTuple(pt) : pt in P2`points];
+  return P1`base_field eq P2`base_field and [* ToTuple(pt) : pt in P1`points *] eq [* ToTuple(pt) : pt in P2`points *] and (assigned P1`uniformizer_residue and assigned P2`uniformizer_residue and P1`uniformizer_residue eq P2`uniformizer_residue select true else (not assigned P1`uniformizer_residue) and (not assigned P2`uniformizer_residue) select true else false);
 end intrinsic;
 
 ///## Creation
@@ -978,7 +1009,7 @@ intrinsic Copy(pt :: PadRamifPgonPt : Parent:=pt`parent) -> PadRamifPgonPt
   pt2`x := pt`x;
   pt2`J := pt`J;
   pt2`is_equal := pt`is_equal;
-  pt2`is_inequal := pt`is_inequal;
+  pt2`is_unequal := pt`is_unequal;
   pt2`is_vertex := pt`is_vertex;
   if assigned pt`residue then
     pt2`residue := pt`residue;
@@ -993,25 +1024,37 @@ end intrinsic;
 intrinsic ToTuple(pt :: PadRamifPgonPt) -> Tup
   {Converts pt to a tuple.}
   if assigned pt`residue then
-    return <pt`x, pt`J, pt`is_equal select "eq" else pt`is_inequal select "gt" else "ge", pt`residue>;
+    return <pt`x, pt`J, pt`is_equal select "eq" else pt`is_unequal select "gt" else "ge", pt`residue>;
   else
-    return <pt`x, pt`J, pt`is_equal select "eq" else pt`is_inequal select "gt" else "ge">;
+    return <pt`x, pt`J, pt`is_equal select "eq" else pt`is_unequal select "gt" else "ge">;
   end if;
 end intrinsic;
 
-intrinsic RamificationPolygon(f :: RngUPolElt_FldPadTmpl : Fine:=false) -> PadRamifPgon
+intrinsic RamificationPolygon(f :: RngUPolElt_FldPadTmpl : Fine:=false, Res:=false, URes:=false) -> PadRamifPgon
   {The ramification polygon of f.}
   require IsEisenstein(f): "f must be Eisenstein";
   n := Degree(f);
   F := BaseRing(f);
   Rs := [Min([n*(BinomialValuation(F,i,j)+vi-1)+i : i in [j..n] | vi lt Infinity() where vi:=Valuation(Coefficient(f,i))]) : j in [1..n]];
   pgon := NewtonPolygon([<j,Rs[j]> : j in [1..n]] : Faces:="Lower");
-  if Fine then
+  ures := -Coefficient(f,0)`coeffs[1]/Coefficient(f,n)`coeffs[1];
+  if Res then
+    points := [<j,Rs[j],"eq",res>
+      where res := ShiftedBinomialResidue(F,b,j) * (Coefficient(f,b)`coeffs[1] / Coefficient(f,n)`coeffs[1]) / ures^(BinomialValuation(F,b,j) + Valuation(Coefficient(f,b)))
+      where b := ((Rs[j] - 1) mod n) + 1
+      : j in [1..n] | Evaluate(pgon,j) eq Rs[j]];
+    P := RamificationPolygon(F, points : Fine);
+  elif Fine then
     points := [<j,Rs[j]> : j in [1..n] | Evaluate(pgon, j) eq Rs[j]];
-    return RamificationPolygon(F, points : Fine);
+    P := RamificationPolygon(F, points : Fine);
   else
-    return RamificationPolygon(F, Vertices(pgon));
+    P := RamificationPolygon(F, Vertices(pgon));
   end if;
+  if URes then
+    P`uniformizer_residue := ures;
+  end if;
+  assert IsValid(P);
+  return P;
 end intrinsic;
 
 intrinsic RamificationPolygon(F :: FldPadTmpl, X : Fine:=false) -> PadRamifPgon
@@ -1050,15 +1093,36 @@ intrinsic IsCoercibleToRamificationPolygon(F :: FldPadTmpl, X :: List : Fine:=fa
     pt`x := x;
     pt`J := J;
     pt`is_equal := false;
-    pt`is_inequal := false;
+    pt`is_unequal := false;
     if #v lt 3 then
       pt`is_equal := Fine;
     elif v[3] cmpeq "eq" then
       pt`is_equal := true;
     elif v[3] cmpeq "gt" then
-      pt`is_inequal := true;
+      pt`is_unequal := true;
     elif v[3] cmpne "ge" then
       return false, "third entry must be \"eq\", \"ge\" or \"gt\"";
+    end if;
+    if #v ge 4 then
+      ok, res := IsCoercible(ResidueClassField(F), v[4]);
+      if ok then
+        if res eq 0 then
+          if pt`is_equal then
+            return false, "point is present but residue is zero";
+          else
+            pt`is_unequal := true;
+          end if;
+        else
+          if pt`is_unequal then
+            return false, "point is missing but residue is non-zero";
+          else
+            pt`is_equal := true;
+            pt`residue := res;
+          end if;
+        end if;
+      else
+        return false, "fourth entry must be a residue";
+      end if;
     end if;
     ok, s := IsPowerOf(x, p);
     if ok then
@@ -1086,7 +1150,7 @@ intrinsic IsCoercibleToRamificationPolygon(F :: FldPadTmpl, X :: List : Fine:=fa
   P`vertices := vs;
   for i in [1..#pts] do
     if <pts[i]`x, pts[i]`J> in vs then
-      if pts[i]`is_inequal then
+      if pts[i]`is_unequal then
         return false, "inequal points must not be vertices";
       end if;
       pts[i]`is_equal := true;
@@ -1119,13 +1183,13 @@ intrinsic IsCoercibleToRamificationPolygon(F :: FldPadTmpl, X :: List : Fine:=fa
       pt`exponent := s;
       pt`is_vertex := false;
       pt`is_equal := false;
-      pt`is_inequal := Fine;
+      pt`is_unequal := Fine;
       pt`J := Evaluate(pgon, pt`x);
       ok, J := IsCoercible(Z, pt`J);
       if ok then
         pt`J := J;
       else
-        pt`is_inequal := true;
+        pt`is_unequal := true;
       end if;
       Insert(~pts, s+1, pt);
     end if;
@@ -1152,7 +1216,7 @@ end intrinsic;
 
 ///## Validity
 
-function is_valid(P : Weak:=false)
+function is_valid_points(P : Weak:=false)
   K := P`base_field;
   p := Prime(K);
   pts := P`points;
@@ -1202,18 +1266,120 @@ function is_valid(P : Weak:=false)
   return true, _;
 end function;
 
+// given equations [<k1,y1>,...], returns true if the system x^ki=yi is consistent; if so, also returns <k,y> such that x^k=y has the same solutions
+function has_consistent_roots(eqns)
+  assert #eqns gt 0;
+  k := [Z| eqn[1] : eqn in eqns];
+  y := [eqn[2] : eqn in eqns];
+  K, A := XGCD(k);
+  Y := &*[y[i]^A[i] : i in [1..#eqns]];
+  if forall{i : i in [1..#eqns] | y[i] eq Y^xdiv(k[i], K)} then
+    return true, <K,Y>;
+  else
+    return false, _;
+  end if;
+end function;
+
+function is_valid_residues(P)
+  error if not IsWeaklyValid_Points(P), "points are invalid";
+  K := P`base_field;
+  n := P`degree;
+  smax := P`smax;
+  p := Prime(K);
+  FF := ResidueClassField(K);
+  // tame part
+  for pt in P`points[smax+1..#P`points] do
+    assert pt`J eq 0;
+    assert pt`x ge p^smax;
+    if (assigned pt`residue) and (pt`residue ne BinomialResidue(K, n, pt`x)) then
+      return false, "tame";
+    end if;
+  end for;
+  // consistency conditions - initially the equation is for (q-1)th roots of unity, i.e. the units of FF
+  eqn := <#FF-1, FF!1>;
+  for s in [0..smax] do
+    pt := P`points[s+1];
+    if pt`is_equal and assigned pt`residue then
+      a, b := Quotrem(pt`J - 1, n);
+      b +:= 1;
+      if b eq n then
+        ok, eqn := has_consistent_roots([eqn, <a+1, ShiftedBinomialResidue(K,n,p^s) / pt`residue>]);
+        if not ok then
+          return false, Sprintf("inconsistent at n: %o", s);
+        end if;
+      else
+        for s2 in [0..s-1] do
+          pt2 := P`points[s2+1];
+          if pt2`is_equal and assigned pt2`residue then
+            a2, b2 := Quotrem(pt2`J - 1, n);
+            b2 +:= 1;
+            if b2 eq b then
+              ok, eqn := has_consistent_roots([eqn, <a2-a, ShiftedBinomialResidue(K,b2,p^s2) * pt`residue / (ShiftedBinomialResidue(K,b,p^s) * pt2`residue)>]);
+              if not ok then
+                return false, Sprintf("pairwise inconsistent: %o %o", s2, s);
+              end if;
+            end if;
+          end if;
+        end for;
+      end if;
+    end if;
+  end for;
+  return true, eqn;
+end function;
+
+function is_valid_uniformizer_residue(P)
+  error if not IsValid_Residues(P), "residues are invalid";
+  k, y := Explode(P`uniformizer_residue_eqn);
+  u := P`uniformizer_residue;
+  return u^k eq y;
+end function;
+
+intrinsic IsValid_Points(P :: PadRamifPgon) -> BoolElt
+  {True if the points of P are valid.}
+  if not assigned P`is_valid_points then
+    P`is_valid_points := is_valid_points(P);
+  end if;
+  return P`is_valid_points;
+end intrinsic;
+
+intrinsic IsWeaklyValid_Points(P :: PadRamifPgon) -> BoolElt
+  {True if the points of P are weakly valid.}
+  if not assigned P`is_weakly_valid_points then
+    P`is_weakly_valid_points := is_valid_points(P : Weak);
+  end if;
+  return P`is_weakly_valid_points;
+end intrinsic;
+
+intrinsic IsValid_Residues(P :: PadRamifPgon) -> BoolElt, Tup
+  {True if the residues of P are valid. If true, also returns `<k,y>` such that the uniformizer residue is a `k`th root of `y`.}
+  if not assigned P`is_valid_residues then
+    ok, eqn := is_valid_residues(P);
+    if ok then
+      P`is_valid_residues := true;
+      P`uniformizer_residue_eqn := eqn;
+    else
+      P`is_valid_residues := false;
+    end if;
+  end if;
+  if P`is_valid_residues then
+    return true, P`uniformizer_residue_eqn;
+  else
+    return false, _;
+  end if;
+end intrinsic;
+
 intrinsic IsValid(P :: PadRamifPgon) -> BoolElt
-  {True if there is an extension with ramification polygon P.}
+  {True if P is valid.}
   if not assigned P`is_valid then
-    P`is_valid := is_valid(P);
+    P`is_valid := IsValid_Points(P) and IsValid_Residues(P) and ((not assigned P`uniformizer_residue) or is_valid_uniformizer_residue(P));
   end if;
   return P`is_valid;
 end intrinsic;
 
 intrinsic IsWeaklyValid(P :: PadRamifPgon) -> BoolElt
-  {True if adding points to P could yield a valid ramification polygon.}
+  {True if P is weakly valid.}
   if not assigned P`is_weakly_valid then
-    P`is_weakly_valid := is_valid(P : Weak);
+    P`is_weakly_valid := IsWeaklyValid_Points(P) and IsValid_Residues(P) and ((not assigned P`uniformizer_residue) or is_valid_uniformizer_residue(P));
   end if;
   return P`is_weakly_valid;
 end intrinsic;
@@ -1236,7 +1402,7 @@ intrinsic LowerBoundOnEisensteinCoefficient(P :: PadRamifPgon, i :: RngIntElt, s
     pt := P`points[s+1];
     assert pt`exponent eq s;
     ellss := P`ellss;
-    ellss[s+1, i] := (pt`is_inequal select Floor(x)+1 else Ceiling(x) where x:=(pt`J-i)/n) - BinomialValuation(K, i, p^s) + 1;
+    ellss[s+1, i] := (pt`is_unequal select Floor(x)+1 else Ceiling(x) where x:=(pt`J-i)/n) - BinomialValuation(K, i, p^s) + 1;
     P`ellss := ellss;
   end if;
   return P`ellss[s+1, i];
@@ -1245,7 +1411,7 @@ end intrinsic;
 intrinsic LowerBoundOnEisensteinCoefficient(P :: PadRamifPgon, i :: RngIntElt) -> RngIntElt
   {The lower bound on the ith coefficient of an Eisenstein polynomial generating P.}
   n := P`degree;
-  require IsValid(P): "P must be valid";
+  require IsValid_Points(P): "P must be valid";
   require 0 le i and i le n: Sprintf("i must be in range [%o..%o]", 0, n);
   if i eq 0 then
     return 1;
@@ -1281,12 +1447,19 @@ end intrinsic;
 
 ///## Enumeration
 
-intrinsic AllRamificationPolygons(F :: FldPadTmpl, n :: RngIntElt : J0:=false, Fine:=false) -> []
+///param J0 When given restrict to polygons with vertex `<1,J0>`, i.e. with discriminant valuation `J0+n-1`.
+///param Fine:=false When true, produce fine ramification polygons, where every point is either in or out. Equivalent to calling `AllRefinements` on the outputs.
+///param Res:=false When true, produce polygons with residues. Equivalent to calling `WithAllResidues` on the outputs. Implies `Fine:=true`.
+///param URes:=false When true, produce polygons with uniformizer residues. Equivalent to calling `WithAllUniformzerResidues` on the outputs.
+///param Classes:=false When true, produce only one representative per equivalence class. Only makes a difference when `Res` or `URes` are set.
+intrinsic AllRamificationPolygons(F :: FldPadTmpl, n :: RngIntElt : J0:=false, Fine:=false, Res:=false, URes:=false, Classes:=false) -> []
   {All valid ramification polygons over F of degree n.}
-  if Fine then
-    Pss := [AllRefinements(P) : P in AllRamificationPolygons(F, n : J0:=J0, Fine:=false)];
-    assert forall{Ps : Ps in Pss | #Ps gt 0};
-    return &cat Pss;
+  if URes then
+    return &cat[WithAllUniformizerResidues(P : Classes:=Classes) : P in AllRamificationPolygons(F, n : J0:=J0, Fine:=Fine, Res:=Res, Classes:=Classes)];
+  elif Res then
+    return &cat[WithAllResidues(P : Classes:=Classes) : P in AllRamificationPolygons(F, n : J0:=J0, Fine:=Fine)];
+  elif Fine then
+    return &cat[AllRefinements(P) : P in AllRamificationPolygons(F, n : J0:=J0)];
   end if;
   require n ge 1: "n must be positive";
   // get an initial list of J0s
@@ -1316,28 +1489,20 @@ intrinsic AllRamificationPolygons(F :: FldPadTmpl, n :: RngIntElt : J0:=false, F
     todo := todo[2..#todo];
     // are we done?
     if s eq smax then
-      if IsValid(P) then
+      if IsValid_Points(P) then
         Append(~ret, P);
       end if;
     else
-      print "s =", s;
-      print "pgon =", Vertices(P`pgon);
       // branch once to not add a vertex
       Append(~todo, <pts, P, s+1>);
       // branch for each new vertex
-      for J in [Max(1,Ceiling(LeftEvaluate(P`pgon, p^s)))..Ceiling(Evaluate(P`pgon, p^s))-1] do
-        print "J =", J;
+      for J in [Max(1,Floor(LeftEvaluate(P`pgon, p^s))+1)..Ceiling(Evaluate(P`pgon, p^s))-1] do
         if OreConditions(F, n, J, s) then
-          print "ore ok";
           pts2 := Append(pts, <p^s, J>);
           P2 := RamificationPolygon(F, pts2 cat tail);
           assert <p^s, J> in P2`vertices;
-          ok, why := is_valid(P2 : Weak);
-          if ok then
-            print "weakly valid";
+          if IsWeaklyValid_Points(P2) then
             Append(~todo, <pts2, P2, s+1>);
-          else
-            print "invalid:", why;
           end if;
         end if;
       end for;
@@ -1346,9 +1511,17 @@ intrinsic AllRamificationPolygons(F :: FldPadTmpl, n :: RngIntElt : J0:=false, F
   return ret;
 end intrinsic;
 
-intrinsic AllRefinements(P :: PadRamifPgon) -> []
+///param Res:=false As for `AllRamificationPolygons`
+///param URes:=false As for `AllRamificationPolygons`
+///param Classes:=false As for `AllRamificationPolygons`
+intrinsic AllRefinements(P :: PadRamifPgon : Res:=false, URes:=false, Classes:=false) -> []
   {All fine ramification polygons which refine P.}
-  require IsValid(P): "P must be valid";
+  if URes then
+    return &cat[WithAllUniformizerResidues(P2 : Classes:=Classes) : P2 in AllRefinements(P : Res:=Res, Classes:=Classes)];
+  elif Res then
+    return &cat[WithAllResidues(P2 : Classes:=Classes) : P2 in AllRefinements(P)];
+  end if;
+  require IsValid_Points(P): "P must be valid";
   todo := [<WithCorrectTamePoints(P),0>];
   ret := [];
   F := P`base_field;
@@ -1359,27 +1532,131 @@ intrinsic AllRefinements(P :: PadRamifPgon) -> []
     todo := todo[2..#todo];
     // done?
     if s eq smax then
-      if IsValid(P) then
+      if IsValid_Points(P) then
         Append(~ret, P);
       end if;
     else
       pt := P`points[s+1];
-      if pt`is_equal or pt`is_inequal then
+      if pt`is_equal or pt`is_unequal then
         Append(~todo, <P, s+1>);
       else
         P2 := Copy(P);
         P2`points[s+1]`is_equal := true;
-        if IsWeaklyValid(P2) then
+        if IsWeaklyValid_Points(P2) then
           Append(~todo, <P2, s+1>);
         end if;
         P3 := Copy(P);
-        P3`points[s+1]`is_inequal := true;
-        if IsWeaklyValid(P3) then
+        P3`points[s+1]`is_unequal := true;
+        if IsWeaklyValid_Points(P3) then
           Append(~todo, <P3, s+1>);
         end if;
       end if;
     end if;
   end while;
+  return ret;
+end intrinsic;
+
+///param Classes:=false When true, only return one representative per equivalence class
+///param URes:=false As for `AllRamificationPolygons`
+intrinsic WithAllResidues(P :: PadRamifPgon : Classes:=false, URes:=false) -> []
+  {All valid assignments of residues to P.}
+  if URes then
+    return &cat[WithAllUniformizerResidues(P2 : Classes:=Classes) : P2 in WithAllResidues(P : Classes:=Classes)];
+  end if;
+  require IsValid(P): "P must be valid";
+  todo := [<P, 0>];
+  ret := [];
+  K := P`base_field;
+  FF := ResidueClassField(K);
+  smax := P`smax;
+  while #todo gt 0 do
+    // pop an item from the todo list
+    P, s := Explode(todo[1]);
+    todo := todo[2..#todo];
+    // done?
+    if s gt smax then
+      assert IsValid(P);
+      Append(~ret, P);
+    else
+      pt := P`points[s+1];
+      if pt`is_unequal or assigned pt`residue then
+        Append(~todo, <P, s+1>);
+      else
+        if Classes then
+          eqn := <GCD([#FF-1] cat [pt`J : pt in P`points | pt`J ne 0 and pt`is_equal and assigned pt`residue]), FF!1>;
+          classes := [FF|];
+          for x in FF do
+            if x ne 0 then
+              for y in classes do
+                if y ne 0 and has_consistent_roots([eqn, <pt`J, x/y>]) then
+                  continue x;
+                end if;
+              end for;
+            end if;
+            Append(~classes, x);
+          end for;
+        else
+          classes := FF;
+        end if;
+        for x in classes do
+          if x eq 0 then
+            if not pt`is_equal then
+              P2 := Copy(P);
+              P2`points[s+1]`is_unequal := true;
+              if IsValid(P2) then
+                Append(~todo, <P2,s+1>);
+              end if;
+            end if;
+          else
+            P2 := Copy(P);
+            P2`points[s+1]`residue := x;
+            P2`points[s+1]`is_equal := true;
+            if IsValid(P2) then
+              Append(~todo, <P2, s+1>);
+            end if;
+          end if;
+        end for;
+      end if;
+    end if;
+  end while;
+  return ret;
+end intrinsic;
+
+intrinsic WithAllUniformizerResidues(P :: PadRamifPgon : Classes:=false) -> []
+  {All valid assignments of uniformizer residues to P.}
+  require IsValid(P): "P must be valid";
+  if assigned P`uniformizer_residue then
+    return [P];
+  end if;
+  xs := [x[1] : x in Roots(R.1^k - y)]
+    where R:=PolynomialRing(Parent(y))
+    where k,y:=Explode(P`uniformizer_residue_eqn);
+  assert #xs gt 0;
+  if Classes then
+    K := P`base_field;
+    FF := ResidueClassField(K);
+    n := P`degree;
+    eqn := <GCD([#FF-1] cat [pt`J : pt in P`points | pt`J ne 0 and pt`is_equal and assigned pt`residue]), FF!1>;
+    classes := [FF|];
+    for x in xs do
+      assert x ne 0;
+      for y in classes do
+        if has_consistent_roots([eqn, <n, x/y>]) then
+          continue x;
+        end if;
+      end for;
+      Append(~classes, x);
+    end for;
+  else
+    classes := xs;
+  end if;
+  ret := [];
+  for x in classes do
+    P2 := Copy(P);
+    P2`uniformizer_residue := x;
+    assert IsValid(P2);
+    Append(~ret, P2);
+  end for;
   return ret;
 end intrinsic;
 
@@ -1408,22 +1685,28 @@ declare attributes Tmpl_FldPadTmplElt: F, min_val, min_val_sharp, max_val, resid
 
 ///## Creation of templates
 
-intrinsic TemplateForEisensteinPolynomialsByDegreeAndDisciminant(F :: FldPadTmpl, n :: RngIntElt, J :: RngIntElt) -> Tmpl_RngUPolElt_FldPadTmpl
-  {Template for Eisenstein polynomials of degree n, discriminant valuation `n+J-1` over F.}
-  require OreConditions(F, n, J): "parameters must satisfy Ore conditions";
+///param J When given, restrict the discriminant valuation to `n+J-1`.
+intrinsic TemplateForEisensteinPolynomials(F :: FldPadTmpl, n :: RngIntElt : J:=false) -> Tmpl_RngUPolElt_FldPadTmpl
+  {Template for monic Eisenstein polynomials over F of degree n.}
+  require J cmpeq false or Type(J) eq RngIntElt: "J must be an integer";
+  require J cmpeq false or OreConditions(F, n, J): "J must satisfy Ore conditions";
   T := New(Tmpl_RngUPolElt_FldPadTmpl);
   T`R := PolynomialRing(F);
-  b := J mod n;
-  a := J div n;
   T`coeffs := [];
   p := Prime(F);
   e := AbsoluteRamificationDegree(F);
+  Jmax := n * e * Valuation(n, p);
   for i in [0..n] do
     C := New(Tmpl_FldPadTmplElt);
     C`F := F;
-    C`min_val := i eq n select 0 else i eq 0 select 1 else i ge b select Max(1+a-e*Valuation(i,p),1) else Max(2+a-e*Valuation(i,p),1);
-    C`min_val_sharp := i in {0,n,b};
-    C`max_val := i eq n select 0 else Floor(1 + 2*J/n);
+    C`min_val := i eq n        select 0
+      else       J cmpeq false select 1
+      else       i eq 0        select 1
+      else Max(1, (i ge (J mod n) select 1 else 2)+(J div n)-e*Valuation(i,p));
+    C`min_val_sharp := J cmpeq false select i in {0,n} else i in {0,n,J mod n};
+    C`max_val := i eq n        select 0
+      else       J cmpeq false select Floor(1+2*Jmax/n)
+      else Floor(1 + 2*J/n);
     if i eq n then
       C`residues := [{ResidueClassField(F)!1}];
     end if;
@@ -1451,14 +1734,14 @@ intrinsic Print(T :: Tmpl_RngUPolElt_FldPadTmpl)
   IndentPop();
 end intrinsic;
 
-// ///param Residues When given, use these residues instead of the ones attached to P.
-// ///param CCResidue When given, use this CC-residue instead of the one attached to P.
 ///param Shrink:=true When true, returns the smallest template possible; when false, just uses the discriminant to bound the template.
-intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPgon : Shrink:=true) -> Tmpl_RngUPolElt_FldPadTmpl
+///param Residues:=true When true, incorporate residue information when it is available
+intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPgon : Shrink:=true, Residues:=true) -> Tmpl_RngUPolElt_FldPadTmpl
   {A template for Eisenstein polynomials with this ramification polygon.}
-  require IsValid(P): "invalid";
+  require IsValid_Points(P): "invalid";
   F := P`base_field;
   FF := ResidueClassField(P`base_field);
+  p := Prime(F);
   n := P`degree;
   J0 := P`points[1]`J;
   T := New(Tmpl_RngUPolElt_FldPadTmpl);
@@ -1480,45 +1763,51 @@ intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPgon : Shrink:=true) -> 
       C[i+1]`max_val := Min(C[i+1]`max_val, h + (i lt j select 1 else 0));
     end for;
   end if;
-//   // residues
-//   if Residues cmpeq true select assigned P`residues else Residues cmpne false then
-//     FF := ResidueClassField(P`F);
-//     // get the set of residues
-//     if Residues cmpeq true then
-//       require assigned P`residues: "residues not assigned";
-//       rs := P`residues;
-//       ccrespol := P`ccrespol;
-//     else
-//       ok, rs := IsCoercible(PowerSequence(FF), Residues);
-//       require ok: "Residues must be a boolean or a sequence of elements of the residue class field";
-//       ok, ccrespol := IsValidResidues(P, rs);
-//       require ok: "Residues are not valid";
-//     end if;
-//     // get the residue of the leading coefficient
-//     if CCResidue cmpeq false then
-//       require assigned P`ccres: "constant coefficient residue not specified";
-//       ccres := P`ccres;
-//       assert Evaluate(ccrespol, ccres) eq 0;
-//     else
-//       ok, ccres := IsCoercible(FF, CCResidue);
-//       require ok: "CCResidue must be in the residue class field";
-//       require Evaluate(ccrespol, ccres) eq 0: "CCResidue not valid";
-//     end if;
-//     // assign residues
-//     for i in [1..#C] do
-//       if not assigned C[i]`residues then
-//         C[i]`residues := [PowerSet(FF)|];
-//       end if;
-//     end for;
-//     // set the residue of the leading coefficient
-//     C[1]`residues[1] := {-ccres};
-//     // set the other residues
-//     for t in [0..u(P)] do
-//       if b(P,t) ne 0 then
-//         C[b(P,t)+1]`residues[1] := {rs[t+1] * ccres^(1+a(P,t)) / sbinres(P,b(P,t),x(P,t))};
-//       end if;
-//     end for;
-//     // shrink
+  if Residues then
+    if assigned P`uniformizer_residue then
+      ures := P`uniformizer_residue;
+      // ensure residues are assigned
+      for i in [1..#C] do
+        if not assigned C[i]`residues then
+          C[i]`residues := [PowerSet(FF)|];
+        end if;
+      end for;
+      // set the residue of the leading coefficient
+      C[1]`residues[1] := {-ures};
+      for s in [0..P`smax] do
+        pt := P`points[s+1];
+        if pt`is_equal and assigned pt`residue then
+          a, b := Quotrem(pt`J - 1, n);
+          b +:= 1;
+          if b ne n then
+            C[b+1]`residues[1] := { pt`residue * ures^(a+1) / ShiftedBinomialResidue(F, b, p^s) };
+          end if;
+        end if;
+      end for;
+      // shrink
+      if Shrink then
+        RFF := PolynomialRing(FF);
+        for m in [1..M] do
+          Cm := Min([pt`J + pt`x * m : pt in P`points | not pt`is_unequal]);
+          h, j := Quotrem(Cm, n);
+          pts := [pt : pt in P`points | (not pt`is_unequal) and (pt`J + pt`x * m eq Cm)];
+          if forall{pt : pt in pts | assigned pt`residue} then
+            Sm := &+[RFF.1^(pt`x) * pt`residue : pt in pts];
+            U := { ures^(1 + h) * Evaluate(Sm, x) : x in FF };
+            cosets := [];
+            for x in FF do
+              if not exists{c : c in cosets | c-x in U} then
+                Append(~cosets, x);
+              end if;
+            end for;
+            C[j+1]`residues[h+2-C[j+1]`min_val] := SequenceToSet(cosets);
+          end if;
+        end for;
+      end if;
+    elif exists{pt : pt in P`points[1..P`smax] | pt`is_equal and assigned pt`residue} then
+      error "P has some residues set but no uniformizer residue so cannot produce a template; consider the Resiudes:=false parameter";
+    end if;
+  end if;
 //     if Shrink then
 //       RFF := PolynomialRing(FF);
 //       for m in [1..M] do
