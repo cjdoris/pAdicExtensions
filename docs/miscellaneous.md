@@ -1,16 +1,6 @@
 # Miscellaneous
 {:#miscellaneous}
 
-<a id="FloorLog"></a><a id="FloorLog--RngIntElt--etc"></a><a id="FloorLog--RngIntElt--RngIntElt"></a>
-> **FloorLog** (b :: *RngIntElt*, x :: *RngIntElt*)
-> 
-> -> *RngIntElt*
-> {:.ret}
-{:.intrinsic}
-
-Equivalent to `Floor(Log(b,x))` but avoids any floating point arithmetic.
-
-
 <a id="Evaluate"></a><a id="Evaluate--NwtnPgon--etc"></a><a id="Evaluate--NwtnPgon--FldRatElt"></a><a id="Evaluate--NwtnPgon--RngIntElt"></a>
 > **Evaluate** (P :: *NwtnPgon*, x :: *FldRatElt*)
 > 
@@ -21,6 +11,20 @@ Equivalent to `Floor(Log(b,x))` but avoids any floating point arithmetic.
 {:.intrinsic}
 
 Treating `P` as a piecewise-linear function, evaluates it at `x`.
+
+
+
+
+<a id="LeftEvaluate"></a><a id="LeftEvaluate--NwtnPgon--etc"></a><a id="LeftEvaluate--NwtnPgon--FldRatElt"></a><a id="LeftEvaluate--NwtnPgon--RngIntElt"></a>
+> **LeftEvaluate** (P :: *NwtnPgon*, x :: *FldRatElt*)
+> 
+> **LeftEvaluate** (P :: *NwtnPgon*, x :: *RngIntElt*)
+> 
+> -> *FldRatElt*
+> {:.ret}
+{:.intrinsic}
+
+Evaluates the face of `P` to the left of `x` at `x`.
 
 
 
@@ -52,7 +56,7 @@ The `p`-adic valuation of `n` choose `k`.
 > {:.ret}
 {:.intrinsic}
 
-The product of the integers up to `n` which are units in `F`. By Wilson's formula, if `n=kn+r` this is `(-1)^k * r!`.
+The product of the integers up to `n` which are units in `F`. By Wilson's formula, if `n=kp+r` this is `(-1)^k * r!`.
 
 
 <a id="ShiftedFactorial"></a><a id="ShiftedFactorial--FldFin--etc"></a><a id="ShiftedFactorial--FldFin--RngIntElt"></a>

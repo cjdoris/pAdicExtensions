@@ -20,37 +20,36 @@
 >
 > // Find the ramification polygons of degree 9 over Q_3
 > // with dicriminant valuation 10+9-1=18
-> AllRamificationPolygons(F, 9 : J0:=10);                
+> Ps := AllRamificationPolygons(F, 9 : J0:=10);
+> Ps;
 [
-  Ramification Points [10 . 0; 9],
-  Ramification Points [10 3, 0; 9],
-  Ramification Points [10 6, 0; 9]
+  Ramification polygon with points [(1, 10)*, (3^2, 0)*],
+  Ramification polygon with points [(1, 10)*, (3^1, 3)*, (3^2, 0)*],
+  Ramification polygon with points [(1, 10)*, (3^1, 6)*, (3^2, 0)*]
 ]
 >
 > // Pick one
-> P := $1[2];
+> P := Ps[2];
 > P;
-Ramification Points [10 3, 0; 9]
+Ramification polygon with points [(1, 10)*, (3^1, 3)*, (3^2, 0)*]
 >
 > // Make a template
 > T := TemplateForEisensteinPolynomials(P);
 > T;
 Template for an element of
   Univariate polynomial ring over Template 3-adic field (d=1, f=1, e=1) actually
-  3-adic field mod 3^100
+  3-adic field
 with coefficients
-   0 min_val=1 (sharp) max_val=2
-   1 min_val=2 (sharp) max_val=2
-   2 min_val=2 max_val=2
-   3 min_val=1 (sharp) max_val=2
-   4 min_val=2 max_val=2
-   5 min_val=2 max_val=1
-   6 min_val=1 max_val=1
-   7 min_val=2 max_val=1
-   8 min_val=2 max_val=1
-   9   min_val=0 max_val=0 residues=[
-  { 1 }
-  ]
+   0 (1; F* F)
+   1 (2; F*)
+   2 (2; F)
+   3 (1; F* F)
+   4 (2; F)
+   5 (2; )
+   6 (1; F)
+   7 (2; )
+   8 (2; )
+   9 (0; {1})
 > 
 > // The number of possible outputs
 > #T;
@@ -88,11 +87,11 @@ with coefficients
 [ 1, 3, 5, 7, 9, 11, 13, 15, ..., 42, 43, 44, 45, 46, 47, 48 ]
 >
 > // Generate all ramification polygons with discriminant 45, and with all possible residues and CC-residues
-> Ps := AllRamificationPolygons(tK, 8 : J0:=45, WithCCResidues, Classes);
+> Ps := AllRamificationPolygons(tK, 8 : J0:=45, Res, URes, Classes);
 > Ps;
 [
-  Ramification Points [45 30, 16, 0; 8] with residues [ 1, 1, 1, 1 ] with cc-residue 1,
-  Ramification Points [45 32, 16, 0; 8] with residues [ 1, 1, 1, 1 ] with cc-residue 1
+  Ramification polygon with points [(1, 45, 1)*, (2^1, 30, 1)*, (2^2, 16, 1)*, (2^3, 0, 1)*] and uniformizer residue 1,
+  Ramification polygon with points [(1, 45, 1)*, (2^1, 32, 1)*, (2^2, 16, 1)*, (2^3, 0, 1)*] and uniformizer residue 1
 ]
 >
 > // generate templates; check that (in this case) polynomials in the templates correspond 1-1 with extensions

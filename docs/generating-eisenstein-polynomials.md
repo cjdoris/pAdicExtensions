@@ -10,17 +10,19 @@
 ## Creation of templates
 {:#creation-of-templates}
 
-<a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--etc"></a><a id="TemplateForEisensteinPolynomialsByDegreeAndDisciminant--FldPadTmpl--RngIntElt--RngIntElt"></a>
-> **TemplateForEisensteinPolynomialsByDegreeAndDisciminant** (F :: *FldPadTmpl*, n :: *RngIntElt*, J :: *RngIntElt*)
+<a id="TemplateForEisensteinPolynomials"></a><a id="TemplateForEisensteinPolynomials--FldPadTmpl--etc"></a><a id="TemplateForEisensteinPolynomials--FldPadTmpl--RngIntElt"></a>
+> **TemplateForEisensteinPolynomials** (F :: *FldPadTmpl*, n :: *RngIntElt*)
 > 
 > -> *Tmpl_RngUPolElt_FldPadTmpl*
 > {:.ret}
 {:.intrinsic}
 
-Template for Eisenstein polynomials of degree `n`, discriminant valuation `n+J-1` over `F`.
+Template for monic Eisenstein polynomials over `F` of degree `n`.
 
+**Parameters**
+- `J`: When given, restrict the discriminant valuation to `n+J-1`.
 
-<a id="TemplateForEisensteinPolynomials"></a><a id="TemplateForEisensteinPolynomials--PadRamifPgon"></a>
+<a id="TemplateForEisensteinPolynomials-2"></a><a id="TemplateForEisensteinPolynomials--PadRamifPgon"></a>
 > **TemplateForEisensteinPolynomials** (P :: *PadRamifPgon*)
 > 
 > -> *Tmpl_RngUPolElt_FldPadTmpl*
@@ -30,9 +32,8 @@ Template for Eisenstein polynomials of degree `n`, discriminant valuation `n+J-1
 A template for Eisenstein polynomials with this ramification polygon.
 
 **Parameters**
-- `Residues`: When given, use these residues instead of the ones attached to P.
-- `CCResidue`: When given, use this CC-residue instead of the one attached to P.
 - `Shrink := true`: When true, returns the smallest template possible; when false, just uses the discriminant to bound the template.
+- `Residues := true`: When true, incorporate residue information when it is available
 
 ## Creation of polynomials
 {:#creation-of-polynomials}

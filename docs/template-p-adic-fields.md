@@ -206,6 +206,36 @@ The embedding of `F` into `A`, which must share the same residue class field.
 - `ResidueMap`: When given, this must be the residue map from the integers of A to the residue class field of F. By default it is computed from Place.
 - `Uniformizer`: When given, this must be a uniformizing element for the prime. By default it is computed from Place.
 
+<a id="BinomialValuation"></a><a id="BinomialValuation--FldPadTmpl--etc"></a><a id="BinomialValuation--FldPadTmpl--RngIntElt--RngIntElt"></a>
+> **BinomialValuation** (K :: *FldPadTmpl*, n :: *RngIntElt*, k :: *RngIntElt*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The valuation of `n` choose `k` in `K`.
+
+
+<a id="ShiftedBinomialResidue"></a><a id="ShiftedBinomialResidue--FldPadTmpl--etc"></a><a id="ShiftedBinomialResidue--FldPadTmpl--RngIntElt--RngIntElt"></a>
+> **ShiftedBinomialResidue** (K :: *FldPadTmpl*, n :: *RngIntElt*, k :: *RngIntElt*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The residue class of `n` choose `k` shifted in `K` down to a unit.
+
+
+<a id="BinomialResidue"></a><a id="BinomialResidue--FldPadTmpl--etc"></a><a id="BinomialResidue--FldPadTmpl--RngIntElt--RngIntElt"></a>
+> **BinomialResidue** (K :: *FldPadTmpl*, n :: *RngIntElt*, k :: *RngIntElt*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The residue class of `n` choose `k`.
+
+
 ## Ore's conditions
 {:#ores-conditions}
 
@@ -280,6 +310,16 @@ Allows coercion into `F` any of the following:
 {:.intrinsic}
 
 The field containing `x`.
+
+
+<a id="Zero"></a><a id="Zero--FldPadTmpl"></a>
+> **Zero** (F :: *FldPadTmpl*)
+> 
+> -> *FldPadTmplElt*
+> {:.ret}
+{:.intrinsic}
+
+Zero.
 
 
 <a id="IsZero"></a><a id="IsZero--FldPadTmplElt"></a>
@@ -420,6 +460,16 @@ The base ring of `f`.
 {:.intrinsic}
 
 The coefficients of `f`.
+
+
+<a id="Coefficient"></a><a id="Coefficient--RngUPolElt_FldPadTmpl--etc"></a><a id="Coefficient--RngUPolElt_FldPadTmpl--RngIntElt"></a>
+> **Coefficient** (f :: *RngUPolElt_FldPadTmpl*, i :: *RngIntElt*)
+> 
+> -> *FldPadTmplElt*
+> {:.ret}
+{:.intrinsic}
+
+The `i`th coefficient of `f`.
 
 
 <a id="Degree"></a><a id="Degree--RngUPolElt_FldPadTmpl"></a>
