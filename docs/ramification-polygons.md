@@ -78,7 +78,7 @@ The inputs and parameters are as in `RamificationPolygon` above.
 > {:.ret}
 {:.intrinsic}
 
-True if `P` is valid.
+True if `P` is valid. That is, if there exists an Eisenstein polynomial with this ramification polygon.
 
 
 <a id="IsWeaklyValid"></a><a id="IsWeaklyValid--PadRamifPgon"></a>
@@ -88,7 +88,7 @@ True if `P` is valid.
 > {:.ret}
 {:.intrinsic}
 
-True if `P` is weakly valid.
+True if `P` is weakly valid. This is weaker than validity, but is preserved under removing points from `P`. Useful for enumerating all valid polygons.
 
 
 <a id="IsValid_Points"></a><a id="IsValid_Points--PadRamifPgon"></a>

@@ -1363,7 +1363,7 @@ function is_valid_uniformizer_residue(P)
 end function;
 
 intrinsic IsValid(P :: PadRamifPgon) -> BoolElt
-  {True if P is valid.}
+  {True if P is valid. That is, if there exists an Eisenstein polynomial with this ramification polygon.}
   if not assigned P`is_valid then
     P`is_valid := IsValid_Points(P) and IsValid_Residues(P) and ((not assigned P`uniformizer_residue) or is_valid_uniformizer_residue(P));
   end if;
@@ -1371,7 +1371,7 @@ intrinsic IsValid(P :: PadRamifPgon) -> BoolElt
 end intrinsic;
 
 intrinsic IsWeaklyValid(P :: PadRamifPgon) -> BoolElt
-  {True if P is weakly valid.}
+  {True if P is weakly valid. This is weaker than validity, but is preserved under removing points from P. Useful for enumerating all valid polygons.}
   if not assigned P`is_weakly_valid then
     P`is_weakly_valid := IsWeaklyValid_Points(P) and IsValid_Residues(P) and ((not assigned P`uniformizer_residue) or is_valid_uniformizer_residue(P));
   end if;
