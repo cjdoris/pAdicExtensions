@@ -998,6 +998,9 @@ intrinsic Copy(P :: PadRamifPgon) -> PadRamifPgon
   P2`degree := P`degree;
   P2`smax := P`smax;
   P2`vertices := P`vertices;
+  if assigned P`uniformizer_residue then
+    P2`uniformizer_residue := P`uniformizer_residue;
+  end if;
   return P2;
 end intrinsic;
 
