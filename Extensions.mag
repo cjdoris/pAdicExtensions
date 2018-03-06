@@ -53,28 +53,19 @@ intrinsic LeftEvaluate(P :: NwtnPgon, x :: FldRatElt) -> FldRatElt
   {Evaluates the face of P to the left of x at x.}
   vs := Vertices(P);
   require x ge vs[1][1]: "x out of bounds";
-  if x eq vs[1][1] then
-    return vs[1][2];
-  elif #vs eq 1 then
-    return -Infinity();
-  end if;
-  if x gt vs[#vs][1] then
-    idx := #vs;
-  else
-    for i in [1..#vs-1] do
-      if x lt vs[i+1][1] then
-        idx := i;
-        break i;
+  for i in [1..#vs] do
+    assert x ge vs[i][1];
+    if i eq #vs or x lt vs[i+1][1] then
+      if x eq vs[i][1] then
+        return vs[i][2];
+      elif i eq 1 then
+        return -Infinity();
+      else
+        return vs[i-1][2] + (vs[i][2] - vs[i-1][2]) * (x - vs[i-1][1]) / (vs[i][1] - vs[i-1][1]);
       end if;
-    end for;
-  end if;
-  if idx eq 1 then
-    return -Infinity();
-  else
-    x0, y0 := Explode(vs[idx]);
-    x1, y1 := Explode(vs[idx+1]);
-    return y0 + (y1-y0)*(x-x0)/(x1-x0);
-  end if;
+    end if;
+  end for;
+  assert false;
 end intrinsic;
 
 intrinsic LeftEvaluate(P :: NwtnPgon, x :: RngIntElt) -> FldRatElt
