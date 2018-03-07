@@ -170,7 +170,7 @@ If there is residual information, then two polygons `P1` and `P2` are equivalent
 > {:.ret}
 {:.intrinsic}
 
-True iff `P1` and `P2` are equivalent, that is, their corresponding Eisenstein polynomials generate the same extensions.
+True iff `P1` and `P2` are equivalent, that is, their corresponding Eisenstein polynomials generate the same extensions. If true, also returns `<k,y>` such that any solution to `x^k=y` conjugates one to the other. If false, also returns a reason.
 
 
 <a id="EquivalenceClass"></a><a id="EquivalenceClass--PadRamifPgon"></a>
@@ -186,7 +186,7 @@ The elements of the equivalence class of `P`.
 <a id="EquivalenceClassSize"></a><a id="EquivalenceClassSize--PadRamifPgon"></a>
 > **EquivalenceClassSize** (P :: *PadRamifPgon*)
 > 
-> -> {}
+> -> *RngIntElt*
 > {:.ret}
 {:.intrinsic}
 
