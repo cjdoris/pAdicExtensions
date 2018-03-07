@@ -32,7 +32,7 @@ Template for monic Eisenstein polynomials over `F` of degree `n`.
 A template for Eisenstein polynomials with this ramification polygon.
 
 **Parameters**
-- `Shrink := true`: When true, returns the smallest template possible; when false, just uses the discriminant to bound the template.
+- `Limit := "Best"`: When "Best", make the template as small as possible; when "Disc" use the discriminant bound; otherwise it must be an integer.
 - `Residues := true`: When true, incorporate residue information when it is available
 
 ## Creation of polynomials

@@ -12,6 +12,8 @@ Additionally, we can assign a single non-zero element of the residue class field
 **Contents**
 * [Creation](#creation)
 * [Validity](#validity)
+* [Equivalence](#equivalence)
+* [Counting extensions](#counting-extensions)
 * [Enumeration](#enumeration)
 
 ## Creation
@@ -151,6 +153,62 @@ The lower bound on the `i`th coefficient of an Eisenstein polynomial generating 
 True if the `i`th coefficient of an Eisenstein polynomial is critical in determining `P`.
 
 
+## Equivalence
+{:#equivalence}
+
+
+We say two ramification polygons are *equivalent* if the corresponding set of Eisenstein polynomials generates the same set of extensions (up to isomorphism).
+
+Without any residual information, ramification polygons are already an invariant, and therefore are equivalent if and only if they are equal.
+
+If there is residual information, then two polygons `P1` and `P2` are equivalent if they have residual information at the same points, and if there is a unit `u` such that `rho1_j = rho2_j u^R_j` for all `(j,R_j,rho1_j)` in `P1` and `(j,R_j,rho2_j)` in `P2`, and `rho1_0 = rho2_0 u^n` where `rho*_0` are the uniformizer residues.
+
+<a id="IsEquivalent"></a><a id="IsEquivalent--PadRamifPgon--etc"></a><a id="IsEquivalent--PadRamifPgon--PadRamifPgon"></a>
+> **IsEquivalent** (P1 :: *PadRamifPgon*, P2 :: *PadRamifPgon*)
+> 
+> -> *BoolElt*, Any
+> {:.ret}
+{:.intrinsic}
+
+True iff `P1` and `P2` are equivalent, that is, their corresponding Eisenstein polynomials generate the same extensions.
+
+
+<a id="EquivalenceClass"></a><a id="EquivalenceClass--PadRamifPgon"></a>
+> **EquivalenceClass** (P :: *PadRamifPgon*)
+> 
+> -> {}
+> {:.ret}
+{:.intrinsic}
+
+The elements of the equivalence class of `P`.
+
+
+<a id="EquivalenceClassSize"></a><a id="EquivalenceClassSize--PadRamifPgon"></a>
+> **EquivalenceClassSize** (P :: *PadRamifPgon*)
+> 
+> -> {}
+> {:.ret}
+{:.intrinsic}
+
+The size of the equivalence class of `P`.
+
+
+## Counting extensions
+{:#counting-extensions}
+
+
+From Lemma 4.4 of Sinclair, "Counting extensions of p-adic fields with given invariants", we can count the number of extensions (inside an algebraic closure) with the given invariant based on the size of a template for the invariant. Note that this is different to counting the number of isomorphism classes: if an extension `L/K` has no automorphisms, then it has `(L:K)` conjugates in the algebraic closure, which are counted as distinct even though they are isomorphic.
+
+<a id="NumberOfExtensions"></a><a id="NumberOfExtensions--PadRamifPgon"></a>
+> **NumberOfExtensions** (P :: *PadRamifPgon*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The number of extensions (inside an algebraic closure) with this invariant.
+
+
 ## Enumeration
 {:#enumeration}
 
@@ -167,7 +225,7 @@ All valid ramification polygons over `F` of degree `n`.
 - `J0`: When given restrict to polygons with vertex `<1,J0>`, i.e. with discriminant valuation `J0+n-1`.
 - `Fine := false`: When true, produce fine ramification polygons, where every point is either in or out. Equivalent to calling `AllRefinements` on the outputs.
 - `Res := false`: When true, produce polygons with residues. Equivalent to calling `WithAllResidues` on the outputs. Implies `Fine:=true`.
-- `URes := false`: When true, produce polygons with uniformizer residues. Equivalent to calling `WithAllUniformzerResidues` on the outputs.
+- `URes := false`: When true, produce polygons with uniformizer residues. Equivalent to calling `WithAllUniformizerResidues` on the outputs.
 - `Classes := false`: When true, produce only one representative per equivalence class. Only makes a difference when `Res` or `URes` are set.
 
 <a id="AllRefinements"></a><a id="AllRefinements--PadRamifPgon"></a>
