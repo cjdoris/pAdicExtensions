@@ -931,6 +931,9 @@ declare attributes PadRamifPgon
   , is_weakly_valid
   , is_critical_coeff
   , hash
+  , equivalence_class
+  , equivalence_class_size
+  , number_of_extensions
   ;
 
 declare type PadRamifPgonPt;
@@ -1473,12 +1476,141 @@ intrinsic EisensteinCoefficientIsCritical(P :: PadRamifPgon, i :: RngIntElt) -> 
   return P`is_critical_coeff[i];
 end intrinsic;
 
+///## Equivalence
+///
+/// We say two ramification polygons are *equivalent* if the corresponding set of Eisenstein polynomials generates the same set of extensions (up to isomorphism).
+/// 
+/// Without any residual information, ramification polygons are already an invariant, and therefore are equivalent if and only if they are equal.
+/// 
+/// If there is residual information, then two polygons `P1` and `P2` are equivalent if they have residual information at the same points, and if there is a unit `u` such that `rho1_j = rho2_j u^R_j` for all `(j,R_j,rho1_j)` in `P1` and `(j,R_j,rho2_j)` in `P2`, and `rho1_0 = rho2_0 u^n` where `rho*_0` are the uniformizer residues.
+
+intrinsic IsEquivalent(P1 :: PadRamifPgon, P2 :: PadRamifPgon) -> BoolElt, .
+  {True iff P1 and P2 are equivalent, that is, their corresponding Eisenstein polynomials generate the same extensions.}
+  require IsValid(P1) and IsValid(P2): "must be valid";
+  // check the base field
+  K := P1`base_field;
+  require P2`base_field eq K: "must share the same base field";
+  // check the degree
+  n := P1`degree;
+  if P2`degree ne n then
+    return false, "different degree";
+  end if;
+  // check the polygon
+  if Vertices(P1`pgon) ne Vertices(P2`pgon) then
+    return false, "different polygons";
+  end if;
+  // check the points
+  if [<pt`x, pt`J, pt`is_equal, pt`is_unequal> : pt in P1`points] ne [<pt`x, pt`J, pt`is_equal, pt`is_unequal> : pt in P2`points] then
+    return false, "different points";
+  end if;
+  // check the assignments of residues
+  if [assigned pt`residue : pt in P1`points | pt`is_equal] ne [assigned pt`residue : pt in P2`points | pt`is_equal] then
+    return false, "different residue assignments";
+  end if;
+  // check assignment of uniformizer residue
+  if (assigned P1`uniformizer_residue) ne (assigned P2`uniformizer_residue) then
+    return false, "different uniformizer residue assignment";
+  end if;
+  // check the residues
+  FF := ResidueClassField(K);
+  eqns := [<#FF-1, FF!1>] cat [<pt1`J, pt1`residue / pt2`residue> where pt2:=P2`points[i] : i in [1..#P1`points] | pt1`is_equal and assigned pt1`residue where pt1:=P1`points[i]] cat (assigned P1`uniformizer_residue select [<n, P1`uniformizer_residue / P2`uniformizer_residue>] else []);
+  ok, eqn := has_consistent_roots(eqns);
+  if not ok then
+    return false, "different residues";
+  end if;
+  // equivalent!
+  return true, eqn;
+end intrinsic;
+
+intrinsic EquivalenceClass(P :: PadRamifPgon) -> {}
+  {The elements of the equivalence class of P.}
+  require IsValid(P): "must be valid";
+  if not assigned P`equivalence_class then
+    K := P`base_field;
+    n := P`degree;
+    FF := ResidueClassField(K);
+    U, UtoFF := MultiplicativeGroup(FF);
+    g := GCD([#FF-1] cat [pt`J : pt in P`points | pt`is_equal and assigned pt`residue] cat (assigned P`uniformizer_residue select [n] else []));
+    gmap := hom<U -> U | [((U.i @ UtoFF)^g) @@ UtoFF : i in [1..Ngens(U)]]>;
+    Ps := [];
+    for x in Transversal(U, Kernel(gmap)) do
+      u := x @ UtoFF;
+      P2 := Copy(P);
+      for i in [1..#P2`points] do
+        pt := P2`points[i];
+        if pt`is_equal and assigned pt`residue then
+          pt`residue := pt`residue * u^(pt`J);
+        end if;
+      end for;
+      if assigned P2`uniformizer_residue then
+        P2`uniformizer_residue := P2`uniformizer_residue * u^n;
+      end if;
+      Append(~Ps, P2);
+    end for;
+    ret := SequenceToSet(Ps);
+    assert #ret eq #Ps;
+    P`equivalence_class := ret;
+    for i in [1..#Ps] do
+      Ps[i]`equivalence_class := ret;
+    end for;
+  end if;
+  return P`equivalence_class;
+end intrinsic;
+
+intrinsic EquivalenceClassSize(P :: PadRamifPgon) -> {}
+  {The size of the equivalence class of P.}
+  require IsValid(P): "must be valid";
+  if not assigned P`equivalence_class_size then
+    if assigned P`equivalence_class then
+      P`equivalence_class_size := #P`equivalence_class;
+    else
+      K := P`base_field;
+      n := P`degree;
+      FF := ResidueClassField(K);
+      U, UtoFF := MultiplicativeGroup(FF);
+      g := GCD([#FF-1] cat [pt`J : pt in P`points | pt`is_equal and assigned pt`residue] cat (assigned P`uniformizer_residue select [n] else []));
+      gmap := hom<U -> U | [((U.i @ UtoFF)^g) @@ UtoFF : i in [1..Ngens(U)]]>;
+      P`equivalence_class_size := Index(U, Kernel(gmap));
+    end if;
+  end if;
+  return P`equivalence_class_size;
+end intrinsic;
+
+///## Counting extensions
+///
+/// From Lemma 4.4 of Sinclair, "Counting extensions of p-adic fields with given invariants", we can count the number of extensions (inside an algebraic closure) with the given invariant based on the size of a template for the invariant. Note that this is different to counting the number of isomorphism classes: if an extension `L/K` has no automorphisms, then it has `(L:K)` conjugates in the algebraic closure, which are counted as distinct even though they are isomorphic.
+
+intrinsic NumberOfExtensions(P :: PadRamifPgon) -> RngIntElt
+  {The number of extensions (inside an algebraic closure) with this invariant.}
+  require IsValid(P): "must be valid";
+    if not assigned P`number_of_extensions then
+      K := P`base_field;
+      FF := ResidueClassField(K);
+      q := #FF;
+      n := P`degree;
+      J0 := P`points[1]`J;
+      c := Floor(1 + 2*J0/n) + 1;
+      // we can't make a template when there are residues but no uniformizer residue, so we replace P by P2 which has the uniformizer residue set, and multiply up the answer by the number of sub-classes this made
+      if (not assigned P`uniformizer_residue) and exists{pt : pt in P`points | pt`is_equal and assigned pt`residue} then
+        Ps := WithAllUniformizerResidues(P : Classes);
+        P2 := Ps[1];
+        mult := #Ps;
+      else
+        P2 := P;
+        mult := 1;
+      end if;
+      T := TemplateForEisensteinPolynomials(P2 : Limit:=c-1);
+      P`number_of_extensions := mult * xdiv(#T * EquivalenceClassSize(P2) * n, (q-1) * q^(n*c - (n+J0-1) - 2));    
+  end if;
+  return P`number_of_extensions;
+end intrinsic;
+
 ///## Enumeration
 
 ///param J0 When given restrict to polygons with vertex `<1,J0>`, i.e. with discriminant valuation `J0+n-1`.
 ///param Fine:=false When true, produce fine ramification polygons, where every point is either in or out. Equivalent to calling `AllRefinements` on the outputs.
 ///param Res:=false When true, produce polygons with residues. Equivalent to calling `WithAllResidues` on the outputs. Implies `Fine:=true`.
-///param URes:=false When true, produce polygons with uniformizer residues. Equivalent to calling `WithAllUniformzerResidues` on the outputs.
+///param URes:=false When true, produce polygons with uniformizer residues. Equivalent to calling `WithAllUniformizerResidues` on the outputs.
 ///param Classes:=false When true, produce only one representative per equivalence class. Only makes a difference when `Res` or `URes` are set.
 intrinsic AllRamificationPolygons(F :: FldPadTmpl, n :: RngIntElt : J0:=false, Fine:=false, Res:=false, URes:=false, Classes:=false) -> []
   {All valid ramification polygons over F of degree n.}
@@ -1763,9 +1895,9 @@ intrinsic Print(T :: Tmpl_RngUPolElt_FldPadTmpl)
   IndentPop();
 end intrinsic;
 
-///param Shrink:=true When true, returns the smallest template possible; when false, just uses the discriminant to bound the template.
+///param Limit:="Best" When "Best", make the template as small as possible; when "Disc" use the discriminant bound; otherwise it must be an integer.
 ///param Residues:=true When true, incorporate residue information when it is available
-intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPgon : Shrink:=true, Residues:=true) -> Tmpl_RngUPolElt_FldPadTmpl
+intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPgon : Limit:="Best", Residues:=true) -> Tmpl_RngUPolElt_FldPadTmpl
   {A template for Eisenstein polynomials with this ramification polygon.}
   require IsValid_Points(P): "invalid";
   F := P`base_field;
@@ -1775,17 +1907,28 @@ intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPgon : Shrink:=true, Res
   J0 := P`points[1]`J;
   T := New(Tmpl_RngUPolElt_FldPadTmpl);
   T`R := PolynomialRing(F);
+  init_bound := Floor(1 + 2*J0/n);
+  do_shrink := false;
+  if Limit cmpeq "Best" then
+    do_shrink := true;
+  elif Limit cmpeq "Disc" then
+    ;
+  elif Type(Limit) eq RngIntElt then
+    init_bound := Limit;
+  else
+    require false: "Limit parameter invalid";
+  end if;
   C := [New(Tmpl_FldPadTmplElt) : i in [0..n]];
   for i in [0..n] do
     C[i+1]`F := F;
     C[i+1]`min_val := LowerBoundOnEisensteinCoefficient(P, i);
     C[i+1]`min_val_sharp := i eq 0 or EisensteinCoefficientIsCritical(P, i);
-    C[i+1]`max_val := i eq n select 0 else Floor(1 + 2*J0/n);
+    C[i+1]`max_val := i eq n select 0 else init_bound;
     if i eq n then
       C[i+1]`residues := [{FF!1}];
     end if;
   end for;
-  if Shrink then
+  if do_shrink then
     M := Floor(Max([-s : s in Slopes(P`pgon)]));
     h, j := Quotrem(J0 + M + 1, n);
     for i in [0..n-1] do
@@ -1814,7 +1957,7 @@ intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPgon : Shrink:=true, Res
         end if;
       end for;
       // shrink
-      if Shrink then
+      if do_shrink then
         RFF := PolynomialRing(FF);
         for m in [1..M] do
           Cm := Min([pt`J + pt`x * m : pt in P`points | not pt`is_unequal]);
