@@ -1513,7 +1513,7 @@ intrinsic IsEquivalent(P1 :: PadRamifPgon, P2 :: PadRamifPgon) -> BoolElt, .
   end if;
   // check the residues
   FF := ResidueClassField(K);
-  eqns := [<#FF-1, FF!1>] cat [<pt1`J, pt1`residue / pt2`residue> where pt2:=P2`points[i] : i in [1..#P1`points] | pt1`is_equal and assigned pt1`residue where pt1:=P1`points[i]] cat (assigned P1`uniformizer_residue select [<n, P1`uniformizer_residue / P2`uniformizer_residue>] else []);
+  eqns := [<#FF-1, FF!1>] cat [<-pt1`J, pt1`residue / pt2`residue> where pt2:=P2`points[i] : i in [1..#P1`points] | pt1`is_equal and assigned pt1`residue where pt1:=P1`points[i]] cat (assigned P1`uniformizer_residue select [<n, P1`uniformizer_residue / P2`uniformizer_residue>] else []);
   ok, eqn := has_consistent_roots(eqns);
   if not ok then
     return false, "different residues";
@@ -1530,7 +1530,7 @@ intrinsic EquivalenceClass(P :: PadRamifPgon) -> {}
     n := P`degree;
     FF := ResidueClassField(K);
     U, UtoFF := MultiplicativeGroup(FF);
-    g := GCD([#FF-1] cat [pt`J : pt in P`points | pt`is_equal and assigned pt`residue] cat (assigned P`uniformizer_residue select [n] else []));
+    g := GCD([#FF-1] cat [-pt`J : pt in P`points | pt`is_equal and assigned pt`residue] cat (assigned P`uniformizer_residue select [n] else []));
     gmap := hom<U -> U | [((U.i @ UtoFF)^g) @@ UtoFF : i in [1..Ngens(U)]]>;
     Ps := [];
     for x in Transversal(U, Kernel(gmap)) do
@@ -1539,7 +1539,7 @@ intrinsic EquivalenceClass(P :: PadRamifPgon) -> {}
       for i in [1..#P2`points] do
         pt := P2`points[i];
         if pt`is_equal and assigned pt`residue then
-          pt`residue := pt`residue * u^(pt`J);
+          pt`residue := pt`residue * u^(-pt`J);
         end if;
       end for;
       if assigned P2`uniformizer_residue then
@@ -1547,6 +1547,8 @@ intrinsic EquivalenceClass(P :: PadRamifPgon) -> {}
       end if;
       Append(~Ps, P2);
     end for;
+    assert forall{P2 : P2 in Ps | IsValid(P2)};
+    assert forall{P2 : P2 in Ps | IsEquivalent(P,P2)};
     ret := SequenceToSet(Ps);
     assert #ret eq #Ps;
     P`equivalence_class := ret;
@@ -1743,12 +1745,12 @@ intrinsic WithAllResidues(P :: PadRamifPgon : Classes:=false, URes:=false) -> []
         Append(~todo, <P, s+1>);
       else
         if Classes then
-          eqn := <GCD([#FF-1] cat [pt`J : pt in P`points | pt`J ne 0 and pt`is_equal and assigned pt`residue]), FF!1>;
+          eqn := <GCD([#FF-1] cat [-pt`J : pt in P`points | pt`J ne 0 and pt`is_equal and assigned pt`residue]), FF!1>;
           classes := [FF|];
           for x in FF do
             if x ne 0 then
               for y in classes do
-                if y ne 0 and has_consistent_roots([eqn, <pt`J, x/y>]) then
+                if y ne 0 and has_consistent_roots([eqn, <-pt`J, x/y>]) then
                   continue x;
                 end if;
               end for;
@@ -1797,7 +1799,7 @@ intrinsic WithAllUniformizerResidues(P :: PadRamifPgon : Classes:=false) -> []
     K := P`base_field;
     FF := ResidueClassField(K);
     n := P`degree;
-    eqn := <GCD([#FF-1] cat [pt`J : pt in P`points | pt`J ne 0 and pt`is_equal and assigned pt`residue]), FF!1>;
+    eqn := <GCD([#FF-1] cat [-pt`J : pt in P`points | pt`J ne 0 and pt`is_equal and assigned pt`residue]), FF!1>;
     classes := [FF|];
     for x in xs do
       assert x ne 0;
@@ -1929,7 +1931,7 @@ intrinsic TemplateForEisensteinPolynomials(P :: PadRamifPgon : Limit:="Best", Re
     end if;
   end for;
   if do_shrink then
-    M := Floor(Max([-s : s in Slopes(P`pgon)]));
+    M := Floor(Max([-s : s in Slopes(P`pgon)] cat [0]));
     h, j := Quotrem(J0 + M + 1, n);
     for i in [0..n-1] do
       C[i+1]`max_val := Min(C[i+1]`max_val, h + (i lt j select 1 else 0));
