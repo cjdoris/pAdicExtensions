@@ -105,6 +105,8 @@ with coefficients
 (0; 1)*x^8 + (6; 1)*x^7 + (4; 1 1)*x^6 + (6; 1 1)*x^5 + (3; 1 0 0 1 0 1)*x^4 + (8; 1)*x^3 + (1; 1 0 0 0 1)
 >
 > // Embed the polynomial into the original number field with respect to the uniformizer pi=u+1
+> // NOTE: We could have defined tK as TemplatepAdicCompletion(F, ideal<...> : Uniformizer:=pi)
+> //   or as TemplatepAdicCompletion(e : Uniformizer:=pi) and then get f := Global(tf)
 > te := Embedding(tK, F, e : Uniformizer:=pi);
 > f := Polynomial([c@te : c in Coefficients(tf)]);
 > f;
