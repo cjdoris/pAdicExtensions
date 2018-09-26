@@ -5,7 +5,7 @@
 
 Tools for generating extensions of p-adic fields. Implemented in the Magma computer algebra system.
 
-Implements parts of the article "Enumerating extensions of (pi)-adic fields with given invariants" by Pauli and Sinclair.
+Implements parts of the article "Enumerating extensions of (pi)-adic fields with given invariants" by Pauli and Sinclair ([arXiv](https://arxiv.org/abs/1504.06671)). Also see [this re-exposition](https://arxiv.org/abs/1803.08023) of the same work.
 
 - [Getting started]({{site.baseurl}}/getting-started)
 - [Template p-Adic Fields]({{site.baseurl}}/template-p-adic-fields)
