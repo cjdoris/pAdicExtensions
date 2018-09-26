@@ -275,9 +275,9 @@ The global field which `F` is a completion of, and the embedding into it.
 
 
 **Parameters**
-- `Place`
-- `ResidueMap`
-- `Uniformizer`
+- `Place`: When given, this must be the prime ideal of A corresponding to the completion. By default it is computed from e, but the embedding depends on its generators, so you may get a nicer embedding using the original prime.
+- `ResidueMap`: When given, this must be the residue map from the integers of A to the residue class field of F. By default it is computed from Place.
+- `Uniformizer`: When given, this must be a uniformizing element for the prime. By default it is computed from Place.
 
 <a id="BinomialValuation"></a><a id="BinomialValuation--FldPadTmpl--etc"></a><a id="BinomialValuation--FldPadTmpl--RngIntElt--RngIntElt"></a>
 > **BinomialValuation** (K :: *FldPadTmpl*, n :: *RngIntElt*, k :: *RngIntElt*)

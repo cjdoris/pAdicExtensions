@@ -11,6 +11,9 @@ Additionally, we can assign a single non-zero element of the residue class field
 
 **Contents**
 * [Creation](#creation)
+* [Basic properties](#basic-properties)
+* [Points](#points)
+* [Faces](#faces)
 * [Validity](#validity)
 * [Equivalence](#equivalence)
 * [Counting extensions](#counting-extensions)
@@ -68,6 +71,249 @@ True if `X` is coercible to a ramification polygon.
 
 The inputs and parameters are as in `RamificationPolygon` above.
 
+
+
+## Basic properties
+{:#basic-properties}
+
+<a id="BaseField"></a><a id="BaseField--PadRamifPgon"></a>
+> **BaseField** (P :: *PadRamifPgon*)
+> 
+> -> *FldPadTmpl*
+> {:.ret}
+{:.intrinsic}
+
+The base field of `P`.
+
+
+<a id="Degree"></a><a id="Degree--PadRamifPgon"></a>
+> **Degree** (P :: *PadRamifPgon*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The degree of `P`.
+
+
+<a id="Vertices"></a><a id="Vertices--PadRamifPgon"></a>
+> **Vertices** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The vertices of `P`.
+
+
+<a id="Points"></a><a id="Points--PadRamifPgon"></a>
+> **Points** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The points of `P`.
+
+There is a point for each power of `p`, so some points may not be vertices. See [Points](#points).
+
+
+<a id="Faces"></a><a id="Faces--PadRamifPgon"></a>
+> **Faces** (P :: *PadRamifPgon*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The faces of `P`.
+
+See [Faces](#faces).
+
+
+<a id="NewtonPolygon"></a><a id="NewtonPolygon--PadRamifPgon"></a>
+> **NewtonPolygon** (P :: *PadRamifPgon*)
+> 
+> -> *NwtnPgon*
+> {:.ret}
+{:.intrinsic}
+
+The Newton polygon around the vertices of `P`.
+
+
+<a id="Denominator"></a><a id="Denominator--PadRamifPgon"></a>
+> **Denominator** (P :: *PadRamifPgon*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The least common multiple of the denominators of the faces.
+
+
+<a id="DenominatorResidueDegree"></a><a id="DenominatorResidueDegree--PadRamifPgon"></a>
+> **DenominatorResidueDegree** (P :: *PadRamifPgon*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The degree of the residue class field adjoin `Denominator(P)`th roots of unity. This is the least common multiple of the denominator residue degrees of the faces of `P`.
+
+
+<a id="ResidualSplittingDegree"></a><a id="ResidualSplittingDegree--PadRamifPgon"></a>
+> **ResidualSplittingDegree** (P :: *PadRamifPgon*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The degree of the splitting field of the residual polynomials of `P`. This is the least common multiple of the residual splitting degrees of the faces of `P`.
+
+
+## Points
+{:#points}
+
+<a id="IsVertex"></a><a id="IsVertex--PadRamifPgonPt"></a>
+> **IsVertex** (pt :: *PadRamifPgonPt*)
+> 
+> -> *BoolElt*
+> {:.ret}
+{:.intrinsic}
+
+True if `pt` is a vertex in its ramification polygon.
+
+
+<a id="IsDefinitelyOnPolygon"></a><a id="IsDefinitelyOnPolygon--PadRamifPgonPt"></a>
+> **IsDefinitelyOnPolygon** (pt :: *PadRamifPgonPt*)
+> 
+> -> *BoolElt*
+> {:.ret}
+{:.intrinsic}
+
+True if `pt` is definitely on the ramification polygon.
+
+
+<a id="IsDefinitelyNotOnPolygon"></a><a id="IsDefinitelyNotOnPolygon--PadRamifPgonPt"></a>
+> **IsDefinitelyNotOnPolygon** (pt :: *PadRamifPgonPt*)
+> 
+> -> *BoolElt*
+> {:.ret}
+{:.intrinsic}
+
+True if `pt` is definitely not on the ramification polygon.
+
+
+<a id="Coordinates"></a><a id="Coordinates--PadRamifPgonPt"></a>
+> **Coordinates** (pt :: *PadRamifPgonPt*)
+> 
+> -> *Tup*
+> {:.ret}
+{:.intrinsic}
+
+The coordinates `<x,J>` of the point.
+
+
+<a id="HasResidue"></a><a id="HasResidue--PadRamifPgonPt"></a>
+> **HasResidue** (pt :: *PadRamifPgonPt*)
+> 
+> -> *BoolElt*, *FldFinElt*
+> {:.ret}
+{:.intrinsic}
+
+True if `pt` has a residue attached. Implies `IsDefinitelyOnPolygon(pt)`. If so, returns the residue.
+
+
+<a id="Residue"></a><a id="Residue--PadRamifPgonPt"></a>
+> **Residue** (pt :: *PadRamifPgonPt*)
+> 
+> -> *FldFinElt*
+> {:.ret}
+{:.intrinsic}
+
+The residue attached to `pt`.
+
+
+## Faces
+{:#faces}
+
+<a id="Points-2"></a><a id="Points--PadRamifPgonFace"></a>
+> **Points** (F :: *PadRamifPgonFace*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The points of the ramification polygon corresponding to the face.
+
+
+<a id="Vertices-2"></a><a id="Vertices--PadRamifPgonFace"></a>
+> **Vertices** (F :: *PadRamifPgonFace*)
+> 
+> -> []
+> {:.ret}
+{:.intrinsic}
+
+The two end vertices of `F`.
+
+
+<a id="Slope"></a><a id="Slope--PadRamifPgonFace"></a>
+> **Slope** (F :: *PadRamifPgonFace*)
+> 
+> -> *FldRatElt*
+> {:.ret}
+{:.intrinsic}
+
+The slope of `F`.
+
+
+<a id="Denominator-2"></a><a id="Denominator--PadRamifPgonFace"></a>
+> **Denominator** (F :: *PadRamifPgonFace*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The denominator of the slope of `F`.
+
+
+<a id="DenominatorResidueDegree-2"></a><a id="DenominatorResidueDegree--PadRamifPgonFace"></a>
+> **DenominatorResidueDegree** (F :: *PadRamifPgonFace*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The degree of the residue class field adjoin `Denominator(F)`th roots of unity.
+
+
+<a id="HasResidualPolynomial"></a><a id="HasResidualPolynomial--PadRamifPgonFace"></a>
+> **HasResidualPolynomial** (F :: *PadRamifPgonFace*)
+> 
+> -> *BoolElt*, *RngUPolElt*
+> {:.ret}
+{:.intrinsic}
+
+True if the residual polynomial of `F` is known. If so, also returns the polynomial.
+
+
+<a id="ResidualPolynomial"></a><a id="ResidualPolynomial--PadRamifPgonFace"></a>
+> **ResidualPolynomial** (F :: *PadRamifPgonFace*)
+> 
+> -> *RngUPolElt*
+> {:.ret}
+{:.intrinsic}
+
+The residual polynomial of `F`.
+
+
+<a id="ResidualSplittingDegree-2"></a><a id="ResidualSplittingDegree--PadRamifPgonFace"></a>
+> **ResidualSplittingDegree** (F :: *PadRamifPgonFace*)
+> 
+> -> *RngIntElt*
+> {:.ret}
+{:.intrinsic}
+
+The degree of the splitting field of the residual polynomial.
 
 
 ## Validity
@@ -222,11 +468,14 @@ The number of extensions (inside an algebraic closure) with this invariant.
 All valid ramification polygons over `F` of degree `n`.
 
 **Parameters**
-- `J0`: When given restrict to polygons with vertex `<1,J0>`, i.e. with discriminant valuation `J0+n-1`.
+- `J0`: When given, restrict to polygons with vertex `<1,J0>`, i.e. with discriminant valuation `J0+n-1`. May also be a set of integers.
 - `Fine := false`: When true, produce fine ramification polygons, where every point is either in or out. Equivalent to calling `AllRefinements` on the outputs.
 - `Res := false`: When true, produce polygons with residues. Equivalent to calling `WithAllResidues` on the outputs. Implies `Fine:=true`.
 - `URes := false`: When true, produce polygons with uniformizer residues. Equivalent to calling `WithAllUniformizerResidues` on the outputs.
 - `Classes := false`: When true, produce only one representative per equivalence class. Only makes a difference when `Res` or `URes` are set.
+- `NumFaces`: When given, restrict to polygons with this many faces. May also be a set of integers.
+- `Denominator`: When given, restrict to polygons whose denominator is this. May also be a set of integers.
+- `ResidualSplittingDegree`: When given, restrict to polygons whose residual splitting degree is this. Implies `Res:=true`.
 
 <a id="AllRefinements"></a><a id="AllRefinements--PadRamifPgon"></a>
 > **AllRefinements** (P :: *PadRamifPgon*)
@@ -238,9 +487,9 @@ All valid ramification polygons over `F` of degree `n`.
 All fine ramification polygons which refine `P`.
 
 **Parameters**
-- `Res := false`: As for `AllRamificationPolygons`
-- `URes := false`: As for `AllRamificationPolygons`
-- `Classes := false`: As for `AllRamificationPolygons`
+- `Res := false`: As for `AllRamificationPolygons`.
+- `URes := false`: As for `AllRamificationPolygons`.
+- `Classes := false`: As for `AllRamificationPolygons`.
 
 <a id="WithAllResidues"></a><a id="WithAllResidues--PadRamifPgon"></a>
 > **WithAllResidues** (P :: *PadRamifPgon*)
@@ -252,8 +501,9 @@ All fine ramification polygons which refine `P`.
 All valid assignments of residues to `P`.
 
 **Parameters**
-- `Classes := false`: When true, only return one representative per equivalence class
-- `URes := false`: As for `AllRamificationPolygons`
+- `Classes := false`: When true, only return one representative per equivalence class.
+- `URes := false`: As for `AllRamificationPolygons`.
+- `ResidualSplittingDegree`: As for `AllRamificationPolygons`.
 
 <a id="WithAllUniformizerResidues"></a><a id="WithAllUniformizerResidues--PadRamifPgon"></a>
 > **WithAllUniformizerResidues** (P :: *PadRamifPgon*)
