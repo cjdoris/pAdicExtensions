@@ -1063,6 +1063,10 @@ declare attributes PadRamifPgon
   , equivalence_class
   , equivalence_class_size
   , number_of_extensions
+  , faces
+  , residual_splitting_degree
+  , denominator
+  , denominator_residue_degree
   ;
 
 declare type PadRamifPgonPt;
@@ -1079,6 +1083,20 @@ declare attributes PadRamifPgonPt
   , hash
   ;
 
+declare type PadRamifPgonFace;
+declare attributes PadRamifPgonFace
+  : parent                 // a PadRamifPgon
+  , idx                    // the number of the face
+  , points                 // the points corresponding to the face
+  // cache
+  , vertices               // the vertices [<i0,J0>,<i1,J1>]
+  , slope                  // the slope (a rational)
+  , residual_polynomial    // the residual polynomial (a RngUPolElt[FldFin])
+  , residual_splitting_degree  // LCM of degrees of factors of residual polynomial; i.e. degree of splitting field
+  , denominator                // LCM of denominator of slope
+  , denominator_residue_degree // degree of residue class field adjoin (denominator)th roots of unity
+  ;
+
 ///hide
 intrinsic Print(pt :: PadRamifPgonPt)
   {Print.}
@@ -1092,6 +1110,12 @@ intrinsic Print(P :: PadRamifPgon)
   if assigned P`uniformizer_residue then
     printf " and uniformizer residue %o", P`uniformizer_residue;
   end if;
+end intrinsic;
+
+///hide
+intrinsic Print(F :: PadRamifPgonFace)
+  {"}
+  printf "Face of a ramification polygon with points [%o]", Join([Sprint(pt) : pt in F`points | not pt`is_unequal], ", ");
 end intrinsic;
 
 ///hide
@@ -1372,7 +1396,240 @@ intrinsic IsCoercibleToRamificationPolygon(F :: FldPadTmpl, X :: NwtnPgon : Fine
   return IsCoercibleToRamificationPolygon(F, Vertices(X));
 end intrinsic;
 
-// ///## Basic properties
+///## Basic properties
+
+intrinsic BaseField(P :: PadRamifPgon) -> FldPadTmpl
+  {The base field of P.}
+  return P`base_field;
+end intrinsic;
+
+intrinsic Degree(P :: PadRamifPgon) -> RngIntElt
+  {The degree of P.}
+  return P`degree;
+end intrinsic;
+
+intrinsic Vertices(P :: PadRamifPgon) -> []
+  {The vertices of P.}
+  return P`vertices;
+end intrinsic;
+
+/// The points of P.
+/// 
+/// There is a point for each power of `p`, so some points may not be vertices. See [Points](#points).
+intrinsic Points(P :: PadRamifPgon) -> []
+  {The points of P. There is a point for each power of `p`, so some points may not be vertices.}
+  return P`points;
+end intrinsic;
+
+/// The faces of P.
+/// 
+/// See [Faces](#faces).
+intrinsic Faces(P :: PadRamifPgon) -> []
+  {The faces of P.}
+  if not assigned P`faces then
+    faces := [];
+    for n in [2..#P`vertices] do
+      x0 := P`vertices[n-1][1];
+      x1 := P`vertices[n][1];
+      F := New(PadRamifPgonFace);
+      F`parent := P;
+      F`idx := n-1;
+      F`points := [pt : pt in Points(P) | x0 le pt`x and pt`x le x1];
+      Append(~faces, F);
+    end for;
+    P`faces := faces;
+  end if;
+  return P`faces;
+end intrinsic;
+
+intrinsic NewtonPolygon(P :: PadRamifPgon) -> NwtnPgon
+  {The Newton polygon around the vertices of P.}
+  return P`pgon;
+end intrinsic;
+
+intrinsic Denominator(P :: PadRamifPgon) -> RngIntElt
+  {The least common multiple of the denominators of the faces.}
+  if not assigned P`denominator then
+    P`denominator := LCM([Integers()| Denominator(F) : F in Faces(P)]);
+  end if;
+  return P`denominator;
+end intrinsic;
+
+intrinsic DenominatorResidueDegree(P :: PadRamifPgon) -> RngIntElt
+  {The degree of the residue class field adjoin `Denominator(P)`th roots of unity. This is the least common multiple of the denominator residue degrees of the faces of P.}
+  if not assigned P`denominator_residue_degree then
+    P`denominator_residue_degree := LCM([Integers()| DenominatorResidueDegree(F) : F in Faces(P)]);
+  end if;
+  return P`denominator_residue_degree;
+end intrinsic;
+
+intrinsic ResidualSplittingDegree(P :: PadRamifPgon) -> RngIntElt
+  {The degree of the splitting field of the residual polynomials of P. This is the least common multiple of the residual splitting degrees of the faces of P.}
+  if not assigned P`residual_splitting_degree then
+    P`residual_splitting_degree := LCM([Integers()| ResidualSplittingDegree(F) : F in Faces(P)]);
+  end if;
+  return P`residual_splitting_degree;
+end intrinsic;
+
+///## Points
+
+// intrinsic Parent (pt :: PadRamifPgonPt) -> PadRamifPgon
+//   {The ramification polygon to which this belongs.}
+//   return pt`parent;
+// end intrinsic;
+
+intrinsic IsVertex(pt :: PadRamifPgonPt) -> BoolElt
+  {True if pt is a vertex in its ramification polygon.}
+  return pt`is_vertex;
+end intrinsic;
+
+intrinsic IsDefinitelyOnPolygon(pt :: PadRamifPgonPt) -> BoolElt
+  {True if pt is definitely on the ramification polygon.}
+  return pt`is_equal;
+end intrinsic;
+
+intrinsic IsDefinitelyNotOnPolygon(pt :: PadRamifPgonPt) -> BoolElt
+  {True if pt is definitely not on the ramification polygon.}
+  return pt`is_unequal;
+end intrinsic;
+
+intrinsic Coordinates(pt :: PadRamifPgonPt) -> Tup
+  {The coordinates `<x,J>` of the point.}
+  return <pt`x, pt`J>;
+end intrinsic;
+
+intrinsic HasResidue(pt :: PadRamifPgonPt) -> BoolElt, FldFinElt
+  {True if pt has a residue attached. Implies `IsDefinitelyOnPolygon(pt)`. If so, returns the residue.}
+  if assigned pt`residue then
+    return true, pt`residue;
+  else
+    return false, _;
+  end if;
+end intrinsic;
+
+intrinsic Residue(pt :: PadRamifPgonPt) -> FldFinElt
+  {The residue attached to pt.}
+  ok, r := HasResidue(pt);
+  require ok: "no residue on pt";
+  return r;
+end intrinsic;
+
+///## Faces
+
+// intrinsic Parent(F :: PadRamifPgonFace) -> PadRamifPgon
+//   {The ramification polygon to which F belongs.}
+//   return F`parent;
+// end intrinsic;
+
+intrinsic Points(F :: PadRamifPgonFace) -> []
+  {The points of the ramification polygon corresponding to the face.}
+  return F`points;
+end intrinsic;
+
+intrinsic Vertices(F :: PadRamifPgonFace) -> []
+  {The two end vertices of F.}
+  if not assigned F`vertices then
+    F`vertices := [Coordinates(F`points[i]) : i in [1,#F`points]];
+  end if;
+  return F`vertices;
+end intrinsic;
+
+intrinsic Slope(F :: PadRamifPgonFace) -> FldRatElt
+  {The slope of F.}
+  if not assigned F`slope then
+    F`slope := (v[2][2]-v[1][2])/(v[2][1]-v[1][1]) where v:=Vertices(F);
+  end if;
+  return F`slope;
+end intrinsic;
+
+intrinsic Denominator(F :: PadRamifPgonFace) -> RngIntElt
+  {The denominator of the slope of F.}
+  if not assigned F`tame_degree then
+    F`denominator := Denominator(Slope(F));
+  end if;
+  return F`denominator;
+end intrinsic;
+
+intrinsic DenominatorResidueDegree(F :: PadRamifPgonFace) -> RngIntElt
+  {The degree of the residue class field adjoin `Denominator(F)`th roots of unity.}
+  if not assigned F`denominator_residue_degree then
+    e := Denominator(F);
+    q := #ResidueClassField(BaseField(F`parent));
+    _,m := MultiplicativeGroup(Integers(e));
+    F`denominator_residue_degree := Order(q @@ m);
+  end if;
+  return F`denominator_residue_degree;
+end intrinsic;
+
+intrinsic HasResidualPolynomial(F :: PadRamifPgonFace) -> BoolElt, RngUPolElt
+  {True if the residual polynomial of F is known. If so, also returns the polynomial.}
+  if not assigned F`residual_polynomial then
+    v0, v1 := Explode(Vertices(F));
+    x0, J0 := Explode(v0);
+    x1, J1 := Explode(v1);
+    w := x1 - x0;
+    slope := (J1 - J0) / w;
+    h := -Numerator(slope);
+    e := Denominator(slope);
+    ok, d := IsDivisibleBy(w, e);
+    assert ok;
+    cs := [];
+    for pt in Points(F) do
+      x, J := Explode(Coordinates(pt));
+      assert x0 le x and x le x1;
+      Jx := J0 + (x-x0)*slope;
+      assert J ge Jx;
+      if (J gt Jx) or pt`is_unequal then
+        continue;
+      end if;
+      ok, c := HasResidue(pt);
+      if not ok then
+        F`residual_polynomial := false;
+        return false, _;
+      end if;
+      assert c ne 0;
+      assert pt`is_equal;
+      ok, i := IsDivisibleBy(x-x0, e);
+      assert ok;
+      cs[i+1] := c;
+    end for;
+    for i in [1..d+1] do
+      if IsDefined(cs, i) then
+        assert cs[i] ne 0;
+      else
+        cs[i] := 0;
+      end if;
+    end for;
+    assert #cs eq d+1;
+    assert cs[1] ne 0;
+    assert cs[d+1] ne 0;
+    f := Polynomial(cs);
+    assert Degree(f) eq d;
+    assert Coefficient(f, 0) ne 0;
+    assert Coefficient(f, d) ne 0;
+    F`residual_polynomial := f;
+  end if;
+  if F`residual_polynomial cmpeq false then
+    return false, _;
+  else
+    return true, F`residual_polynomial;
+  end if;
+end intrinsic;
+
+intrinsic ResidualPolynomial(F :: PadRamifPgonFace) -> RngUPolElt
+  {The residual polynomial of F.}
+  ok, r := HasResidualPolynomial(F);
+  require ok: "residual polynomial not known";
+  return r;
+end intrinsic;
+
+intrinsic ResidualSplittingDegree(F :: PadRamifPgonFace) -> RngIntElt
+  {The degree of the splitting field of the residual polynomial.}
+  if not assigned F`residual_splitting_degree then
+    F`residual_splitting_degree := LCM([Integers()| Degree(x[1]) : x in Factorization(ResidualPolynomial(F))]);
+  end if;
+  return F`residual_splitting_degree;
+end intrinsic;
 
 ///## Validity
 
@@ -1738,28 +1995,52 @@ end intrinsic;
 
 ///## Enumeration
 
-///param J0 When given restrict to polygons with vertex `<1,J0>`, i.e. with discriminant valuation `J0+n-1`.
+function intset(x)
+  ok, y := IsCoercible(Integers(), x);
+  if ok then
+    return [y];
+  end if;
+  ok, y := IsCoercible(PowerSet(Integers()), x);
+  if ok then
+    return y;
+  end if;
+  error "expecting an integer or set of integers";
+end function;
+
+DENOM := Denominator;
+
+///param J0 When given, restrict to polygons with vertex `<1,J0>`, i.e. with discriminant valuation `J0+n-1`. May also be a set of integers.
+///param NumFaces When given, restrict to polygons with this many faces. May also be a set of integers.
+///param Denominator When given, restrict to polygons whose denominator is this. May also be a set of integers.
+///param ResidualSplittingDegree When given, restrict to polygons whose residual splitting degree is this. Implies `Res:=true`.
 ///param Fine:=false When true, produce fine ramification polygons, where every point is either in or out. Equivalent to calling `AllRefinements` on the outputs.
 ///param Res:=false When true, produce polygons with residues. Equivalent to calling `WithAllResidues` on the outputs. Implies `Fine:=true`.
 ///param URes:=false When true, produce polygons with uniformizer residues. Equivalent to calling `WithAllUniformizerResidues` on the outputs.
 ///param Classes:=false When true, produce only one representative per equivalence class. Only makes a difference when `Res` or `URes` are set.
-intrinsic AllRamificationPolygons(F :: FldPadTmpl, n :: RngIntElt : J0:=false, Fine:=false, Res:=false, URes:=false, Classes:=false) -> []
+intrinsic AllRamificationPolygons(F :: FldPadTmpl, n :: RngIntElt : J0:=false, Fine:=false, Res:=false, URes:=false, Classes:=false, NumFaces:=false, Denominator:=false, ResidualSplittingDegree:=false) -> []
   {All valid ramification polygons over F of degree n.}
-  if URes then
-    return &cat[WithAllUniformizerResidues(P : Classes:=Classes) : P in AllRamificationPolygons(F, n : J0:=J0, Fine:=Fine, Res:=Res, Classes:=Classes)];
-  elif Res then
-    return &cat[WithAllResidues(P : Classes:=Classes) : P in AllRamificationPolygons(F, n : J0:=J0, Fine:=Fine)];
-  elif Fine then
-    return &cat[AllRefinements(P) : P in AllRamificationPolygons(F, n : J0:=J0)];
-  end if;
   require n ge 1: "n must be positive";
+  Res or:= ResidualSplittingDegree cmpne false;
+  Fine or:= Res;
+  filters := [* IsValid_Points *];
+  weakfilters := [* IsWeaklyValid_Points *];
+  isdone := [**];
+  if NumFaces cmpne false then
+    NumFaces := intset(NumFaces);
+    Append(~filters, func<P | #Faces(P) in NumFaces>);
+    Append(~weakfilters, func<P | #Faces(P) le M> where M:=Max(NumFaces));
+    Append(~isdone, func<P | #Faces(P) ge M> where M:=Max(NumFaces));
+  end if;
+  if Denominator cmpne false then
+    Denominator := intset(Denominator);
+    Append(~filters, func<P | DENOM(P) in Denominator>);
+    Append(~weakfilters, func<P | LCM([Integers()| DENOM(F) : F in Fs[1..#Fs-1]] where Fs:=Faces(P)) in tds> where tds:={d : d in Divisors(td), td in Denominator});
+  end if;
   // get an initial list of J0s
   if J0 cmpeq false then
     J0s := OrePossibilities(F, n);
-  elif OreConditions(F, n, J0) then
-    J0s := [J0];
   else
-    return [];
+    J0s := [J0 : J0 in intset(J0) | OreConditions(F, n, J0)];
   end if;
   // the tame part
   p := Prime(F);
@@ -1771,17 +2052,17 @@ intrinsic AllRamificationPolygons(F :: FldPadTmpl, n :: RngIntElt : J0:=false, F
     return [RamificationPolygon(F, tail)];
   end if;
   // make an initial todo list
-  todo := [<[<1,J>], RamificationPolygon(F, [<1,J>] cat tail), 1> : J in J0s];
+  todo := [<[<1,J>], P, 1> : J in J0s | forall{t:t in weakfilters|t(P)} where P:=RamificationPolygon(F, [<1,J>] cat tail)];
   // process the todo list until done
-  ret := [];
+  Ps := [];
   while #todo gt 0 do
     // get a todo item
     pts, P, s := Explode(todo[1]);
     todo := todo[2..#todo];
     // are we done?
-    if s eq smax then
-      if IsValid_Points(P) then
-        Append(~ret, P);
+    if s eq smax or exists{t : t in isdone | t(P)} then
+      if forall{t : t in filters | t(P)} then
+        Append(~Ps, P);
       end if;
     else
       // branch once to not add a vertex
@@ -1792,29 +2073,34 @@ intrinsic AllRamificationPolygons(F :: FldPadTmpl, n :: RngIntElt : J0:=false, F
           pts2 := Append(pts, <p^s, J>);
           P2 := RamificationPolygon(F, pts2 cat tail);
           assert <p^s, J> in P2`vertices;
-          if IsWeaklyValid_Points(P2) then
+          if forall{t : t in weakfilters | t(P2)} then
             Append(~todo, <pts2, P2, s+1>);
           end if;
         end if;
       end for;
     end if;
   end while;
-  return ret;
+  // refine
+  if Fine then
+    Ps := &cat[AllRefinements(P) : P in Ps];
+  end if;
+  if Res then
+    Ps := &cat[WithAllResidues(P : Classes:=Classes, ResidualSplittingDegree:=ResidualSplittingDegree) : P in Ps];
+  end if;
+  if URes then
+    Ps := &cat[WithAllUniformizerResidues(P : Classes:=Classes) : P in Ps];
+  end if;
+  return Ps;
 end intrinsic;
 
-///param Res:=false As for `AllRamificationPolygons`
-///param URes:=false As for `AllRamificationPolygons`
-///param Classes:=false As for `AllRamificationPolygons`
+///param Res:=false As for `AllRamificationPolygons`.
+///param URes:=false As for `AllRamificationPolygons`.
+///param Classes:=false As for `AllRamificationPolygons`.
 intrinsic AllRefinements(P :: PadRamifPgon : Res:=false, URes:=false, Classes:=false) -> []
   {All fine ramification polygons which refine P.}
-  if URes then
-    return &cat[WithAllUniformizerResidues(P2 : Classes:=Classes) : P2 in AllRefinements(P : Res:=Res, Classes:=Classes)];
-  elif Res then
-    return &cat[WithAllResidues(P2 : Classes:=Classes) : P2 in AllRefinements(P)];
-  end if;
   require IsValid_Points(P): "P must be valid";
   todo := [<WithCorrectTamePoints(P),0>];
-  ret := [];
+  Ps := [];
   F := P`base_field;
   smax := P`smax;
   while #todo gt 0 do
@@ -1824,7 +2110,7 @@ intrinsic AllRefinements(P :: PadRamifPgon : Res:=false, URes:=false, Classes:=f
     // done?
     if s eq smax then
       if IsValid_Points(P) then
-        Append(~ret, P);
+        Append(~Ps, P);
       end if;
     else
       pt := P`points[s+1];
@@ -1844,19 +2130,33 @@ intrinsic AllRefinements(P :: PadRamifPgon : Res:=false, URes:=false, Classes:=f
       end if;
     end if;
   end while;
-  return ret;
+  // refine
+  if Res then
+    Ps := &cat[WithAllResidues(P : Classes:=Classes) : P in Ps];
+  end if;
+  if URes then
+    Ps := &cat[WithAllUniformizerResidues(P : Classes:=Classes) : P in Ps];
+  end if;
+  return Ps;
 end intrinsic;
 
-///param Classes:=false When true, only return one representative per equivalence class
-///param URes:=false As for `AllRamificationPolygons`
-intrinsic WithAllResidues(P :: PadRamifPgon : Classes:=false, URes:=false) -> []
+RSD := ResidualSplittingDegree;
+
+///param Classes:=false When true, only return one representative per equivalence class.
+///param URes:=false As for `AllRamificationPolygons`.
+///param ResidualSplittingDegree As for `AllRamificationPolygons`.
+intrinsic WithAllResidues(P :: PadRamifPgon : Classes:=false, URes:=false, ResidualSplittingDegree:=false) -> []
   {All valid assignments of residues to P.}
-  if URes then
-    return &cat[WithAllUniformizerResidues(P2 : Classes:=Classes) : P2 in WithAllResidues(P : Classes:=Classes)];
-  end if;
   require IsValid(P): "P must be valid";
+  filters := [* IsValid *];
+  weakfilters := [* IsValid *];
+  if ResidualSplittingDegree cmpne false then
+    ResidualSplittingDegree := intset(ResidualSplittingDegree);
+    Append(~filters, func<P | RSD(P) in ResidualSplittingDegree>);
+    Append(~weakfilters, func<P | LCM([Integers()| RSD(F) : F in Faces(P) | HasResidualPolynomial(F)]) in ds> where ds:={d : d in Divisors(d0), d0 in ResidualSplittingDegree});
+  end if;
   todo := [<P, 0>];
-  ret := [];
+  Ps := [];
   K := P`base_field;
   FF := ResidueClassField(K);
   smax := P`smax;
@@ -1867,7 +2167,9 @@ intrinsic WithAllResidues(P :: PadRamifPgon : Classes:=false, URes:=false) -> []
     // done?
     if s gt smax then
       assert IsValid(P);
-      Append(~ret, P);
+      if forall{t : t in filters | t(P)} then
+        Append(~Ps, P);
+      end if;
     else
       pt := P`points[s+1];
       if pt`is_unequal or assigned pt`residue then
@@ -1894,7 +2196,7 @@ intrinsic WithAllResidues(P :: PadRamifPgon : Classes:=false, URes:=false) -> []
             if not pt`is_equal then
               P2 := Copy(P);
               P2`points[s+1]`is_unequal := true;
-              if IsValid(P2) then
+              if forall{t : t in weakfilters | t(P2)} then
                 Append(~todo, <P2,s+1>);
               end if;
             end if;
@@ -1902,7 +2204,7 @@ intrinsic WithAllResidues(P :: PadRamifPgon : Classes:=false, URes:=false) -> []
             P2 := Copy(P);
             P2`points[s+1]`residue := x;
             P2`points[s+1]`is_equal := true;
-            if IsValid(P2) then
+            if forall{t : t in weakfilters | t(P2)} then
               Append(~todo, <P2, s+1>);
             end if;
           end if;
@@ -1910,7 +2212,11 @@ intrinsic WithAllResidues(P :: PadRamifPgon : Classes:=false, URes:=false) -> []
       end if;
     end if;
   end while;
-  return ret;
+  // refine
+  if URes then
+    Ps := &cat[WithAllUniformizerResidues(P : Classes:=Classes) : P in Ps];
+  end if;
+  return Ps;
 end intrinsic;
 
 ///param Classes:=false When true, returns one per equivalence class
@@ -1942,14 +2248,14 @@ intrinsic WithAllUniformizerResidues(P :: PadRamifPgon : Classes:=false) -> []
   else
     classes := xs;
   end if;
-  ret := [];
+  Ps := [];
   for x in classes do
     P2 := Copy(P);
     P2`uniformizer_residue := x;
     assert IsValid(P2);
-    Append(~ret, P2);
+    Append(~Ps, P2);
   end for;
-  return ret;
+  return Ps;
 end intrinsic;
 
 intrinsic CorrectTamePoints(P :: PadRamifPgon) -> []
