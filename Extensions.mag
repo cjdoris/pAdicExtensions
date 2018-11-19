@@ -1544,7 +1544,7 @@ end intrinsic;
 
 intrinsic Denominator(F :: PadRamifPgonFace) -> RngIntElt
   {The denominator of the slope of F.}
-  if not assigned F`tame_degree then
+  if not assigned F`denominator then
     F`denominator := Denominator(Slope(F));
   end if;
   return F`denominator;
